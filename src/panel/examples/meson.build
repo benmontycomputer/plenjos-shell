@@ -4,13 +4,13 @@ subdir('demo')
 executable(
     'gtk-layer-demo',
     demo_srcs,
-    build_by_default: get_option('examples'),
+    build_by_default: true,
     dependencies: [gtk, gtk_layer_shell],
-    install: get_option('examples'))
+    install: false)
 
 executable(
     'simple-example-c',
     files('simple-example.c'),
-    build_by_default: get_option('examples'),
+    build_by_default: true,
     dependencies: [gtk, gtk_layer_shell],
     install: false)
