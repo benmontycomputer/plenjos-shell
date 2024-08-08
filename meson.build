@@ -17,3 +17,4 @@ wayland_protocols = dependency('wayland-protocols', version: '>=1.16')
 test('basic', exe)
 
 subdir('src')
+subdir('protocol')

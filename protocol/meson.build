@@ -5,7 +5,7 @@ else
 endif
 
 protocols = [
-    'wlr-layer-shell-unstable-v1.xml'
+    
 ]
 
 if wayland_protocols.found()
@@ -17,26 +17,19 @@ else
     protocols += 'xdg-shell.xml'
 endif
 
-gen_client_header = generator(prog_wayland_scanner,
-    output: ['@BASENAME@-client.h'],
-    arguments: ['-c', 'client-header', '@INPUT@', '@BUILD_DIR@/@BASENAME@-client.h'])
-
-gen_server_header = generator(prog_wayland_scanner,
-    output: ['@BASENAME@-server.h'],
-    arguments: ['-c', 'server-header', '@INPUT@', '@BUILD_DIR@/@BASENAME@-server.h'])
+gen_panel_header = generator(prog_wayland_scanner,
+    output: ['@BASENAME@-panel.h'],
+    arguments: ['-c', 'panel-header', '@INPUT@', '@BUILD_DIR@/@BASENAME@-panel.h'])
 
 gen_private_code = generator(prog_wayland_scanner,
     output: ['@BASENAME@.c'],
     arguments: ['-c', 'code', '@INPUT@', '@BUILD_DIR@/@BASENAME@.c'])
 # 'code' is deprecated, and can be replaced with 'private-code' when all platforms have a new enough wayland-scanner
 
-client_protocol_srcs = []
-server_protocol_srcs = []
+panel_protocol_srcs = []
 
 foreach protocol : protocols
-    client_header = gen_client_header.process(protocol)
-    server_header = gen_server_header.process(protocol)
+    panel_header = gen_panel_header.process(protocol)
     code = gen_private_code.process(protocol)
-    client_protocol_srcs += [client_header, code]
-    server_protocol_srcs += [server_header, code]
+    panel_protocol_srcs += [panel_header, code]
 endforeach
