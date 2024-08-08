@@ -5,6 +5,7 @@
 #include <wayland-client-core.h>
 #include <wayland-client-protocol.h>
 #include <wayland-cursor.h>
+#include "xdg-shell-client-protocol.h"
 
 struct PanelInterface;
 
