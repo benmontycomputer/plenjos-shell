@@ -3,6 +3,22 @@
 // Lots of code adapted from https://github.com/selairi/yatbfw
 
 static void
+toplevel_manager_handle_toplevel (
+    PanelInterface *self,
+    struct zwlr_foreign_toplevel_manager_v1 *zwlr_foreign_toplevel_manager_v1,
+    struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle) {
+    PanelInterfaceToplevelButton *toplevel_button = panel_interface_toplevel_button_new (toplevel_handle, self->seat, self->toplevel_handles);
+    // TODO: set width, height, stuff
+    self->toplevel_handles = g_list_append (self->toplevel_handles, toplevel_button);
+}
+
+static const struct zwlr_foreign_toplevel_manager_v1_listener
+    toplevel_manager_listener
+    = {
+          .toplevel = toplevel_manager_handle_toplevel,
+      };
+
+static void
 registry_handle_global (PanelInterface *self, struct wl_registry *registry,
                         uint32_t name, const char *interface,
                         uint32_t version) {
@@ -32,19 +48,22 @@ registry_handle_global (PanelInterface *self, struct wl_registry *registry,
                                       version);
         printf ("Binding interface %s\n", wl_shm_interface.name);
         fflush (stdout);
-    } else if (!strcmp (interface, zwlr_layer_shell_v1_interface.name)) {
+    } /* else if (!strcmp (interface, zwlr_layer_shell_v1_interface.name)) {
         self->layer_shell = wl_registry_bind (
             self->registry, name, &zwlr_layer_shell_v1_interface, version);
         printf ("Binding interface %s\n", zwlr_layer_shell_v1_interface.name);
         fflush (stdout);
-    } else if (!strcmp (interface,
-                        zwlr_foreign_toplevel_manager_v1_interface.name)) {
+    } */
+    else if (!strcmp (interface,
+                      zwlr_foreign_toplevel_manager_v1_interface.name)) {
         self->toplevel_manager = wl_registry_bind (
             self->registry, name, &zwlr_foreign_toplevel_manager_v1_interface,
             version);
         printf ("Binding interface %s\n",
                 zwlr_foreign_toplevel_manager_v1_interface.name);
         fflush (stdout);
+        zwlr_foreign_toplevel_manager_v1_add_listener (
+            self->toplevel_manager, &toplevel_manager_listener, self);
     } else if (!strcmp (interface, wl_output_interface.name)) {
         self->output = wl_registry_bind (self->registry, name,
                                          &wl_output_interface, version);
@@ -83,9 +102,11 @@ static const struct wl_seat_listener seat_listener = {
     .name = wl_seat_name,
 };
 
-struct PanelInterface *
+PanelInterface *
 panel_interface_init () {
     PanelInterface *self = malloc (sizeof (PanelInterface));
+
+    self->toplevel_handles = g_list_alloc();
 
     const char *wl_display_name = getenv ("WAYLAND_DISPLAY");
 
@@ -154,9 +175,11 @@ panel_interface_init () {
 
     self->pointer = wl_seat_get_pointer (self->seat);
     self->keyboard = wl_seat_get_keyboard (self->seat);
+
+    return self;
 }
 
-static void
+void
 panel_interface_run (PanelInterface *self) {
     self->running = true;
     struct pollfd fds[1];

@@ -5,7 +5,7 @@ else
 endif
 
 protocols = [
-    
+    'wlr-foreign-toplevel-management-unstable-v1.xml',
 ]
 
 if wayland_protocols.found()

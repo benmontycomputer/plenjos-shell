@@ -2,7 +2,9 @@
     "C_Cpp.default.compileCommands": "/home/plenjamin/Projects/plenjos-desktop/plenjos-session/builddir/compile_commands.json",
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
     "files.associations": {
-        "wayland-client-protocol.h": "c"
+        "wayland-client-protocol.h": "c",
+        "wlr-foreign-toplevel-management-unstable-v1-client.h": "c",
+        "stdbool.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}"
 }

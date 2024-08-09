@@ -12,7 +12,7 @@
 #include "panel.h"
 
 typedef struct {
-    struct PanelInterface *interface;
+    PanelInterface *interface;
 } Panel;
 
 static void
@@ -58,7 +58,9 @@ activate (GtkApplication* app, void *_data)
     gtk_container_set_border_width (GTK_CONTAINER (gtk_window), 12);
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
 
-    struct PanelInterface *panel_interface = panel_interface_init ();
+    PanelInterface *panel_interface = panel_interface_init ();
+
+    g_timeout_add (1, panel_interface_run, panel_interface);
 }
 
 int

@@ -5,4 +5,6 @@
 #include <wayland-client-protocol.h>
 #include <wayland-cursor.h>
 
+#include <glib.h>
+
 #include "panel-interface.h"
