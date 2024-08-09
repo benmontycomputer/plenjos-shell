@@ -32,17 +32,20 @@ registry_handle_global (PanelInterface *self, struct wl_registry *registry,
                                       version);
         printf ("Binding interface %s\n", wl_shm_interface.name);
         fflush (stdout);
-    } /* else if (!strcmp(interface, zwlr_layer_shell_v1_interface.name)) {
-        self->layer_shell = wl_registry_bind(self->registry, name,
-    &zwlr_layer_shell_v1_interface, version); printf("Binding interface %s\n",
-    zwlr_layer_shell_v1_interface.name); fflush(stdout); } else if
-    (!strcmp(interface, zwlr_foreign_toplevel_manager_v1_interface.name)) {
-        self->toplevel_manager = wl_registry_bind(self->registry, name,
-    &zwlr_foreign_toplevel_manager_v1_interface, version); printf("Binding
-    interface %s\n", zwlr_foreign_toplevel_manager_v1_interface.name);
-        fflush(stdout);
-    } */
-    else if (!strcmp (interface, wl_output_interface.name)) {
+    } else if (!strcmp (interface, zwlr_layer_shell_v1_interface.name)) {
+        self->layer_shell = wl_registry_bind (
+            self->registry, name, &zwlr_layer_shell_v1_interface, version);
+        printf ("Binding interface %s\n", zwlr_layer_shell_v1_interface.name);
+        fflush (stdout);
+    } else if (!strcmp (interface,
+                        zwlr_foreign_toplevel_manager_v1_interface.name)) {
+        self->toplevel_manager = wl_registry_bind (
+            self->registry, name, &zwlr_foreign_toplevel_manager_v1_interface,
+            version);
+        printf ("Binding interface %s\n",
+                zwlr_foreign_toplevel_manager_v1_interface.name);
+        fflush (stdout);
+    } else if (!strcmp (interface, wl_output_interface.name)) {
         self->output = wl_registry_bind (self->registry, name,
                                          &wl_output_interface, version);
         printf ("Binding interface %s\n", wl_output_interface.name);
@@ -175,21 +178,27 @@ panel_interface_run (PanelInterface *self) {
         // for ()
         //  TODO: finish this part
 
+        printf ("Timeout %d\n", timeout_msecs);
+
         // Process pending Wayland events
         wl_display_dispatch_pending (self->display);
         wl_display_flush (self->display);
 
+        // Wait for events
         ret = poll (fds, sizeof (fds) / sizeof (fds[0]), timeout_msecs);
         if (ret > 0) {
             if (fds[0].revents) {
                 wl_display_dispatch (self->display);
                 fds[0].revents = 0;
+                printf ("Poll %d\n", ret);
+                fflush (stdout);
             }
         } else if (ret == 0) {
             printf ("Timeout\n");
             fflush (stdout);
         } else {
             printf ("Poll failed %d\n", ret);
+            fflush (stdout);
         }
     }
 }
