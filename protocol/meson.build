@@ -17,9 +17,9 @@ else
     protocols += 'xdg-shell.xml'
 endif
 
-gen_panel_header = generator(prog_wayland_scanner,
-    output: ['@BASENAME@-panel.h'],
-    arguments: ['-c', 'panel-header', '@INPUT@', '@BUILD_DIR@/@BASENAME@-panel.h'])
+gen_client_header = generator(prog_wayland_scanner,
+    output: ['@BASENAME@-client.h'],
+    arguments: ['-c', 'client-header', '@INPUT@', '@BUILD_DIR@/@BASENAME@-client.h'])
 
 gen_private_code = generator(prog_wayland_scanner,
     output: ['@BASENAME@.c'],
@@ -29,7 +29,7 @@ gen_private_code = generator(prog_wayland_scanner,
 panel_protocol_srcs = []
 
 foreach protocol : protocols
-    panel_header = gen_panel_header.process(protocol)
+    client_header = gen_client_header.process(protocol)
     code = gen_private_code.process(protocol)
-    panel_protocol_srcs += [panel_header, code]
+    panel_protocol_srcs += [client_header, code]
 endforeach
