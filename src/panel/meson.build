@@ -3,6 +3,7 @@ panel_sources = [
 ]
 
 subdir('taskbar')
+subdir('clock')
 
 gnome = import('gnome')
 

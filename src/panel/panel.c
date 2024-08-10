@@ -29,7 +29,7 @@ typedef struct {
 
 void
 panel_taskbar_run_wrap (GTask *task, GObject *source_object,
-                          gpointer task_data, GCancellable *cancellable) {
+                        gpointer task_data, GCancellable *cancellable) {
     UNUSED (task);
     UNUSED (source_object);
     UNUSED (cancellable);
@@ -38,7 +38,6 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
 
     panel_taskbar_run (taskbar);
 }
-
 static void
 activate (GtkApplication *app, void *_data) {
     (void)_data;
@@ -52,8 +51,6 @@ activate (GtkApplication *app, void *_data) {
 
     // Create a normal GTK window however you like
     GtkWindow *gtk_window = GTK_WINDOW (gtk_application_window_new (app));
-
-    gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel");
 
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (gtk_window);
@@ -81,14 +78,28 @@ activate (GtkApplication *app, void *_data) {
 
     gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 120, 56);
 
+    GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
+
     PanelTaskbar *panel_taskbar = panel_taskbar_init ();
-    gtk_container_add (GTK_CONTAINER (gtk_window),
+    gtk_container_add (GTK_CONTAINER (panel_box),
                        GTK_WIDGET (panel_taskbar->taskbar_box));
-    gtk_widget_show_all (GTK_WIDGET (gtk_window));
 
     GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (task, panel_taskbar, NULL);
     g_task_run_in_thread (task, (GTaskThreadFunc)panel_taskbar_run_wrap);
+
+    PanelClock *panel_clock = panel_clock_new ();
+
+    g_timeout_add (500, (GSourceFunc)panel_clock_update, panel_clock);
+
+    gtk_box_pack_end (panel_box, GTK_WIDGET (panel_clock->label), FALSE,
+                      FALSE, 0);
+
+    gtk_container_add (GTK_CONTAINER (gtk_window), GTK_WIDGET (panel_box));
+
+    gtk_widget_show_all (GTK_WIDGET (panel_box));
+    gtk_widget_show_all (GTK_WIDGET (gtk_window));
 }
 
 int
