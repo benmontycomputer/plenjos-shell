@@ -1,4 +1,4 @@
-#include "panel-icon.h"
+#include "panel-taskbar-icon.h"
 
 // https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
 str_split_return_val
@@ -285,4 +285,162 @@ suggested_icon_for_id (char *id, int icon_size) {
     free_string_list (icon_theme_paths);
 
     return NULL;
+}
+
+void
+free_icon_exec_map_item (icon_exec_map_item *item) {
+    if (item) {
+        if (item->exec)
+            free (item->exec);
+        if (item->icon)
+            free (item->icon);
+
+        free (item);
+    }
+}
+
+int
+icon_exec_map_finder (gpointer item, gchar *exec) {
+    if (item && exec && !strcmp (((icon_exec_map_item *)item)->exec, exec)) {
+        return 0;
+    }
+
+    return 1;
+}
+
+GList *
+init_icon_exec_map () {
+    GList *return_val = g_list_alloc ();
+
+    char *xdg_data_dirs = g_strdup (getenv ("XDG_DATA_DIRS"));
+
+    str_split_return_val str_split_result = str_split (xdg_data_dirs, ':');
+
+    char **desktop_paths
+        = malloc ((str_split_result.count + 2) * sizeof (char *));
+
+    for (size_t i = 0; str_split_result.result[i]; i++) {
+        size_t len = 0;
+        if (str_split_result.result[i]) {
+            len = strlen (str_split_result.result[i]);
+        }
+
+        size_t path_len = len + strlen ("/applications/") + 1;
+        desktop_paths[i] = malloc (path_len);
+        snprintf (desktop_paths[i], path_len, "%s/applications/",
+                  str_split_result.result[i]);
+
+        desktop_paths[i + 1] = NULL;
+    }
+    free_string_list (str_split_result.result);
+
+    // Don't free.
+    const char *home_path = getenv ("HOME");
+
+    size_t home_apps_dir_len
+        = strlen (home_path) + strlen ("/.local/share/applications/") + 1;
+    desktop_paths[str_split_result.count] = malloc (home_apps_dir_len);
+
+    snprintf (desktop_paths[str_split_result.count], home_apps_dir_len,
+              "%s/.local/share/applications/", home_path);
+    desktop_paths[str_split_result.count + 1] = NULL;
+
+    str_split_result.count++;
+
+    for (size_t i = 0; i < str_split_result.count; i++) {
+        char *dir = desktop_paths[i];
+
+        // https://stackoverflow.com/questions/1271064/how-do-i-loop-through-all-files-in-a-folder-using-c
+        struct dirent *dp;
+        DIR *dfd;
+
+        if ((dfd = opendir (dir)) != NULL) {
+            while ((dp = readdir (dfd)) != NULL) {
+                if (dp->d_name[0] != '.') {
+                    char *fname_split = g_strdup (dp->d_name);
+                    str_split_return_val fname_split_result
+                        = str_split (fname_split, '.');
+
+                    if (!strcmp (fname_split_result
+                                     .result[fname_split_result.count - 1],
+                                 "desktop")) {
+
+                        size_t full_path_len
+                            = strlen (dir) + strlen (dp->d_name) + 2;
+                        char *full_path = malloc (full_path_len);
+                        snprintf (full_path, full_path_len, "%s/%s", dir,
+                                  dp->d_name);
+
+                        GKeyFile *kf = g_key_file_new ();
+                        g_key_file_load_from_file (kf, full_path,
+                                                   G_KEY_FILE_NONE, NULL);
+
+                        icon_exec_map_item *item
+                            = malloc (sizeof (icon_exec_map_item));
+
+                        item->exec = g_key_file_get_string (
+                            kf, G_KEY_FILE_DESKTOP_GROUP,
+                            G_KEY_FILE_DESKTOP_KEY_EXEC, NULL);
+                        item->icon = g_key_file_get_string (
+                            kf, G_KEY_FILE_DESKTOP_GROUP,
+                            G_KEY_FILE_DESKTOP_KEY_ICON, NULL);
+
+                        if (item->exec && item->icon)
+                            return_val = g_list_append (return_val, item);
+
+                        icon_exec_map_item *item_2
+                            = malloc (sizeof (icon_exec_map_item));
+
+                        item_2->exec = g_strdup (dp->d_name);
+                        item_2->exec[strlen (item_2->exec) - 8] = '\0';
+                        item_2->icon = g_key_file_get_string (
+                            kf, G_KEY_FILE_DESKTOP_GROUP,
+                            G_KEY_FILE_DESKTOP_KEY_ICON, NULL);
+
+                        if (item_2->exec && item_2->icon)
+                            return_val = g_list_append (return_val, item_2);
+
+                        size_t underscore_pos;
+
+                        for (underscore_pos = 0;
+                             dp->d_name[underscore_pos] != '\0';
+                             underscore_pos++) {
+                            if (dp->d_name[underscore_pos] == '_') {
+                                icon_exec_map_item *item_3
+                                    = malloc (sizeof (icon_exec_map_item));
+
+                                size_t underscore_len
+                                    = strlen (dp->d_name) - underscore_pos - 8;
+                                char *underscore_str = malloc (underscore_len);
+                                snprintf (
+                                    underscore_str, underscore_len, "%s",
+                                    (char *)(dp->d_name + underscore_pos + 1));
+
+                                item_3->exec = NULL;
+                                item_3->icon = NULL;
+
+                                item_3->exec = underscore_str;
+                                item_3->icon = g_key_file_get_string (
+                                    kf, G_KEY_FILE_DESKTOP_GROUP,
+                                    G_KEY_FILE_DESKTOP_KEY_ICON, NULL);
+
+                                if (item_3->exec && item_3->icon)
+                                    return_val
+                                        = g_list_append (return_val, item_3);
+
+                                break;
+                            }
+                        }
+                    }
+
+                    free_string_list (fname_split_result.result);
+                    free (fname_split);
+                }
+            }
+        }
+    }
+
+    free_string_list (desktop_paths);
+
+    return return_val;
 }

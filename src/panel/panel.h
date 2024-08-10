@@ -7,4 +7,4 @@
 
 #include <glib.h>
 
-#include "panel-interface.h"
+#include "taskbar/panel-taskbar.h"

@@ -8,7 +8,9 @@
         "panel-interface-toplevel-button.h": "c",
         "unistd.h": "c",
         "glib.h": "c",
-        "gtk.h": "c"
+        "gtk.h": "c",
+        "panel-taskbar-toplevel-button.h": "c",
+        "typeinfo": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}"
 }

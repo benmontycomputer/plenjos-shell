@@ -16,7 +16,7 @@
 
 #define UNUSED(x) (void)(x)
 
-typedef struct PanelInterface {
+typedef struct PanelTaskbar {
     struct wl_display *display;
     struct wl_registry *registry;
     struct wl_compositor *compositor;
@@ -37,10 +37,10 @@ typedef struct PanelInterface {
 
     GList *toplevel_handles;
     GtkBox *taskbar_box;
-} PanelInterface;
+} PanelTaskbar;
 
-PanelInterface *panel_interface_init();
-void panel_interface_run (PanelInterface *self);
+PanelTaskbar *panel_taskbar_init();
+void panel_taskbar_run (PanelTaskbar *self);
 
 #define PLENJOS_PANEL_INTERFACE_DEFINED TRUE
 #endif

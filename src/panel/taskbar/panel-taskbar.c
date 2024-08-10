@@ -1,15 +1,17 @@
-#include "panel-interface.h"
-#include "panel-interface-toplevel-button.h"
+#include "panel-taskbar.h"
+#include "panel-taskbar-toplevel-button.h"
 
 // Lots of code adapted from https://github.com/selairi/yatbfw
 
 gboolean
-handle_toplevel_gtk (PanelInterfaceToplevelButton *toplevel_button) {
+handle_toplevel_gtk (PanelTaskbarToplevelButton *toplevel_button) {
+    panel_taskbar_toplevel_button_gtk_run (toplevel_button);
+
     gtk_container_add (
-        GTK_CONTAINER (toplevel_button->m_interface->taskbar_box),
-        toplevel_button->m_rendered);
+        GTK_CONTAINER (toplevel_button->m_taskbar->taskbar_box),
+        toplevel_button->rendered);
     gtk_widget_show_all (
-        GTK_WIDGET (toplevel_button->m_interface->taskbar_box));
+        GTK_WIDGET (toplevel_button->m_taskbar->taskbar_box));
 
     return FALSE;
 }
@@ -20,10 +22,10 @@ toplevel_manager_handle_toplevel (
     struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle) {
     UNUSED (toplevel_manager);
 
-    PanelInterface *self = (PanelInterface *)data;
+    PanelTaskbar *self = (PanelTaskbar *)data;
 
-    PanelInterfaceToplevelButton *toplevel_button
-        = panel_interface_toplevel_button_new (toplevel_handle, self->seat,
+    PanelTaskbarToplevelButton *toplevel_button
+        = panel_taskbar_toplevel_button_new (toplevel_handle, self->seat,
                                                self);
     // TODO: set width, height, stuff
     self->toplevel_handles
@@ -33,8 +35,8 @@ toplevel_manager_handle_toplevel (
 }
 
 /*static void
-panel_interface_remove_toplevel (
-    PanelInterfaceToplevelButton *self,
+panel_taskbar_remove_toplevel (
+    PanelTaskbarToplevelButton *self,
     struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle) {
     UNUSED (self);
     UNUSED (toplevel_handle);
@@ -52,7 +54,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
                         uint32_t version) {
     // Add/handle global
 
-    PanelInterface *self = (PanelInterface *)data;
+    PanelTaskbar *self = (PanelTaskbar *)data;
 
     UNUSED (registry);
 
@@ -109,7 +111,7 @@ registry_handle_global_remove (void *data, struct wl_registry *registry,
                                uint32_t name) {
     // Remove global
 
-    PanelInterface *self = (PanelInterface *)data;
+    PanelTaskbar *self = (PanelTaskbar *)data;
 
     UNUSED (self);
     UNUSED (registry);
@@ -124,7 +126,7 @@ static const struct wl_registry_listener registry_listener = {
 static void
 seat_handle_capabilities (void *data, struct wl_seat *wl_seat,
                           uint32_t capabilities) {
-    PanelInterface *self = (PanelInterface *)data;
+    PanelTaskbar *self = (PanelTaskbar *)data;
 
     UNUSED (wl_seat);
 
@@ -148,11 +150,12 @@ static const struct wl_seat_listener seat_listener = {
     .name = wl_seat_name,
 };
 
-PanelInterface *
-panel_interface_init () {
-    PanelInterface *self = malloc (sizeof (PanelInterface));
+PanelTaskbar *
+panel_taskbar_init () {
+    PanelTaskbar *self = malloc (sizeof (PanelTaskbar));
 
     self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
 
     self->toplevel_handles = g_list_alloc ();
 
@@ -228,7 +231,7 @@ panel_interface_init () {
 }
 
 void
-panel_interface_run (PanelInterface *self) {
+panel_taskbar_run (PanelTaskbar *self) {
     self->running = true;
     struct pollfd fds[1];
     int timeout_msecs = -1;

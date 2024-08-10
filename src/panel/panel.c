@@ -24,27 +24,36 @@
 #include "panel.h"
 
 typedef struct {
-    PanelInterface *interface;
+    PanelTaskbar *taskbar;
 } Panel;
 
 void
-panel_interface_run_wrap (GTask *task, GObject *source_object,
+panel_taskbar_run_wrap (GTask *task, GObject *source_object,
                           gpointer task_data, GCancellable *cancellable) {
     UNUSED (task);
     UNUSED (source_object);
     UNUSED (cancellable);
 
-    PanelInterface *interface = (PanelInterface *)task_data;
+    PanelTaskbar *taskbar = (PanelTaskbar *)task_data;
 
-    panel_interface_run (interface);
+    panel_taskbar_run (taskbar);
 }
 
 static void
 activate (GtkApplication *app, void *_data) {
     (void)_data;
 
+    GtkCssProvider *cssProvider = gtk_css_provider_new ();
+    gtk_css_provider_load_from_resource (cssProvider,
+                                         "/com/plenjos/Panel/theme.css");
+    gtk_style_context_add_provider_for_screen (
+        gdk_screen_get_default (), GTK_STYLE_PROVIDER (cssProvider),
+        GTK_STYLE_PROVIDER_PRIORITY_USER);
+
     // Create a normal GTK window however you like
     GtkWindow *gtk_window = GTK_WINDOW (gtk_application_window_new (app));
+
+    gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel");
 
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (gtk_window);
@@ -70,18 +79,16 @@ activate (GtkApplication *app, void *_data) {
         gtk_layer_set_anchor (gtk_window, i, anchors[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 120, 48);
+    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 120, 56);
 
-    gtk_container_set_border_width (GTK_CONTAINER (gtk_window), 12);
-
-    PanelInterface *panel_interface = panel_interface_init ();
+    PanelTaskbar *panel_taskbar = panel_taskbar_init ();
     gtk_container_add (GTK_CONTAINER (gtk_window),
-                       GTK_WIDGET (panel_interface->taskbar_box));
+                       GTK_WIDGET (panel_taskbar->taskbar_box));
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
 
     GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
-    g_task_set_task_data (task, panel_interface, NULL);
-    g_task_run_in_thread (task, (GTaskThreadFunc)panel_interface_run_wrap);
+    g_task_set_task_data (task, panel_taskbar, NULL);
+    g_task_run_in_thread (task, (GTaskThreadFunc)panel_taskbar_run_wrap);
 }
 
 int
