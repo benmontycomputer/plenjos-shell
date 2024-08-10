@@ -23,8 +23,7 @@ gen_client_header = generator(prog_wayland_scanner,
 
 gen_private_code = generator(prog_wayland_scanner,
     output: ['@BASENAME@.c'],
-    arguments: ['-c', 'code', '@INPUT@', '@BUILD_DIR@/@BASENAME@.c'])
-# 'code' is deprecated, and can be replaced with 'private-code' when all platforms have a new enough wayland-scanner
+    arguments: ['-c', 'private-code', '@INPUT@', '@BUILD_DIR@/@BASENAME@.c'])
 
 panel_protocol_srcs = []
 

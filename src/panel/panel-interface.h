@@ -1,3 +1,5 @@
+#ifndef PLENJOS_PANEL_INTERFACE_DEFINED
+
 #include <gtk-layer-shell.h>
 #include <gtk/gtk.h>
 
@@ -12,7 +14,7 @@
 #include <poll.h>
 #include <sys/time.h>
 
-#include "panel-interface-toplevel-button.h"
+#define UNUSED(x) (void)(x)
 
 typedef struct PanelInterface {
     struct wl_display *display;
@@ -34,7 +36,11 @@ typedef struct PanelInterface {
     struct wl_keyboard *keyboard;
 
     GList *toplevel_handles;
+    GtkBox *taskbar_box;
 } PanelInterface;
 
 PanelInterface *panel_interface_init();
 void panel_interface_run (PanelInterface *self);
+
+#define PLENJOS_PANEL_INTERFACE_DEFINED TRUE
+#endif

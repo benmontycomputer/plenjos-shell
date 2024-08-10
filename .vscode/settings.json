@@ -4,7 +4,11 @@
     "files.associations": {
         "wayland-client-protocol.h": "c",
         "wlr-foreign-toplevel-management-unstable-v1-client.h": "c",
-        "stdbool.h": "c"
+        "stdbool.h": "c",
+        "panel-interface-toplevel-button.h": "c",
+        "unistd.h": "c",
+        "glib.h": "c",
+        "gtk.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}"
 }

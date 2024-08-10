@@ -1,16 +1,44 @@
 #include "panel-interface.h"
+#include "panel-interface-toplevel-button.h"
 
 // Lots of code adapted from https://github.com/selairi/yatbfw
 
+gboolean
+handle_toplevel_gtk (PanelInterfaceToplevelButton *toplevel_button) {
+    gtk_container_add (
+        GTK_CONTAINER (toplevel_button->m_interface->taskbar_box),
+        toplevel_button->m_rendered);
+    gtk_widget_show_all (
+        GTK_WIDGET (toplevel_button->m_interface->taskbar_box));
+
+    return FALSE;
+}
+
 static void
 toplevel_manager_handle_toplevel (
-    PanelInterface *self,
-    struct zwlr_foreign_toplevel_manager_v1 *zwlr_foreign_toplevel_manager_v1,
+    void *data, struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager,
     struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle) {
-    PanelInterfaceToplevelButton *toplevel_button = panel_interface_toplevel_button_new (toplevel_handle, self->seat, self->toplevel_handles);
+    UNUSED (toplevel_manager);
+
+    PanelInterface *self = (PanelInterface *)data;
+
+    PanelInterfaceToplevelButton *toplevel_button
+        = panel_interface_toplevel_button_new (toplevel_handle, self->seat,
+                                               self);
     // TODO: set width, height, stuff
-    self->toplevel_handles = g_list_append (self->toplevel_handles, toplevel_button);
+    self->toplevel_handles
+        = g_list_append (self->toplevel_handles, toplevel_button);
+
+    gdk_threads_add_idle ((GSourceFunc)handle_toplevel_gtk, toplevel_button);
 }
+
+/*static void
+panel_interface_remove_toplevel (
+    PanelInterfaceToplevelButton *self,
+    struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle) {
+    UNUSED (self);
+    UNUSED (toplevel_handle);
+}*/
 
 static const struct zwlr_foreign_toplevel_manager_v1_listener
     toplevel_manager_listener
@@ -19,14 +47,18 @@ static const struct zwlr_foreign_toplevel_manager_v1_listener
       };
 
 static void
-registry_handle_global (PanelInterface *self, struct wl_registry *registry,
+registry_handle_global (void *data, struct wl_registry *registry,
                         uint32_t name, const char *interface,
                         uint32_t version) {
     // Add/handle global
 
-    printf ("Found interface %s version %lu\n", interface,
-            (unsigned long)version);
-    fflush (stdout);
+    PanelInterface *self = (PanelInterface *)data;
+
+    UNUSED (registry);
+
+    // printf ("Found interface %s version %lu\n", interface,
+    //         (unsigned long)version);
+    // fflush (stdout);
 
     if (!strcmp (interface, wl_compositor_interface.name)) {
         self->compositor = wl_registry_bind (
@@ -73,9 +105,15 @@ registry_handle_global (PanelInterface *self, struct wl_registry *registry,
 }
 
 static void
-registry_handle_global_remove (PanelInterface *self,
-                               struct wl_registry *registry, uint32_t name) {
+registry_handle_global_remove (void *data, struct wl_registry *registry,
+                               uint32_t name) {
     // Remove global
+
+    PanelInterface *self = (PanelInterface *)data;
+
+    UNUSED (self);
+    UNUSED (registry);
+    UNUSED (name);
 }
 
 static const struct wl_registry_listener registry_listener = {
@@ -84,8 +122,12 @@ static const struct wl_registry_listener registry_listener = {
 };
 
 static void
-seat_handle_capabilities (PanelInterface *self, struct wl_seat *wl_seat,
+seat_handle_capabilities (void *data, struct wl_seat *wl_seat,
                           uint32_t capabilities) {
+    PanelInterface *self = (PanelInterface *)data;
+
+    UNUSED (wl_seat);
+
     self->has_keyboard = capabilities & WL_SEAT_CAPABILITY_KEYBOARD;
     self->has_pointer = capabilities & WL_SEAT_CAPABILITY_POINTER;
     printf ("Keyboard: %s, pointer: %s\n",
@@ -95,7 +137,11 @@ seat_handle_capabilities (PanelInterface *self, struct wl_seat *wl_seat,
 }
 
 static void
-wl_seat_name (void *data, struct wl_seat *seat, const char *name) {}
+wl_seat_name (void *data, struct wl_seat *seat, const char *name) {
+    UNUSED (data);
+    UNUSED (seat);
+    UNUSED (name);
+}
 
 static const struct wl_seat_listener seat_listener = {
     .capabilities = seat_handle_capabilities,
@@ -106,7 +152,9 @@ PanelInterface *
 panel_interface_init () {
     PanelInterface *self = malloc (sizeof (PanelInterface));
 
-    self->toplevel_handles = g_list_alloc();
+    self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+
+    self->toplevel_handles = g_list_alloc ();
 
     const char *wl_display_name = getenv ("WAYLAND_DISPLAY");
 
@@ -147,12 +195,12 @@ panel_interface_init () {
         fprintf(stderr, "layer_shell not loaded.");
         fflush(stderr);
         return NULL;
-    } else if (!self->toplevel_manager) {
-        fprintf(stderr, "foreign_toplevel not loaded.");
-        fflush(stderr);
-        return NULL;
     } */
-    else if (!self->output) {
+    else if (!self->toplevel_manager) {
+        fprintf (stderr, "foreign_toplevel not loaded.");
+        fflush (stderr);
+        return NULL;
+    } else if (!self->output) {
         fprintf (stderr, "wl_output not loaded.");
         fflush (stderr);
         return NULL;
@@ -197,6 +245,7 @@ panel_interface_run (PanelInterface *self) {
         // Update timeout and run timeout events
         gettimeofday (&timeval_current, NULL);
         now_in_msecs = timeval_current.tv_usec / 1000;
+        UNUSED (now_in_msecs);
         timeout_msecs = -1;
         // for ()
         //  TODO: finish this part
