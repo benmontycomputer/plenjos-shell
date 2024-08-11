@@ -240,8 +240,12 @@ button_rerender_app_id_and_icon_gtk (gpointer user_data) {
             GTK_CONTAINER (gtk_widget_get_parent (self->box)), self->box);
     }
 
-    self->icon = gtk_image_new_from_pixbuf (
-        gdk_pixbuf_new_from_file_at_size (self->m_icon_path, 32, 32, NULL));
+    if (self->m_icon_path) {
+        self->icon = gtk_image_new_from_pixbuf (
+            gdk_pixbuf_new_from_file_at_size (self->m_icon_path, 32, 32, NULL));
+    } else {
+        self->icon = gtk_image_new ();
+    }
     self->label = gtk_label_new (self->m_title);
 
     gtk_widget_set_size_request (self->label, 100, 32);
