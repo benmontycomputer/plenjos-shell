@@ -207,6 +207,8 @@ button_click (GtkButton *button, PanelTaskbarToplevelButton *self) {
     zwlr_foreign_toplevel_handle_v1_activate (self->m_toplevel_handle,
                                               self->m_taskbar->seat);
 
+    wl_display_roundtrip (self->m_taskbar->display);
+
     return FALSE;
 }
 
