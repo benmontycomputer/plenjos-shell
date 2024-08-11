@@ -205,7 +205,7 @@ button_click (GtkButton *button, PanelTaskbarToplevelButton *self) {
     UNUSED (button);
 
     zwlr_foreign_toplevel_handle_v1_activate (self->m_toplevel_handle,
-                                              self->m_taskbar->seat);
+                                              self->m_seat);
 
     wl_display_roundtrip (self->m_taskbar->display);
 
@@ -310,6 +310,9 @@ panel_taskbar_toplevel_button_new (
     self->m_maximized = self->m_activated = self->m_minimized
         = self->m_fullscreen = false;
     self->m_taskbar = taskbar;
+
+    self->m_title = self->m_id = self->m_icon_path = self->m_output = self->m_state = NULL;
+
 
     zwlr_foreign_toplevel_handle_v1_add_listener (self->m_toplevel_handle,
                                                   &toplevel_listener, self);
