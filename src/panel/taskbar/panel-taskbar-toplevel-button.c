@@ -180,13 +180,13 @@ toplevel_handle_closed (
 void
 toplevel_excess () {}
 
-/*static void
+/* static void
 toplevel_handle_state (
     void *data,
     struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle,
     struct wl_array *state) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
-}*/
+} */
 
 static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
     = {
