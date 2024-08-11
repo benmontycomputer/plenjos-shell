@@ -81,9 +81,16 @@ activate (GtkApplication *app, void *_data) {
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
 
+    PanelApplicationsMenu *apps_menu = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
+
+    gtk_box_pack_start (panel_box, GTK_WIDGET (panel_applications_menu_get_launcher_button (apps_menu)), FALSE,
+                      FALSE, 0);
+
+    hide_applications_menu (apps_menu);
+
     PanelTaskbar *panel_taskbar = panel_taskbar_init ();
-    gtk_container_add (GTK_CONTAINER (panel_box),
-                       GTK_WIDGET (panel_taskbar->taskbar_box));
+    gtk_box_pack_start (panel_box,
+                       GTK_WIDGET (panel_taskbar->taskbar_box), FALSE, FALSE, 0);
 
     GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (task, panel_taskbar, NULL);
@@ -100,10 +107,6 @@ activate (GtkApplication *app, void *_data) {
 
     gtk_widget_show_all (GTK_WIDGET (panel_box));
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
-
-    PanelApplicationsMenu *apps_menu = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
-
-    show_applications_menu (apps_menu);
 }
 
 int

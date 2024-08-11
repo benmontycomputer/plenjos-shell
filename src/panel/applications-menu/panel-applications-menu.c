@@ -43,6 +43,8 @@ struct _PanelApplicationsMenu
   GdkRectangle monitor_geometry;
 
   GSettings *settings;
+
+  GtkWidget *launcher_button;
 };
 
 G_DEFINE_TYPE(PanelApplicationsMenu, panel_applications_menu, GTK_TYPE_APPLICATION_WINDOW)
@@ -52,7 +54,7 @@ panel_applications_menu_class_init(PanelApplicationsMenuClass *klass)
 {
   GtkWidgetClass *widget_class = GTK_WIDGET_CLASS(klass);
 
-  gtk_widget_class_set_template_from_resource(widget_class, "/com/plenjos/Panel/dashboard/panel-applications-menu.ui");
+  gtk_widget_class_set_template_from_resource(widget_class, "/com/plenjos/Panel/applications-menu/panel-applications-menu.ui");
   gtk_widget_class_bind_template_child(widget_class, PanelApplicationsMenu, apps_flow_box);
   // gtk_widget_class_bind_template_child (widget_class, PanelApplicationsMenu, favorites_grid);
   gtk_widget_class_bind_template_child(widget_class, PanelApplicationsMenu, scrolled_window);
@@ -127,9 +129,29 @@ GtkWidget *applications_menu_render_app(PanelApplicationsMenu *self,
 
   GtkImage *icon = GTK_IMAGE(gtk_image_new());
 
+  bool fallback = true;
+
   if (icon_name)
   {
     GdkPixbuf *icon_unscaled = gtk_icon_theme_load_icon_for_scale(self->icon_theme, icon_name, self->icon_size, self->scale, 0, NULL);
+
+    if (icon_unscaled)
+    {
+      cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf(icon_unscaled, 0, gtk_widget_get_window(GTK_WIDGET(icon)));
+
+      if (s)
+      {
+        gtk_image_set_from_surface(icon, s);
+        cairo_surface_destroy(s);
+
+        fallback = false;
+      }
+
+      g_object_unref(icon_unscaled);
+    }
+  }
+  if (fallback) {
+    GdkPixbuf *icon_unscaled = gtk_icon_theme_load_icon_for_scale(self->icon_theme, "dialog-question", self->icon_size, self->scale, 0, NULL);
 
     if (icon_unscaled)
     {
@@ -238,29 +260,6 @@ gboolean expose_draw_dashboard(GtkWidget *widget, cairo_t *cr, PanelApplications
 {
   cairo_save(cr);
 
-  // Adapted from https://stackoverflow.com/questions/4183546/how-can-i-draw-image-with-rounded-corners-in-cairo-gtk
-  double width, height, radius;
-  int wi, hi;
-  gtk_window_get_size(&self->parent_instance, &wi, &hi);
-
-  width = (double)wi - 8;
-  height = (double)hi - 6;
-  radius = 16;
-
-  double x = 4;
-  double y = 2;
-
-  double degrees = M_PI / 180.0;
-
-  cairo_new_sub_path(cr);
-  cairo_arc(cr, x + width - radius, y + radius, radius, -90 * degrees, 0 * degrees);
-  cairo_arc(cr, x + width - radius, y + height - radius, radius, 0 * degrees, 90 * degrees);
-  cairo_arc(cr, x + radius, y + height - radius, radius, 90 * degrees, 180 * degrees);
-  cairo_arc(cr, x + radius, y + radius, radius, 180 * degrees, 270 * degrees);
-  cairo_close_path(cr);
-
-  cairo_clip(cr);
-
   if (GDK_IS_PIXBUF(self->desktop_blurred))
   {
     gint x_win, y_win;
@@ -275,7 +274,7 @@ gboolean expose_draw_dashboard(GtkWidget *widget, cairo_t *cr, PanelApplications
     }
     else
     {
-      cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+      cairo_set_source_rgb(cr, 0.2, 0.2, 0.2);
     }
   }
 
@@ -481,4 +480,22 @@ panel_applications_menu_init(PanelApplicationsMenu *self)
 
   gtk_widget_set_margin_start(GTK_WIDGET(self->scrolled_window), self->monitor_geometry.width / 4);
   gtk_widget_set_margin_end(GTK_WIDGET(self->scrolled_window), self->monitor_geometry.width / 4);
+}
+
+void show_wrap (GtkButton *button, PanelApplicationsMenu *self) {
+  show_applications_menu (self);
+}
+
+GtkWidget *panel_applications_menu_get_launcher_button (PanelApplicationsMenu *self) {
+  if (!self->launcher_button) {
+    self->launcher_button = gtk_button_new ();
+
+    gtk_widget_set_name (self->launcher_button, "taskbar_button");
+    
+    gtk_button_set_image (GTK_BUTTON (self->launcher_button), gtk_image_new_from_icon_name ("view-app-grid", GTK_ICON_SIZE_DND));
+
+    g_signal_connect (self->launcher_button, "clicked", show_wrap, self);
+  }
+
+  return self->launcher_button;
 }

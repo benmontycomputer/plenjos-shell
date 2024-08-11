@@ -1,11 +1,46 @@
 #taskbar_button {
     padding: 0px 8px;
+
+    margin: 2px 1px;
 }
 
 #taskbar_box {
-    padding: 2px;
+    padding: 0px;
 }
 
 #panel_box {
+    padding: 2px;
     padding-right: 16px;
+}
+
+#panel_applications_menu_window {
+    background-color: black;
+}
+
+#panel_applications_menu_item {
+    border-radius: 12px;
+    background-image: none;
+    border: none;
+    box-shadow: none;
+}
+
+#panel_applications_menu_item:hover {
+    background-color: rgba(128, 128, 128, 0.3);
+}
+
+#panel_applications_menu_search_entry {
+    border-radius: 120px;
+    padding: 0px 20px;
+}
+
+#panel_applications_menu_scrolled_window {
+    box-shadow: none;
+    border: none;
+    border-image: none;
+}
+
+#panel_applications_menu_scrolled_window * {
+    box-shadow: none;
+    border: none;
+    border-image: none;
 }

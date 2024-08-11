@@ -19,7 +19,7 @@
 #pragma once
 
 #include <gtk/gtk.h>
-#include <math.h>
+#include <stdbool.h>
 #include <ctype.h>
 #include <assert.h>
 
@@ -34,3 +34,5 @@ G_END_DECLS
 void panel_applications_menu_set_bg (PanelApplicationsMenu *self, GdkPixbuf *bg);
 void hide_applications_menu (PanelApplicationsMenu *self);
 void show_applications_menu (PanelApplicationsMenu *self);
+
+GtkWidget *panel_applications_menu_get_launcher_button (PanelApplicationsMenu *self);

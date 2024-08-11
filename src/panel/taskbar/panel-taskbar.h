@@ -35,7 +35,7 @@ typedef struct PanelTaskbar {
     struct wl_pointer *pointer;
     struct wl_keyboard *keyboard;
 
-    GList *toplevel_handles;
+    GList *applications;
     GtkBox *taskbar_box;
 } PanelTaskbar;
 

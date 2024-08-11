@@ -2,6 +2,6 @@
 <gresources>
   <gresource prefix="/com/plenjos/Panel">
     <file>theme.css</file>
-    <file>dashboard/panel-applications-menu.ui</file>
+    <file>applications-menu/panel-applications-menu.ui</file>
   </gresource>
 </gresources>

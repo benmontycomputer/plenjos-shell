@@ -1,4 +1,5 @@
 #include "panel-taskbar.h"
+#include "panel-taskbar-application.h"
 #include "panel-taskbar-toplevel-button.h"
 
 // Lots of code adapted from https://github.com/selairi/yatbfw
@@ -28,8 +29,18 @@ toplevel_manager_handle_toplevel (
         = panel_taskbar_toplevel_button_new (toplevel_handle, self->seat,
                                                self);
     // TODO: set width, height, stuff
-    self->toplevel_handles
-        = g_list_append (self->toplevel_handles, toplevel_button);
+    //self->toplevel_handles
+    //    = g_list_append (self->toplevel_handles, toplevel_button);
+    
+    GList *applications = self->applications;
+
+    while (applications) {
+        PanelTaskbarApplication *application = (PanelTaskbarApplication *)applications->data;
+
+        if (!strcmp (application->id,)
+
+        applications = applications->next;
+    }
 
     gdk_threads_add_idle ((GSourceFunc)handle_toplevel_gtk, toplevel_button);
 }
