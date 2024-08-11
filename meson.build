@@ -14,6 +14,8 @@ wayland_scanner = dependency('wayland-scanner', version: '>=1.10.0', native: tru
 
 wayland_protocols = dependency('wayland-protocols', version: '>=1.16')
 
+dbus = dependency('dbus-1', version: '>=1.12.0')
+
 test('basic', exe)
 
 subdir('protocol')
