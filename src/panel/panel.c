@@ -76,7 +76,7 @@ activate (GtkApplication *app, void *_data) {
         gtk_layer_set_anchor (gtk_window, i, anchors[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 120, 56);
+    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
 
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
