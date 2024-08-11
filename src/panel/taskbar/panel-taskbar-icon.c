@@ -310,7 +310,7 @@ icon_exec_map_finder (gpointer item, gchar *exec) {
 
 GList *
 init_icon_exec_map () {
-    GList *return_val = g_list_alloc ();
+    GList *return_val = NULL;
 
     char *xdg_data_dirs = g_strdup (getenv ("XDG_DATA_DIRS"));
 

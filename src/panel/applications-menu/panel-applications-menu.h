@@ -23,6 +23,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#define UNUSED(x) (void)(x)
+
 G_BEGIN_DECLS
 
 #define PANEL_TYPE_APPLICATIONS_MENU (panel_applications_menu_get_type())

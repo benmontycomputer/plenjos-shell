@@ -1,4 +1,5 @@
 #include "panel-taskbar-toplevel-button.h"
+#include "panel-taskbar-application.h"
 
 static void
 toplevel_handle_title (void *data,
@@ -141,6 +142,44 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
     self->m_icon_path = icon;
 }
 
+gboolean
+toplevel_handle_app_id_gtk (gpointer *data) {
+    PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
+
+    if (!self->rendered)
+        panel_taskbar_toplevel_button_gtk_run (self);
+
+    if (self->m_application && self->m_application->id && strcmp (self->m_id, self->m_application->id)) {
+        panel_taskbar_application_remove_toplevel (self->m_application, self);
+
+        self->m_application = NULL;
+    }
+
+    if (!self->m_application) {
+        GList *applications = self->m_taskbar->applications;
+
+        while (applications && applications->data) {
+            PanelTaskbarApplication *application = (PanelTaskbarApplication *)applications->data;
+
+            if (!strcmp(application->id, self->m_id)) {
+                self->m_application = application;
+
+                panel_taskbar_application_add_toplevel (self->m_application, self);
+
+                return FALSE;
+            }
+
+            applications = applications->next;
+        }
+
+        self->m_application = panel_taskbar_application_new (self->m_id, self->m_taskbar);
+
+        panel_taskbar_application_add_toplevel (self->m_application, self);
+    }
+
+    return FALSE;
+}
+
 static void
 toplevel_handle_app_id (
     void *data, struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle,
@@ -154,6 +193,8 @@ toplevel_handle_app_id (
     toplevel_update_icon_from_app_id (self, self->m_id);
 
     panel_taskbar_toplevel_button_rerender (self, false, true);
+
+    gdk_threads_add_idle ((GSourceFunc)toplevel_handle_app_id_gtk, self);
 }
 
 gboolean
@@ -163,6 +204,9 @@ handle_closed_gtk (gpointer user_data) {
     gtk_container_remove (
         GTK_CONTAINER (gtk_widget_get_parent (self->rendered)),
         self->rendered);
+
+    panel_taskbar_application_remove_toplevel (self->m_application, self);
+    self->m_application = NULL;
 
     return FALSE;
 }
@@ -283,6 +327,9 @@ panel_taskbar_toplevel_button_rerender (PanelTaskbarToplevelButton *self,
 
 void
 panel_taskbar_toplevel_button_gtk_run (PanelTaskbarToplevelButton *self) {
+    if (self->rendered)
+        return;
+
     self->rendered = gtk_button_new ();
     gtk_widget_set_name (self->rendered, "taskbar_button");
     g_signal_connect (self->rendered, "clicked", (GCallback)button_click,
@@ -310,8 +357,11 @@ panel_taskbar_toplevel_button_new (
     self->m_maximized = self->m_activated = self->m_minimized
         = self->m_fullscreen = false;
     self->m_taskbar = taskbar;
+    self->m_application = NULL;
 
-    self->m_title = self->m_id = self->m_icon_path = self->m_output = self->m_state = NULL;
+    self->m_title = self->m_id = self->m_icon_path = NULL;
+    self->m_output = NULL;
+    self->m_state = NULL;
 
 
     zwlr_foreign_toplevel_handle_v1_add_listener (self->m_toplevel_handle,

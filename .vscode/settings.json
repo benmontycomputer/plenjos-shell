@@ -11,7 +11,11 @@
         "gtk.h": "c",
         "panel-taskbar-toplevel-button.h": "c",
         "typeinfo": "c",
-        "panel-applications-menu.h": "c"
+        "panel-applications-menu.h": "c",
+        "panel-taskbar-application.h": "c",
+        "panel-taskbar.h": "c",
+        "panel-taskbar-icon.h": "c",
+        "panel.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}"
 }

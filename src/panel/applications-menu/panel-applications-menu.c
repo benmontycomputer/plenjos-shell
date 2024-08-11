@@ -110,7 +110,7 @@ static void applications_menu_app_clicked(GtkWidget *widget, GdkEventButton *eve
   (void)event;
   (void)widget;
 
-  hide_applications_menu(GTK_WIDGET(&args->self->parent_instance));
+  hide_applications_menu(args->self);
   size_t new_exec_len = strlen(args->exec) + 3;
   char *new_exec = malloc(new_exec_len);
   snprintf(new_exec, new_exec_len, "%s &", args->exec);
@@ -133,21 +133,42 @@ GtkWidget *applications_menu_render_app(PanelApplicationsMenu *self,
 
   if (icon_name)
   {
-    GdkPixbuf *icon_unscaled = gtk_icon_theme_load_icon_for_scale(self->icon_theme, icon_name, self->icon_size, self->scale, 0, NULL);
+    if (access (icon_name, F_OK) == 0) {
+      GdkPixbuf *icon_unscaled = gdk_pixbuf_new_from_file_at_size(icon_name, self->icon_size, self->icon_size, NULL);
 
-    if (icon_unscaled)
-    {
-      cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf(icon_unscaled, 0, gtk_widget_get_window(GTK_WIDGET(icon)));
-
-      if (s)
+      if (icon_unscaled)
       {
-        gtk_image_set_from_surface(icon, s);
-        cairo_surface_destroy(s);
+        cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf(icon_unscaled, 0, gtk_widget_get_window(GTK_WIDGET(icon)));
 
-        fallback = false;
+        if (s)
+        {
+          gtk_image_set_from_surface(icon, s);
+          cairo_surface_destroy(s);
+
+          fallback = false;
+        }
+
+        g_object_unref(icon_unscaled);
       }
+    }
 
-      g_object_unref(icon_unscaled);
+    if (fallback) {
+      GdkPixbuf *icon_unscaled = gtk_icon_theme_load_icon_for_scale(self->icon_theme, icon_name, self->icon_size, self->scale, 0, NULL);
+
+      if (icon_unscaled)
+      {
+        cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf(icon_unscaled, 0, gtk_widget_get_window(GTK_WIDGET(icon)));
+
+        if (s)
+        {
+          gtk_image_set_from_surface(icon, s);
+          cairo_surface_destroy(s);
+
+          fallback = false;
+        }
+
+        g_object_unref(icon_unscaled);
+      }
     }
   }
   if (fallback) {
@@ -358,7 +379,7 @@ panel_applications_menu_init(PanelApplicationsMenu *self)
                                             GTK_STYLE_PROVIDER_PRIORITY_USER);
 
   // gtk_widget_set_size_request (GTK_WIDGET (&self->parent_instance), self->monitor_geometry.width, self->monitor_geometry.height);
-  gtk_window_set_keep_above(&self->parent_instance, TRUE);
+  gtk_window_set_keep_above(GTK_WINDOW (&self->parent_instance), TRUE);
 
   // TODO: possibly keep the window always open or loaded so it doesn't reload apps and icons every time
 
@@ -483,6 +504,8 @@ panel_applications_menu_init(PanelApplicationsMenu *self)
 }
 
 void show_wrap (GtkButton *button, PanelApplicationsMenu *self) {
+  UNUSED (button);
+
   show_applications_menu (self);
 }
 
@@ -494,7 +517,7 @@ GtkWidget *panel_applications_menu_get_launcher_button (PanelApplicationsMenu *s
     
     gtk_button_set_image (GTK_BUTTON (self->launcher_button), gtk_image_new_from_icon_name ("view-app-grid", GTK_ICON_SIZE_DND));
 
-    g_signal_connect (self->launcher_button, "clicked", show_wrap, self);
+    g_signal_connect (self->launcher_button, "clicked", G_CALLBACK (show_wrap), self);
   }
 
   return self->launcher_button;

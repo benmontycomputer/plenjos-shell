@@ -11,3 +11,5 @@
 #include "clock/panel-clock.h"
 
 #include "applications-menu/panel-applications-menu.h"
+
+#define UNUSED(x) (void)(x)

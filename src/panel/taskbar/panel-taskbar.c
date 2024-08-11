@@ -5,7 +5,7 @@
 // Lots of code adapted from https://github.com/selairi/yatbfw
 
 gboolean
-handle_toplevel_gtk (PanelTaskbarToplevelButton *toplevel_button) {
+handle_application_gtk (PanelTaskbarToplevelButton *toplevel_button) {
     panel_taskbar_toplevel_button_gtk_run (toplevel_button);
 
     gtk_container_add (
@@ -25,33 +25,9 @@ toplevel_manager_handle_toplevel (
 
     PanelTaskbar *self = (PanelTaskbar *)data;
 
-    PanelTaskbarToplevelButton *toplevel_button
-        = panel_taskbar_toplevel_button_new (toplevel_handle, self->seat,
+    panel_taskbar_toplevel_button_new (toplevel_handle, self->seat,
                                                self);
-    // TODO: set width, height, stuff
-    //self->toplevel_handles
-    //    = g_list_append (self->toplevel_handles, toplevel_button);
-    
-    GList *applications = self->applications;
-
-    while (applications) {
-        PanelTaskbarApplication *application = (PanelTaskbarApplication *)applications->data;
-
-        if (!strcmp (application->id,)
-
-        applications = applications->next;
-    }
-
-    gdk_threads_add_idle ((GSourceFunc)handle_toplevel_gtk, toplevel_button);
 }
-
-/*static void
-panel_taskbar_remove_toplevel (
-    PanelTaskbarToplevelButton *self,
-    struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle) {
-    UNUSED (self);
-    UNUSED (toplevel_handle);
-}*/
 
 static const struct zwlr_foreign_toplevel_manager_v1_listener
     toplevel_manager_listener
@@ -68,10 +44,6 @@ registry_handle_global (void *data, struct wl_registry *registry,
     PanelTaskbar *self = (PanelTaskbar *)data;
 
     UNUSED (registry);
-
-    // printf ("Found interface %s version %lu\n", interface,
-    //         (unsigned long)version);
-    // fflush (stdout);
 
     if (!strcmp (interface, wl_compositor_interface.name)) {
         self->compositor = wl_registry_bind (
@@ -168,7 +140,7 @@ panel_taskbar_init () {
     self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
 
-    self->toplevel_handles = g_list_alloc ();
+    self->applications = NULL;
 
     const char *wl_display_name = getenv ("WAYLAND_DISPLAY");
 
