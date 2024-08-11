@@ -367,7 +367,7 @@ panel_applications_menu_init(PanelApplicationsMenu *self)
   self->icon_size = 96;
   self->scale = gtk_widget_get_scale_factor(GTK_WIDGET(&self->parent_instance));
 
-  char *data_dirs = getenv("XDG_DATA_DIRS");
+  char *data_dirs = g_strdup (getenv("XDG_DATA_DIRS"));
 
   GList *applications = NULL;
 
@@ -402,11 +402,11 @@ panel_applications_menu_init(PanelApplicationsMenu *self)
 
           snprintf(path, len, "%s%s", applications_dir, dir->d_name);
 
-          printf("%s\n", path);
-          fflush(stdout);
+          //printf("%s\n", path);
+          //fflush(stdout);
           if (g_key_file_load_from_file(key_file, path, G_KEY_FILE_NONE, NULL))
           {
-            printf("%s\n", path);
+            //printf("%s\n", path);
             applications = g_list_append(applications, key_file);
           }
           else
