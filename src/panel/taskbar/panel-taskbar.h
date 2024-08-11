@@ -1,4 +1,4 @@
-#ifndef PLENJOS_PANEL_INTERFACE_DEFINED
+#pragma once
 
 #include <gtk-layer-shell.h>
 #include <gtk/gtk.h>
@@ -41,6 +41,3 @@ typedef struct PanelTaskbar {
 
 PanelTaskbar *panel_taskbar_init();
 void panel_taskbar_run (PanelTaskbar *self);
-
-#define PLENJOS_PANEL_INTERFACE_DEFINED TRUE
-#endif

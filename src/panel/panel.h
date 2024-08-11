@@ -9,3 +9,5 @@
 
 #include "taskbar/panel-taskbar.h"
 #include "clock/panel-clock.h"
+
+#include "dashboard/panel-applications-menu.h"

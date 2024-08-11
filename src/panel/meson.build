@@ -4,6 +4,7 @@ panel_sources = [
 
 subdir('taskbar')
 subdir('clock')
+subdir('dashboard')
 
 gnome = import('gnome')
 

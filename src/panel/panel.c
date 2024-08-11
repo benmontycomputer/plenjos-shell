@@ -100,6 +100,10 @@ activate (GtkApplication *app, void *_data) {
 
     gtk_widget_show_all (GTK_WIDGET (panel_box));
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
+
+    PanelApplicationsMenu *apps_menu = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
+
+    show_applications_menu (apps_menu);
 }
 
 int
