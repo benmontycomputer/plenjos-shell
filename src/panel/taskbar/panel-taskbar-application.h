@@ -13,6 +13,14 @@ typedef struct {
     GtkBox *items_box;
 } PanelTaskbarApplication;
 
+enum panel_taskbar_toplevel_state_field {
+    TOPLEVEL_STATE_MAXIMIZED = (1 << 0),
+    TOPLEVEL_STATE_MINIMIZED = (1 << 1),
+    TOPLEVEL_STATE_ACTIVATED = (1 << 2),
+    TOPLEVEL_STATE_FULLSCREEN = (1 << 3),
+    TOPLEVEL_STATE_INVALID = (1 << 4),
+};
+
 typedef struct PanelTaskbarToplevelButton {
     struct zwlr_foreign_toplevel_handle_v1 *m_toplevel_handle;
     char *m_title, *m_id, *m_icon_path;
@@ -31,6 +39,8 @@ typedef struct PanelTaskbarToplevelButton {
 
     GtkWidget *icon;
     GtkWidget *label;
+
+    uint32_t state;
 } PanelTaskbarToplevelButton;
 
 PanelTaskbarApplication *panel_taskbar_application_new (char *id, PanelTaskbar *taskbar);

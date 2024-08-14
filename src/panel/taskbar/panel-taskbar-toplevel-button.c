@@ -149,7 +149,8 @@ toplevel_handle_app_id_gtk (gpointer *data) {
     if (!self->rendered)
         panel_taskbar_toplevel_button_gtk_run (self);
 
-    if (self->m_application && self->m_application->id && strcmp (self->m_id, self->m_application->id)) {
+    if (self->m_application && self->m_application->id
+        && strcmp (self->m_id, self->m_application->id)) {
         panel_taskbar_application_remove_toplevel (self->m_application, self);
 
         self->m_application = NULL;
@@ -159,12 +160,14 @@ toplevel_handle_app_id_gtk (gpointer *data) {
         GList *applications = self->m_taskbar->applications;
 
         while (applications && applications->data) {
-            PanelTaskbarApplication *application = (PanelTaskbarApplication *)applications->data;
+            PanelTaskbarApplication *application
+                = (PanelTaskbarApplication *)applications->data;
 
-            if (!strcmp(application->id, self->m_id)) {
+            if (!strcmp (application->id, self->m_id)) {
                 self->m_application = application;
 
-                panel_taskbar_application_add_toplevel (self->m_application, self);
+                panel_taskbar_application_add_toplevel (self->m_application,
+                                                        self);
 
                 return FALSE;
             }
@@ -172,7 +175,8 @@ toplevel_handle_app_id_gtk (gpointer *data) {
             applications = applications->next;
         }
 
-        self->m_application = panel_taskbar_application_new (self->m_id, self->m_taskbar);
+        self->m_application
+            = panel_taskbar_application_new (self->m_id, self->m_taskbar);
 
         panel_taskbar_application_add_toplevel (self->m_application, self);
     }
@@ -224,13 +228,31 @@ toplevel_handle_closed (
 void
 toplevel_excess () {}
 
-/* static void
-toplevel_handle_state (
-    void *data,
-    struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle,
-    struct wl_array *state) {
+static void
+toplevel_handle_state (void *data,
+                       struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle,
+                       struct wl_array *state) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
-} */
+
+    uint32_t *entry;
+
+    self->state = 0;
+
+    wl_array_for_each (entry, state) {
+        if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_MAXIMIZED) {
+            self->state |= TOPLEVEL_STATE_MAXIMIZED;
+        }
+        if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_MINIMIZED) {
+            self->state |= TOPLEVEL_STATE_MINIMIZED;
+        }
+        if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_ACTIVATED) {
+            self->state |= TOPLEVEL_STATE_ACTIVATED;
+        }
+        if (*entry == ZWLR_FOREIGN_TOPLEVEL_HANDLE_V1_STATE_FULLSCREEN) {
+            self->state |= TOPLEVEL_STATE_FULLSCREEN;
+        }
+    }
+}
 
 static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
     = {
@@ -241,15 +263,23 @@ static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
           .output_enter = toplevel_excess,
           .output_leave = toplevel_excess,
           .parent = toplevel_excess,
-          .state = toplevel_excess,
+          .state = toplevel_handle_state,
       };
 
 gboolean
 button_click (GtkButton *button, PanelTaskbarToplevelButton *self) {
     UNUSED (button);
 
-    zwlr_foreign_toplevel_handle_v1_activate (self->m_toplevel_handle,
-                                              self->m_seat);
+    if (self->state & TOPLEVEL_STATE_ACTIVATED) {
+        zwlr_foreign_toplevel_handle_v1_set_minimized (
+            self->m_toplevel_handle);
+    } else if (self->state & TOPLEVEL_STATE_MINIMIZED) {
+        zwlr_foreign_toplevel_handle_v1_unset_minimized (
+            self->m_toplevel_handle);
+    } else {
+        zwlr_foreign_toplevel_handle_v1_activate (self->m_toplevel_handle,
+                                                  self->m_seat);
+    }
 
     wl_display_roundtrip (self->m_taskbar->display);
 
@@ -285,8 +315,9 @@ button_rerender_app_id_and_icon_gtk (gpointer user_data) {
     }
 
     if (self->m_icon_path) {
-        self->icon = gtk_image_new_from_pixbuf (
-            gdk_pixbuf_new_from_file_at_size (self->m_icon_path, 32, 32, NULL));
+        self->icon
+            = gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size (
+                self->m_icon_path, 32, 32, NULL));
     } else {
         self->icon = gtk_image_new ();
     }
@@ -362,7 +393,6 @@ panel_taskbar_toplevel_button_new (
     self->m_title = self->m_id = self->m_icon_path = NULL;
     self->m_output = NULL;
     self->m_state = NULL;
-
 
     zwlr_foreign_toplevel_handle_v1_add_listener (self->m_toplevel_handle,
                                                   &toplevel_listener, self);
