@@ -59,12 +59,126 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     height = (double)hi;
     radius = 16;
 
-    double x = 0;
-    double y = 0;
+    double x = 0.0;
+    double y = 0.0;
+
+    x += 2.0;
+    y += 2.0;
+    width -= 4.0;
+    height -= 4.0;
 
     double degrees = M_PI / 180.0;
 
-    cairo_new_sub_path (cr);
+    cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+
+    /*cairo_set_line_width (cr, 2.0);
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_line_to (cr, x + width - radius, y);
+
+    cairo_stroke (cr);*/
+
+    cairo_pattern_t *pattern = cairo_pattern_create_radial (
+        x + radius, y + radius, radius, x + radius, y + radius, radius + 2.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    pattern = cairo_pattern_create_radial (x + width - radius, y + radius,
+                                           radius, x + width - radius,
+                                           y + radius, radius + 2.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    pattern = cairo_pattern_create_radial (
+        x + width - radius, y + height - radius, radius, x + width - radius,
+        y + height - radius, radius + 2.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    pattern = cairo_pattern_create_radial (x + radius, y + height - radius,
+                                           radius, x + radius,
+                                           y + height - radius, radius + 2.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    pattern = cairo_pattern_create_linear (x + (width / 2), y, x + (width / 2), y - 2.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    /*pattern = cairo_pattern_create_linear (x + width, y + radius, x + width, y + height - radius);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    pattern = cairo_pattern_create_linear (x + radius, y + height, x + width - radius, y + height);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);
+
+    pattern = cairo_pattern_create_linear (x, y + radius, x, y + height - radius);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_paint (cr);
+
+    cairo_pattern_destroy (pattern);*/
+
     cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
                0 * degrees);
     cairo_arc (cr, x + width - radius, y + height - radius, radius,
@@ -91,21 +205,6 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
-
-    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.6);
-
-    cairo_set_line_width (cr, 1.5);
-    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
-               270 * degrees);
-    cairo_line_to (cr, x + width - radius, y);
-
-    cairo_stroke (cr);
 
     cairo_restore (cr);
 
@@ -171,7 +270,7 @@ activate (GtkApplication *app, void *_data) {
 
     // The margins are the gaps around the window's edges
     // Margins and anchors can be set like this...
-    static const gint margins[] = { 4, 4, 4, 4 };
+    static const gint margins[] = { 2, 2, 2, 2 };
     for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
         gtk_layer_set_margin (gtk_window, i, margins[i]);
     }
@@ -227,8 +326,26 @@ activate (GtkApplication *app, void *_data) {
 
     GdkWindow *win = gtk_widget_get_window (GTK_WIDGET (gtk_window));
 
-    GdkPixbuf *pbuf = gdk_pixbuf_new_from_file_at_size (
-        "/usr/share/backgrounds/gnome/drool-d.svg", 2560, -1, NULL);
+    GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
+    GSettings *bg_settings = g_settings_new ("org.gnome.desktop.background");
+
+    char *bg = NULL;
+    if (!strcmp (g_settings_get_string (settings, "color-scheme"),
+                 "prefer-dark")) {
+        bg = g_settings_get_string (bg_settings, "picture-uri-dark");
+    } else {
+        bg = g_settings_get_string (bg_settings, "picture-uri");
+    }
+
+    GdkPixbuf *pbuf = NULL;
+
+    // "/usr/share/backgrounds/gnome/drool-d.svg"
+    if (bg != NULL) {
+        pbuf = gdk_pixbuf_new_from_file_at_size (bg + 7, 2560, -1, NULL);
+    } else {
+        pbuf = gdk_pixbuf_new_from_file_at_size (
+            "/usr/share/backgrounds/gnome/drool-d.svg", 2560, -1, NULL);
+    }
 
     int scale_factor = gdk_monitor_get_scale_factor (
         gdk_display_get_monitor_at_window (gdk_display_get_default (), win));
@@ -256,6 +373,8 @@ activate (GtkApplication *app, void *_data) {
     cairo_surface_destroy (surface);
 
     self->blurred = scaled;
+
+    panel_applications_menu_set_bg (apps_menu, self->blurred);
 
     g_signal_connect (gtk_window, "draw", G_CALLBACK (expose_draw), self);
 }

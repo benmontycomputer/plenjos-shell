@@ -63,7 +63,17 @@ activate (GtkApplication *app, void *_data) {
     gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
     gtk_widget_set_name (GTK_WIDGET (gtk_window), "desktop_window");
 
-    gtk_container_add (GTK_CONTAINER (gtk_window), gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size ("/usr/share/backgrounds/gnome/drool-d.svg", 2560, -1, NULL)));
+    GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
+    GSettings *bg_settings = g_settings_new ("org.gnome.desktop.background");
+
+    char *bg = NULL;
+    if (!strcmp (g_settings_get_string (settings, "color-scheme"), "prefer-dark")) {
+        bg = g_settings_get_string (bg_settings, "picture-uri-dark");
+    } else {
+        bg = g_settings_get_string (bg_settings, "picture-uri");
+    }
+
+    gtk_container_add (GTK_CONTAINER (gtk_window), gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size (bg + 7, 2560, -1, NULL)));
 
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
 }
