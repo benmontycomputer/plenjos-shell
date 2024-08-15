@@ -185,12 +185,44 @@ get_icon_for_theme (char *path, char *theme, char *icon_name, int icon_size) {
     paths = read_index_theme_paths (new_path, icon_size);
     //}
 
+    char icon_size_str[32];
+
+    snprintf (icon_size_str, 32, "%d", icon_size);
+
     if (paths) {
         for (size_t i = 0; paths[i]; i++) {
             for (int j = 0; j < 2; j++) {
                 size_t icon_len = strlen (path) + strlen (theme)
                                   + strlen (paths[i]) + strlen (icon_name)
                                   + strlen (formats[j]) + 4;
+
+                char *icon = malloc (icon_len);
+                snprintf (icon, icon_len, "%s/%s/%s/%s%s", path, theme,
+                          paths[i], icon_name, formats[j]);
+
+                // printf("testing: %s\n", icon);
+                // fflush(stdout);
+
+                if (access (icon, F_OK) == 0) {
+                    // printf("ICON: %s\n\n\n", icon);
+                    // fflush(stdout);
+                    if (strstr (paths[i], icon_size_str) || strstr (paths[i], "scalable")) {
+                        free (new_path);
+                        free_string_list (paths);
+                        return icon;
+                    }
+                }
+
+                free (icon);
+            }
+        }
+
+        for (size_t i = 0; paths[i]; i++) {
+            for (int j = 0; j < 2; j++) {
+                size_t icon_len = strlen (path) + strlen (theme)
+                                  + strlen (paths[i]) + strlen (icon_name)
+                                  + strlen (formats[j]) + 4;
+
                 char *icon = malloc (icon_len);
                 snprintf (icon, icon_len, "%s/%s/%s/%s%s", path, theme,
                           paths[i], icon_name, formats[j]);
@@ -219,10 +251,12 @@ get_icon_for_theme (char *path, char *theme, char *icon_name, int icon_size) {
 }
 
 char *
-suggested_icon_for_id (char *id, int icon_size) {
+suggested_icon_for_id (char *id, int icon_size, char *current_theme) {
     if (id[0] == '/' && (access (id, F_OK) == 0)) {
         return g_strdup (id);
     }
+    printf ("Icon for %s.\n", id);
+        fflush (stdout);
 
     // char *icon;
 
@@ -255,7 +289,7 @@ suggested_icon_for_id (char *id, int icon_size) {
         icon_theme_paths[i + 2] = NULL;
     }
 
-    char *themes[] = { "Yaru", "hicolor" };
+    char *themes[] = { current_theme, "hicolor" };
 
     // char *formats[] = { ".png", ".svg" };
 

@@ -37,6 +37,8 @@ typedef struct PanelTaskbar {
 
     GList *applications;
     GtkBox *taskbar_box;
+
+    GSettings *settings;
 } PanelTaskbar;
 
 PanelTaskbar *panel_taskbar_init();

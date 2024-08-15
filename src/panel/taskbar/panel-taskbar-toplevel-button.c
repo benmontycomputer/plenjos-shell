@@ -26,22 +26,22 @@ remove_spaces (char *s) {
 }
 
 void
-toplevel_update_icon_from_app_id (void *data, char *id) {
-    PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
-
+toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
     char *icon = NULL;
+
+    char *current_theme = g_settings_get_string (self->m_taskbar->settings, "icon-theme");
 
     // Is this icon already loaded?
     // TODO: actually check if icon is already loaded
 
     if (icon == NULL) {
-        icon = suggested_icon_for_id (id, 32);
+        icon = suggested_icon_for_id (id, 32, current_theme);
     }
     if (icon == NULL) {
         char *mod_id = g_strdup (id);
 
         remove_spaces (mod_id);
-        icon = suggested_icon_for_id (mod_id, 32);
+        icon = suggested_icon_for_id (mod_id, 32, current_theme);
 
         free (mod_id);
     }
@@ -51,7 +51,7 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
         for (size_t i = 0; mod_id[i]; i++) {
             mod_id[i] = tolower (mod_id[i]);
         }
-        icon = suggested_icon_for_id (mod_id, 32);
+        icon = suggested_icon_for_id (mod_id, 32, current_theme);
 
         free (mod_id);
     }
@@ -69,14 +69,14 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
             pos++;
         }
 
-        icon = suggested_icon_for_id (mod_id, 32);
+        icon = suggested_icon_for_id (mod_id, 32, current_theme);
 
         if (icon == NULL) {
             for (size_t i = 0; mod_id[i]; i++) {
                 mod_id[i] = tolower (mod_id[i]);
             }
 
-            icon = suggested_icon_for_id (mod_id, 32);
+            icon = suggested_icon_for_id (mod_id, 32, current_theme);
         }
 
         free (mod_id);
@@ -95,14 +95,14 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
             i++;
         }
 
-        icon = suggested_icon_for_id ((mod_id + pos), 32);
+        icon = suggested_icon_for_id ((mod_id + pos), 32, current_theme);
 
         if (icon == NULL) {
             for (size_t i = 0; mod_id[i]; i++) {
                 mod_id[i] = tolower (mod_id[i]);
             }
 
-            icon = suggested_icon_for_id ((mod_id + pos), 32);
+            icon = suggested_icon_for_id ((mod_id + pos), 32, current_theme);
         }
 
         free (mod_id);
@@ -115,7 +115,7 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
 
         if (found != NULL) {
             icon = suggested_icon_for_id (
-                ((icon_exec_map_item *)found->data)->icon, 32);
+                ((icon_exec_map_item *)found->data)->icon, 32, current_theme);
         } else {
             char *mod_id = g_strdup (id);
 
@@ -128,7 +128,7 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
 
             if (found != NULL) {
                 icon = suggested_icon_for_id (
-                    ((icon_exec_map_item *)found->data)->icon, 32);
+                    ((icon_exec_map_item *)found->data)->icon, 32, current_theme);
             }
         }
 
@@ -136,7 +136,7 @@ toplevel_update_icon_from_app_id (void *data, char *id) {
                           (GDestroyNotify)free_icon_exec_map_item);
     }
     if (icon == NULL) {
-        icon = suggested_icon_for_id ("emblem-dialog-question", 32);
+        icon = suggested_icon_for_id ("emblem-dialog-question", 32, current_theme);
     }
 
     self->m_icon_path = icon;

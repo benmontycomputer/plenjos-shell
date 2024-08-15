@@ -15,7 +15,7 @@ typedef struct {
 str_split_return_val str_split (char *a_str, const char a_delim);
 void free_string_list (char **list);
 
-char *suggested_icon_for_id (char *id, int icon_size);
+char *suggested_icon_for_id (char *id, int icon_size, char *current_theme);
 
 typedef struct {
     char *exec;

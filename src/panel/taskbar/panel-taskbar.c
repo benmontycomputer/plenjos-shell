@@ -137,6 +137,8 @@ PanelTaskbar *
 panel_taskbar_init () {
     PanelTaskbar *self = malloc (sizeof (PanelTaskbar));
 
+    self->settings = g_settings_new ("org.gnome.desktop.interface");
+
     self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
 

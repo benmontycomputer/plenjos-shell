@@ -5,6 +5,7 @@ panel_sources = [
 subdir('taskbar')
 subdir('clock')
 subdir('applications-menu')
+subdir('blur')
 
 gnome = import('gnome')
 
@@ -18,5 +19,5 @@ panel_sources += panel_protocol_srcs
 executable(
     'plenjos-panel', panel_sources,
     build_by_default: true,
-    dependencies: [gtk, gtk_layer_shell, wayland_client, wayland_protocols],
+    dependencies: [gtk, gtk_layer_shell, wayland_client, wayland_protocols, m],
     install: true)

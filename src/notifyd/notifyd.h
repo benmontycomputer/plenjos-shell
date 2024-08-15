@@ -3,4 +3,8 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
+#include <gtk-layer-shell.h>
+
 #include <dbus/dbus.h>
+
+#include "plenjos-notifyd-fdo-gbus.h"

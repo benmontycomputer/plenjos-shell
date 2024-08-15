@@ -25,6 +25,12 @@
 
 typedef struct {
     PanelTaskbar *taskbar;
+
+    GdkPixbuf *blurred;
+
+    GtkWindow *gtk_window;
+
+    bool supports_alpha;
 } Panel;
 
 void
@@ -38,6 +44,95 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
 
     panel_taskbar_run (taskbar);
 }
+
+gboolean
+expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
+    cairo_save (cr);
+
+    // Adapted from
+    // https://stackoverflow.com/questions/4183546/how-can-i-draw-image-with-rounded-corners-in-cairo-gtk
+    double width, height, radius;
+    int wi, hi;
+    gtk_window_get_size (self->gtk_window, &wi, &hi);
+
+    width = (double)wi;
+    height = (double)hi;
+    radius = 16;
+
+    double x = 0;
+    double y = 0;
+
+    double degrees = M_PI / 180.0;
+
+    cairo_new_sub_path (cr);
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_close_path (cr);
+
+    cairo_clip (cr);
+
+    if (GDK_IS_PIXBUF (self->blurred)) {
+        gint x_win, y_win;
+        gtk_window_get_position (self->gtk_window, &x_win, &y_win);
+        gdk_cairo_set_source_pixbuf (cr, self->blurred, -x_win, -1376);
+    } else {
+        if (self->supports_alpha) {
+            cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0);
+        } else {
+            cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+        }
+    }
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint (cr);
+
+    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.6);
+
+    cairo_set_line_width (cr, 1.5);
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_line_to (cr, x + width - radius, y);
+
+    cairo_stroke (cr);
+
+    cairo_restore (cr);
+
+    return FALSE;
+}
+
+void
+screen_changed (GtkWidget *widget, GdkScreen *old_screen, Panel *self) {
+    // fix unused parameter warning
+    (void)old_screen;
+    GdkScreen *screen = gtk_widget_get_screen (widget);
+    GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
+
+    if (!visual) {
+        printf ("Your screen does not support alpha channels!\n");
+        visual = gdk_screen_get_system_visual (screen);
+        self->supports_alpha = FALSE;
+    } else {
+        printf ("Your screen supports alpha channels!\n");
+        self->supports_alpha = TRUE;
+    }
+
+    fflush (stdout);
+
+    gtk_widget_set_visual (widget, visual);
+}
+
 static void
 activate (GtkApplication *app, void *_data) {
     (void)_data;
@@ -52,11 +147,20 @@ activate (GtkApplication *app, void *_data) {
     // Create a normal GTK window however you like
     GtkWindow *gtk_window = GTK_WINDOW (gtk_application_window_new (app));
 
+    Panel *self = malloc (sizeof (Panel));
+    self->blurred = NULL;
+    self->gtk_window = gtk_window;
+    self->supports_alpha = FALSE;
+    self->taskbar = NULL;
+
+    g_signal_connect (gtk_window, "screen-changed",
+                      G_CALLBACK (screen_changed), self);
+
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (gtk_window);
 
     // Order below normal windows
-    gtk_layer_set_layer (gtk_window, GTK_LAYER_SHELL_LAYER_BOTTOM);
+    gtk_layer_set_layer (gtk_window, GTK_LAYER_SHELL_LAYER_TOP);
 
     // Push other windows out of the way
     gtk_layer_auto_exclusive_zone_enable (gtk_window);
@@ -67,7 +171,10 @@ activate (GtkApplication *app, void *_data) {
 
     // The margins are the gaps around the window's edges
     // Margins and anchors can be set like this...
-    gtk_layer_set_margin (gtk_window, GTK_LAYER_SHELL_EDGE_TOP, 2);
+    static const gint margins[] = { 4, 4, 4, 4 };
+    for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
+        gtk_layer_set_margin (gtk_window, i, margins[i]);
+    }
 
     // ... or like this
     // Anchors are if the window is pinned to each edge of the output
@@ -77,20 +184,27 @@ activate (GtkApplication *app, void *_data) {
     }
 
     gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
+    gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
 
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
 
-    PanelApplicationsMenu *apps_menu = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
+    PanelApplicationsMenu *apps_menu
+        = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
 
-    gtk_box_pack_start (panel_box, GTK_WIDGET (panel_applications_menu_get_launcher_button (apps_menu)), FALSE,
-                      FALSE, 0);
+    gtk_box_pack_start (
+        panel_box,
+        GTK_WIDGET (panel_applications_menu_get_launcher_button (apps_menu)),
+        FALSE, FALSE, 0);
 
     hide_applications_menu (apps_menu);
 
     PanelTaskbar *panel_taskbar = panel_taskbar_init ();
-    gtk_box_pack_start (panel_box,
-                       GTK_WIDGET (panel_taskbar->taskbar_box), FALSE, FALSE, 0);
+
+    self->taskbar = panel_taskbar;
+
+    gtk_box_pack_start (panel_box, GTK_WIDGET (panel_taskbar->taskbar_box),
+                        FALSE, FALSE, 0);
 
     GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (task, panel_taskbar, NULL);
@@ -100,13 +214,50 @@ activate (GtkApplication *app, void *_data) {
 
     g_timeout_add (500, (GSourceFunc)panel_clock_update, panel_clock);
 
-    gtk_box_pack_end (panel_box, GTK_WIDGET (panel_clock->label), FALSE,
-                      FALSE, 0);
+    gtk_box_pack_end (panel_box, GTK_WIDGET (panel_clock->label), FALSE, FALSE,
+                      0);
 
     gtk_container_add (GTK_CONTAINER (gtk_window), GTK_WIDGET (panel_box));
 
     gtk_widget_show_all (GTK_WIDGET (panel_box));
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
+
+    gtk_widget_set_app_paintable (GTK_WIDGET (gtk_window), TRUE);
+    gtk_widget_show (GTK_WIDGET (gtk_window));
+
+    GdkWindow *win = gtk_widget_get_window (GTK_WIDGET (gtk_window));
+
+    GdkPixbuf *pbuf = gdk_pixbuf_new_from_file_at_size (
+        "/usr/share/backgrounds/gnome/drool-d.svg", 2560, -1, NULL);
+
+    int scale_factor = gdk_monitor_get_scale_factor (
+        gdk_display_get_monitor_at_window (gdk_display_get_default (), win));
+
+    cairo_surface_t *surfaceold
+        = gdk_cairo_surface_create_from_pixbuf (pbuf, 1, win);
+
+    cairo_surface_t *surface = cairo_image_surface_create (
+        CAIRO_FORMAT_RGB24, cairo_image_surface_get_width (surfaceold),
+        cairo_image_surface_get_height (surfaceold));
+
+    cairo_surface_set_device_scale (surface, scale_factor, scale_factor);
+
+    stack_blur (surfaceold, surface, 240, 240);
+
+    GdkPixbuf *unscaled
+        = gdk_pixbuf_get_from_surface (surface, 0, 0, 2560, 1440);
+
+    GdkPixbuf *scaled
+        = gdk_pixbuf_scale_simple (unscaled, 2560, 1440, GDK_INTERP_BILINEAR);
+
+    g_object_unref (unscaled);
+    g_object_unref (pbuf);
+    cairo_surface_destroy (surfaceold);
+    cairo_surface_destroy (surface);
+
+    self->blurred = scaled;
+
+    g_signal_connect (gtk_window, "draw", G_CALLBACK (expose_draw), self);
 }
 
 int

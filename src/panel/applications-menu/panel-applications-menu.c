@@ -188,6 +188,8 @@ GtkWidget *applications_menu_render_app(PanelApplicationsMenu *self,
     }
   }
 
+  gtk_widget_set_size_request (icon, self->icon_size, self->icon_size);
+
   GtkLabel *label = GTK_LABEL(gtk_label_new(""));
 
   size_t len = 12;
