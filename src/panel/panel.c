@@ -31,6 +31,7 @@ typedef struct {
     GtkWindow *gtk_window;
 
     bool supports_alpha;
+    bool dark_mode;
 } Panel;
 
 void
@@ -142,7 +143,6 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
-    cairo_new_sub_path (cr);
     cairo_move_to (cr, x + radius, y + height + 6.0);
     cairo_line_to (cr, x + width - radius, y + height + 6.0);
     cairo_line_to (cr, x + width - radius, y + height);
@@ -166,7 +166,6 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
-    cairo_new_sub_path (cr);
     cairo_move_to (cr, x + radius, y - 6.0);
     cairo_line_to (cr, x + width - radius, y - 6.0);
     cairo_line_to (cr, x + width - radius, y);
@@ -190,7 +189,6 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
-    cairo_new_sub_path (cr);
     cairo_move_to (cr, x - 6.0, y + radius);
     cairo_line_to (cr, x - 6.0, y + height - radius);
     cairo_line_to (cr, x, y + height - radius);
@@ -214,7 +212,6 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
-    cairo_new_sub_path (cr);
     cairo_move_to (cr, x + width + 6.0, y + radius);
     cairo_line_to (cr, x + width + 6.0, y + height - radius);
     cairo_line_to (cr, x + width, y + height - radius);
@@ -231,7 +228,18 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     cairo_pattern_destroy (pattern);
 
-    cairo_new_sub_path (cr);
+    cairo_arc (cr, x + width - radius, y + radius, radius + 0.5, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius + 0.5,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius + 0.5, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius + 0.5, 180 * degrees,
+               270 * degrees);
+    cairo_close_path (cr);
+    cairo_set_line_width (cr, 1.0);
+    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.4);
+    cairo_stroke (cr);
 
     cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
                0 * degrees);
@@ -259,6 +267,8 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
+
+    cairo_set_source_rgba (cr, )
 
     cairo_restore (cr);
 
@@ -387,8 +397,10 @@ activate (GtkApplication *app, void *_data) {
     if (!strcmp (g_settings_get_string (settings, "color-scheme"),
                  "prefer-dark")) {
         bg = g_settings_get_string (bg_settings, "picture-uri-dark");
+        self->dark_mode = TRUE;
     } else {
         bg = g_settings_get_string (bg_settings, "picture-uri");
+        self->dark_mode = FALSE;
     }
 
     GdkPixbuf *pbuf = NULL;
