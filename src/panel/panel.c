@@ -268,7 +268,27 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
 
-    cairo_set_source_rgba (cr, )
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_close_path (cr);
+
+    cairo_clip (cr);
+
+    if (self->dark_mode) {
+        cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.7);
+    } else {
+        cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.5);
+    }
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+
+    cairo_paint (cr);
 
     cairo_restore (cr);
 

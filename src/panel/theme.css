@@ -7,6 +7,8 @@
     background-image: none;
 
     border-color: rgba(80, 80, 80, 0.2);
+
+    border-radius: 10px;
 }
 
 #taskbar_box {
@@ -26,8 +28,8 @@
 }
 
 #panel_box {
-    padding: 2px;
-    padding-left: 8px;
+    padding: 4px;
+    padding-left: 5px;
     padding-right: 16px;
     margin: 2px;
 }
