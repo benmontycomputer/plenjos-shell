@@ -325,10 +325,10 @@ button_rerender_app_id_and_icon_gtk (gpointer user_data) {
 
     gtk_widget_set_size_request (self->label, 60, 32);
 
-    self->box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8);
+    self->box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
     gtk_box_pack_start (GTK_BOX (self->box), self->icon, FALSE, FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (self->box), self->label, FALSE, FALSE, 0);
+    gtk_box_pack_start (GTK_BOX (self->box), self->label, FALSE, FALSE, 8);
     // gtk_widget_set_size_request (self->box, 120, -1);
     gtk_widget_show_all (self->box);
 
