@@ -25,6 +25,14 @@ remove_spaces (char *s) {
     } while ((*s++ = *d++));
 }
 
+char *shorten_label (char *label) {
+    if (strlen (label) > 24) {
+        return g_strdup (label);
+    } else {
+        return NULL;
+    }
+}
+
 void
 toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
     char *icon = NULL;

@@ -191,8 +191,12 @@ GtkWidget *applications_menu_render_app(PanelApplicationsMenu *self,
   gtk_widget_set_size_request (icon, self->icon_size, self->icon_size);
 
   GtkLabel *label = GTK_LABEL(gtk_label_new(""));
+  gtk_widget_set_size_request (GTK_WIDGET (label), self->icon_size + 24, -1);
+  gtk_label_set_line_wrap (label, TRUE);
+  gtk_label_set_line_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
+  gtk_label_set_max_width_chars (label, 0);
 
-  size_t len = 12;
+  size_t len = 30;
   char *name = malloc(len);
   snprintf(name, len, "%s", display_name);
 
