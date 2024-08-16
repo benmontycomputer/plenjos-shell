@@ -135,14 +135,25 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     cairo_pattern_destroy (pattern);
 
-    pattern = cairo_pattern_create_linear (x + (width / 2), y, x + (width / 2), y - 2.0);
+    pattern = cairo_pattern_create_linear (x + (width / 2), y + height, x + (width / 2), y + height + 2.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
+    cairo_new_sub_path (cr);
+    cairo_move_to (cr, x + radius, y + height + 2.0);
+    cairo_line_to (cr, x + width - radius, y + height + 2.0);
+    cairo_line_to (cr, x + width - radius, y + height);
+    cairo_line_to (cr, x + radius, y + height);
+    cairo_close_path (cr);
+
+    cairo_save (cr);
+    cairo_clip (cr);
+
     cairo_set_source (cr, pattern);
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
+    cairo_restore (cr);
 
     cairo_pattern_destroy (pattern);
 
@@ -178,6 +189,8 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_paint (cr);
 
     cairo_pattern_destroy (pattern);*/
+
+    cairo_new_sub_path (cr);
 
     cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
                0 * degrees);
