@@ -57,15 +57,15 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     width = (double)wi;
     height = (double)hi;
-    radius = 16;
+    radius = 12;
 
     double x = 0.0;
     double y = 0.0;
 
-    x += 2.0;
-    y += 2.0;
-    width -= 4.0;
-    height -= 4.0;
+    x += 6.0;
+    y += 6.0;
+    width -= 12.0;
+    height -= 12.0;
 
     double degrees = M_PI / 180.0;
 
@@ -85,7 +85,7 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
     cairo_stroke (cr);*/
 
     cairo_pattern_t *pattern = cairo_pattern_create_radial (
-        x + radius, y + radius, radius, x + radius, y + radius, radius + 2.0);
+        x + radius, y + radius, radius, x + radius, y + radius, radius + 6.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
@@ -98,7 +98,7 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     pattern = cairo_pattern_create_radial (x + width - radius, y + radius,
                                            radius, x + width - radius,
-                                           y + radius, radius + 2.0);
+                                           y + radius, radius + 6.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
@@ -111,7 +111,7 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     pattern = cairo_pattern_create_radial (
         x + width - radius, y + height - radius, radius, x + width - radius,
-        y + height - radius, radius + 2.0);
+        y + height - radius, radius + 6.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
@@ -124,7 +124,7 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     pattern = cairo_pattern_create_radial (x + radius, y + height - radius,
                                            radius, x + radius,
-                                           y + height - radius, radius + 2.0);
+                                           y + height - radius, radius + 6.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
@@ -135,14 +135,16 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     cairo_pattern_destroy (pattern);
 
-    pattern = cairo_pattern_create_linear (x + (width / 2), y + height, x + (width / 2), y + height + 2.0);
+    // Bottom shadow
+    pattern = cairo_pattern_create_linear (x + (width / 2), y + height,
+                                           x + (width / 2), y + height + 6.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
     cairo_new_sub_path (cr);
-    cairo_move_to (cr, x + radius, y + height + 2.0);
-    cairo_line_to (cr, x + width - radius, y + height + 2.0);
+    cairo_move_to (cr, x + radius, y + height + 6.0);
+    cairo_line_to (cr, x + width - radius, y + height + 6.0);
     cairo_line_to (cr, x + width - radius, y + height);
     cairo_line_to (cr, x + radius, y + height);
     cairo_close_path (cr);
@@ -157,38 +159,77 @@ expose_draw (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     cairo_pattern_destroy (pattern);
 
-    /*pattern = cairo_pattern_create_linear (x + width, y + radius, x + width, y + height - radius);
+    // Top shadow
+    pattern = cairo_pattern_create_linear (x + (width / 2), y,
+                                           x + (width / 2), y - 6.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
+    cairo_new_sub_path (cr);
+    cairo_move_to (cr, x + radius, y - 6.0);
+    cairo_line_to (cr, x + width - radius, y - 6.0);
+    cairo_line_to (cr, x + width - radius, y);
+    cairo_line_to (cr, x + radius, y);
+    cairo_close_path (cr);
+
+    cairo_save (cr);
+    cairo_clip (cr);
+
     cairo_set_source (cr, pattern);
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
+    cairo_restore (cr);
 
     cairo_pattern_destroy (pattern);
 
-    pattern = cairo_pattern_create_linear (x + radius, y + height, x + width - radius, y + height);
+    // Left shadow
+    pattern = cairo_pattern_create_linear (x, y + (height / 2),
+                                           x - 6.0, y + (height / 2));
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
+    cairo_new_sub_path (cr);
+    cairo_move_to (cr, x - 6.0, y + radius);
+    cairo_line_to (cr, x - 6.0, y + height - radius);
+    cairo_line_to (cr, x, y + height - radius);
+    cairo_line_to (cr, x, y + radius);
+    cairo_close_path (cr);
+
+    cairo_save (cr);
+    cairo_clip (cr);
+
     cairo_set_source (cr, pattern);
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
+    cairo_restore (cr);
 
     cairo_pattern_destroy (pattern);
 
-    pattern = cairo_pattern_create_linear (x, y + radius, x, y + height - radius);
+    // Right shadow
+    pattern = cairo_pattern_create_linear (x + width, y + (height / 2),
+                                           x + width + 6.0, y + (height / 2));
 
     cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.3);
     cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0);
 
-    cairo_set_source (cr, pattern);
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-    cairo_paint (cr);
+    cairo_new_sub_path (cr);
+    cairo_move_to (cr, x + width + 6.0, y + radius);
+    cairo_line_to (cr, x + width + 6.0, y + height - radius);
+    cairo_line_to (cr, x + width, y + height - radius);
+    cairo_line_to (cr, x + width, y + radius);
+    cairo_close_path (cr);
 
-    cairo_pattern_destroy (pattern);*/
+    cairo_save (cr);
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint (cr);
+    cairo_restore (cr);
+
+    cairo_pattern_destroy (pattern);
 
     cairo_new_sub_path (cr);
 
@@ -295,7 +336,7 @@ activate (GtkApplication *app, void *_data) {
         gtk_layer_set_anchor (gtk_window, i, anchors[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
+    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 64);
     gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
 
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
