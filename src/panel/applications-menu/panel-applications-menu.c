@@ -304,6 +304,12 @@ gboolean expose_draw_dashboard(GtkWidget *widget, cairo_t *cr, PanelApplications
   cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
   cairo_paint(cr);
 
+  cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.7);
+
+  cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+
+  cairo_paint (cr);
+
   cairo_restore(cr);
 
   return FALSE;
