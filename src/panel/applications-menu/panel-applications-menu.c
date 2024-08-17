@@ -191,10 +191,11 @@ GtkWidget *applications_menu_render_app(PanelApplicationsMenu *self,
   gtk_widget_set_size_request (icon, self->icon_size, self->icon_size);
 
   GtkLabel *label = GTK_LABEL(gtk_label_new(""));
-  gtk_widget_set_size_request (GTK_WIDGET (label), self->icon_size + 24, -1);
+  gtk_widget_set_size_request (GTK_WIDGET (label), self->icon_size + 24, 30);
   gtk_label_set_line_wrap (label, TRUE);
   gtk_label_set_line_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
   gtk_label_set_max_width_chars (label, 0);
+  gtk_label_set_justify (label, GTK_JUSTIFY_CENTER);
 
   size_t len = 30;
   char *name = malloc(len);
@@ -511,8 +512,8 @@ panel_applications_menu_init(PanelApplicationsMenu *self)
 
   free_string_list (favorites);*/
 
-  gtk_widget_set_margin_start(GTK_WIDGET(self->scrolled_window), self->monitor_geometry.width / 4);
-  gtk_widget_set_margin_end(GTK_WIDGET(self->scrolled_window), self->monitor_geometry.width / 4);
+  gtk_widget_set_margin_start(GTK_WIDGET(self->scrolled_window), self->monitor_geometry.width / 6);
+  gtk_widget_set_margin_end(GTK_WIDGET(self->scrolled_window), self->monitor_geometry.width / 6);
 }
 
 void show_wrap (GtkButton *button, PanelApplicationsMenu *self) {
