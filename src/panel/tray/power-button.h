@@ -1,12 +1,12 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-#include "panel-tray-menu.h"
-
 typedef struct PowerButton {
     GtkButton *button;
 
-    PanelTrayMenu *menu;
+    GtkStack *stack;
+
+    GtkBox *box;
 
     GtkButton *shutdown;
     GtkButton *restart;
@@ -14,4 +14,4 @@ typedef struct PowerButton {
     GtkButton *logout;
 } PowerButton;
 
-PowerButton *power_button_new (gpointer panel_ptr);
+PowerButton *power_button_new (GtkStack *stack);

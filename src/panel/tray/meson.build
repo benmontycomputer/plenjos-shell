@@ -5,4 +5,5 @@ panel_sources += [
     'tray/audio-button.c',
     'tray/power-button.c',
     'tray/network-button.c',
+    'tray/media-control.c',
 ]

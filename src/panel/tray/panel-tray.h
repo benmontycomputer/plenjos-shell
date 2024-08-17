@@ -9,6 +9,10 @@
 #include "network-button.h"
 #include "power-button.h"
 
+#include "media-control.h"
+
+#include "panel-tray-menu.h"
+
 typedef struct PanelTray {
     GtkBox *box;
 
@@ -16,7 +20,17 @@ typedef struct PanelTray {
     NetworkButton *network_button;
     PowerButton *power_button;
 
+    GtkButton *control_center_button;
+
+    GtkStack *stack;
+
+    PanelTrayMenu *menu;
+
+    GtkGrid *control_center_grid;
+
     Clock *clock;
+
+    MediaControl *media_control;
 } PanelTray;
 
 PanelTray *panel_tray_new (gpointer panel_ptr);

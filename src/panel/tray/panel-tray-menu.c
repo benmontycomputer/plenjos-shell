@@ -45,7 +45,7 @@ panel_tray_menu_new (gpointer panel_ptr) {
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_BOTTOM, TRUE);
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
 
-    gtk_widget_set_size_request (GTK_WIDGET (self->window), -1, -1);
+    gtk_widget_set_size_request (GTK_WIDGET (self->window), 400, 640);
 
     gtk_widget_set_app_paintable (GTK_WIDGET (self->window), TRUE);
 

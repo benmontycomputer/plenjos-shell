@@ -64,3 +64,8 @@
 #panel_tray_menu_window_box {
     padding: 8px;
 }
+
+#panel_power_menu_button {
+    background-color: transparent;
+    background-image: none;
+}

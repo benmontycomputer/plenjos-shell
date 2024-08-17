@@ -1,13 +1,13 @@
 #include <gtk/gtk.h>
 
-#include "panel-tray-menu.h"
-
 typedef struct AudioButton {
-    GtkButton *button;
+    GtkStack *stack;
 
-    PanelTrayMenu *menu;
+    GtkBox *box;
+
+    GtkButton *button;
 
     GtkScale *volume;
 } AudioButton;
 
-AudioButton *audio_button_new (gpointer panel_ptr);
+AudioButton *audio_button_new (GtkStack *stack);

@@ -20,6 +20,8 @@ cc = meson.get_compiler('c')
 
 m = cc.find_library('m', required : true)
 
+playerctl = dependency('playerctl', version: '>=2.4.1')
+
 test('basic', exe)
 
 subdir('protocol')
