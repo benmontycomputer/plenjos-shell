@@ -9,4 +9,4 @@ typedef struct PowerButton {
     PanelTrayMenu *menu;
 } PowerButton;
 
-PowerButton *power_button_new ();
+PowerButton *power_button_new (gpointer panel_ptr);

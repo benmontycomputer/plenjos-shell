@@ -1,12 +1,12 @@
 #include "panel-tray.h"
 
 PanelTray *
-panel_tray_new () {
+panel_tray_new (gpointer panel_ptr) {
     PanelTray *self = malloc (sizeof (PanelTray));
 
     self->audio_button = audio_button_new ();
     self->network_button = network_button_new ();
-    self->power_button = power_button_new ();
+    self->power_button = power_button_new (panel_ptr);
 
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
 

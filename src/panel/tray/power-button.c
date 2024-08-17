@@ -1,17 +1,17 @@
 #include "power-button.h"
 
 void toggle_menu_wrap (GtkButton *button, PowerButton *self) {
-    panel_tray_menu_toggle_show (self->menu, 0, 8);
+    panel_tray_menu_toggle_show (self->menu, 0, 6);
 }
 
-PowerButton *power_button_new () {
+PowerButton *power_button_new (gpointer panel_ptr) {
     PowerButton *self = malloc (sizeof (PowerButton));
 
     self->button = gtk_button_new_from_icon_name ("system-shutdown", GTK_ICON_SIZE_DND);
 
     gtk_widget_set_name (self->button, "panel_button");
 
-    self->menu = panel_tray_menu_new ();
+    self->menu = panel_tray_menu_new (panel_ptr);
 
     g_signal_connect (self->button, "clicked", toggle_menu_wrap, self);
 

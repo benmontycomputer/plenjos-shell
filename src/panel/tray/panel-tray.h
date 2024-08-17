@@ -19,4 +19,4 @@ typedef struct PanelTray {
     Clock *clock;
 } PanelTray;
 
-PanelTray *panel_tray_new ();
+PanelTray *panel_tray_new (gpointer panel_ptr);

@@ -62,7 +62,7 @@ panel_applications_menu_class_init(PanelApplicationsMenuClass *klass)
 
 static int applications_menu_hide(GtkWidget *widget)
 {
-  gdk_window_hide(gtk_widget_get_window(widget));
+  gtk_widget_hide (widget);
   return FALSE;
 }
 
@@ -73,10 +73,7 @@ void hide_applications_menu(PanelApplicationsMenu *self)
 
 void show_applications_menu(PanelApplicationsMenu *self)
 {
-  gtk_window_present(GTK_WINDOW (&self->parent_instance));
-
-  gtk_window_resize(GTK_WINDOW(&self->parent_instance), self->monitor_geometry.width, self->monitor_geometry.height);
-  gtk_window_move(GTK_WINDOW(&self->parent_instance), 0, 0);
+  gtk_widget_show (&self->parent_instance);
 }
 
 static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer data)
@@ -373,6 +370,29 @@ static void
 panel_applications_menu_init(PanelApplicationsMenu *self)
 {
   gtk_widget_init_template(GTK_WIDGET(self));
+
+  // Before the window is first realized, set it up to be a layer surface
+  gtk_layer_init_for_window (&self->parent_instance);
+
+  // Order below normal windows
+  gtk_layer_set_layer (&self->parent_instance, GTK_LAYER_SHELL_LAYER_OVERLAY);
+
+  gtk_layer_set_keyboard_mode (
+        &self->parent_instance,
+        GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE); // NONE is default
+
+  // Push other windows out of the way
+  gtk_layer_auto_exclusive_zone_enable (&self->parent_instance);
+
+  // We don't need to get keyboard input
+  // gtk_layer_set_keyboard_mode (gtk_window,
+  // GTK_LAYER_SHELL_KEYBOARD_MODE_NONE); // NONE is default
+
+  // Anchors are if the window is pinned to each edge of the output
+  static const gboolean anchors[] = { TRUE, TRUE, TRUE, TRUE };
+  for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
+      gtk_layer_set_anchor (&self->parent_instance, i, anchors[i]);
+  }
 
   g_signal_connect(&self->parent_instance, "key_press_event", G_CALLBACK(check_escape), NULL);
   g_signal_connect(&self->parent_instance, "focus-out-event", G_CALLBACK(focus_out_event), NULL);

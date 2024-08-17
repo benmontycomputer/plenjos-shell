@@ -1,5 +1,7 @@
-#include <stdio.h>
+#pragma once
+
 #include <stdbool.h>
+#include <stdio.h>
 
 #include <gtk/gtk.h>
 
@@ -11,8 +13,13 @@ typedef struct PanelTrayMenu {
     GtkWindow *window;
 
     bool visible;
+
+    gpointer panel_ptr;
+
+    gint x, y;
 } PanelTrayMenu;
 
-PanelTrayMenu *panel_tray_menu_new ();
+PanelTrayMenu *panel_tray_menu_new (gpointer panel_ptr);
 
-void *panel_tray_menu_toggle_show (PanelTrayMenu *self, gint bottom, gint right);
+void *panel_tray_menu_toggle_show (PanelTrayMenu *self, gint bottom,
+                                   gint right);

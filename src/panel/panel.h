@@ -9,6 +9,7 @@
 
 #include "taskbar/panel-taskbar.h"
 #include "tray/panel-tray.h"
+#include "tray/panel-tray-menu.h"
 
 #include "applications-menu/panel-applications-menu.h"
 

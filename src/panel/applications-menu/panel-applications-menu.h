@@ -23,6 +23,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+#include <gtk-layer-shell.h>
+
 #define UNUSED(x) (void)(x)
 
 G_BEGIN_DECLS

@@ -46,6 +46,364 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
     panel_taskbar_run (taskbar);
 }
 
+typedef struct DrawArgs {
+    GtkWindow *gtk_window;
+
+    gboolean dark_mode;
+    gboolean supports_alpha;
+
+    GdkPixbuf *blurred;
+
+    gint x, y;
+} DrawArgs;
+
+gboolean expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args);
+
+gboolean
+expose_draw_tray_menu (GtkWidget *widget, cairo_t *cr, PanelTrayMenu *menu) {
+    Panel *self = (Panel *)menu->panel_ptr;
+
+    DrawArgs *args = malloc (sizeof (DrawArgs));
+
+    args->gtk_window = menu->window;
+
+    args->dark_mode = self->dark_mode;
+    args->supports_alpha = self->supports_alpha;
+
+    args->blurred = self->blurred;
+
+    args->x = menu->x;
+    args->y = menu->y;
+
+    gboolean return_val = expose_draw_raw (widget, cr, args);
+
+    free (args);
+
+    return return_val;
+}
+
+gboolean
+expose_draw_panel (GtkWidget *widget, cairo_t *cr, Panel *self) {
+    DrawArgs *args = malloc (sizeof (DrawArgs));
+
+    args->gtk_window = self->gtk_window;
+
+    args->dark_mode = self->dark_mode;
+    args->supports_alpha = self->supports_alpha;
+
+    args->blurred = self->blurred;
+
+    GdkWindow *gdk_window = gtk_widget_get_window (GTK_WIDGET (self->gtk_window));
+
+    GdkRectangle geo;
+
+    gdk_monitor_get_geometry (gdk_display_get_monitor_at_window (gdk_window_get_display (gdk_window), gdk_window), &geo);
+
+    args->x = 0;
+    args->y = geo.height - 64;
+
+    gboolean return_val = expose_draw_raw (widget, cr, args);
+
+    free (args);
+
+    return return_val;
+}
+
+gboolean
+expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
+    cairo_save (cr);
+
+    // Adapted from
+    // https://stackoverflow.com/questions/4183546/how-can-i-draw-image-with-rounded-corners-in-cairo-gtk
+    double width, height, radius;
+    int wi, hi;
+    gtk_window_get_size (args->gtk_window, &wi, &hi);
+
+    width = (double)wi;
+    height = (double)hi;
+    radius = 12;
+
+    double x = 0.0;
+    double y = 0.0;
+
+    x += 6.0;
+    y += 6.0;
+    width -= 12.0;
+    height -= 12.0;
+
+    double degrees = M_PI / 180.0;
+
+    // cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
+
+    /*cairo_set_line_width (cr, 2.0);
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_line_to (cr, x + width - radius, y);
+
+    cairo_stroke (cr);*/
+
+    cairo_pattern_t *pattern = cairo_pattern_create_radial (
+        x + radius, y + radius, radius, x + radius, y + radius, radius + 6.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x - 6.0, y - 6.0, radius + 6.0, radius + 6.0);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    pattern = cairo_pattern_create_radial (x + width - radius, y + radius,
+                                           radius, x + width - radius,
+                                           y + radius, radius + 6.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x + width - radius, y - 6.0, radius + 6.0,
+                     radius + 6.0);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    pattern = cairo_pattern_create_radial (
+        x + width - radius, y + height - radius, radius, x + width - radius,
+        y + height - radius, radius + 6.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x + width - radius, y + height - radius, radius + 6.0,
+                     radius + 6.0);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    pattern = cairo_pattern_create_radial (x + radius, y + height - radius,
+                                           radius, x + radius,
+                                           y + height - radius, radius + 6.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x - 6.0, y + height - radius, radius + 6.0,
+                     radius + 6.0);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    // Bottom shadow
+    pattern = cairo_pattern_create_linear (x + (width / 2), y + height,
+                                           x + (width / 2), y + height + 6.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x + radius, y + height, width - (2 * radius), 6.0);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    // Top shadow
+    pattern = cairo_pattern_create_linear (x + (width / 2), y, x + (width / 2),
+                                           y - 6.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x + radius, y - 6.0, width - (2 * radius), 6.0);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    // Left shadow
+    pattern = cairo_pattern_create_linear (x, y + (height / 2), x - 6.0,
+                                           y + (height / 2));
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x - 6.0, y + radius, 6.0, height - (2 * radius));
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    // Right shadow
+    pattern = cairo_pattern_create_linear (x + width, y + (height / 2),
+                                           x + width + 6.0, y + (height / 2));
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, x + width, y + radius, 6.0, height - (2 * radius));
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+
+    cairo_arc (cr, x + width - radius, y + radius, radius + 0.5, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius + 0.5,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius + 0.5, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius + 0.5, 180 * degrees,
+               270 * degrees);
+    cairo_close_path (cr);
+    cairo_set_line_width (cr, 1.0);
+    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.4);
+    cairo_stroke (cr);
+
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_close_path (cr);
+
+    cairo_clip (cr);
+
+    if (GDK_IS_PIXBUF (args->blurred)) {
+        gdk_cairo_set_source_pixbuf (cr, args->blurred, -args->x, -args->y);
+    } else {
+        if (args->supports_alpha) {
+            cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0);
+        } else {
+            cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+        }
+    }
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint (cr);
+
+    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
+               0 * degrees);
+    cairo_arc (cr, x + width - radius, y + height - radius, radius,
+               0 * degrees, 90 * degrees);
+    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
+               180 * degrees);
+    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
+               270 * degrees);
+    cairo_close_path (cr);
+
+    cairo_clip (cr);
+
+    if (args->dark_mode) {
+        cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.7);
+    } else {
+        cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.5);
+    }
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
+
+    cairo_paint (cr);
+
+    cairo_restore (cr);
+
+    return FALSE;
+}
+
+void
+screen_changed (GtkWidget *widget, GdkScreen *old_screen, Panel *self) {
+    // fix unused parameter warning
+    (void)old_screen;
+    GdkScreen *screen = gtk_widget_get_screen (widget);
+    GdkVisual *visual = gdk_screen_get_rgba_visual (screen);
+
+    if (!visual) {
+        printf ("Your screen does not support alpha channels!\n");
+        visual = gdk_screen_get_system_visual (screen);
+        self->supports_alpha = FALSE;
+    } else {
+        printf ("Your screen supports alpha channels!\n");
+        self->supports_alpha = TRUE;
+    }
+
+    fflush (stdout);
+
+    gtk_widget_set_visual (widget, visual);
+}
+
 static void
 activate (GtkApplication *app, void *_data) {
     (void)_data;
@@ -122,8 +480,8 @@ activate (GtkApplication *app, void *_data) {
     GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (task, panel_taskbar, NULL);
     g_task_run_in_thread (task, (GTaskThreadFunc)panel_taskbar_run_wrap);
-    
-    PanelTray *panel_tray = panel_tray_new ();
+
+    PanelTray *panel_tray = panel_tray_new ((gpointer)self);
 
     gtk_box_pack_end (panel_box, GTK_WIDGET (panel_tray->box), FALSE, FALSE,
                       0);
@@ -190,7 +548,8 @@ activate (GtkApplication *app, void *_data) {
 
     panel_applications_menu_set_bg (apps_menu, self->blurred);
 
-    g_signal_connect (gtk_window, "draw", G_CALLBACK (expose_draw), self);
+    g_signal_connect (gtk_window, "draw", G_CALLBACK (expose_draw_panel),
+                      self);
 }
 
 int
