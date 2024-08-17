@@ -8,7 +8,7 @@ panel_tray_new () {
     self->network_button = network_button_new ();
     self->power_button = power_button_new ();
 
-    self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4));
+    self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
 
     self->clock = clock_new ();
 

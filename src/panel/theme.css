@@ -11,6 +11,11 @@
     border-radius: 10px;
 }
 
+#panel_clock {
+    padding: 0px 4px;
+    margin: 2px 1px;
+}
+
 #taskbar_box {
     padding: 0px;
 }
