@@ -45,7 +45,7 @@ panel_tray_menu_new (gpointer panel_ptr) {
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_BOTTOM, TRUE);
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
 
-    gtk_widget_set_size_request (GTK_WIDGET (self->window), 480, 640);
+    gtk_widget_set_size_request (GTK_WIDGET (self->window), -1, -1);
 
     gtk_widget_set_app_paintable (GTK_WIDGET (self->window), TRUE);
 
@@ -60,6 +60,9 @@ panel_tray_menu_new (gpointer panel_ptr) {
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
     gtk_container_add (GTK_CONTAINER (self->window), GTK_WIDGET (self->box));
+
+    gtk_widget_set_name (GTK_WIDGET (self->window), "panel_tray_menu_window");
+    gtk_widget_set_name (GTK_WIDGET (self->box), "panel_tray_menu_window_box");
 
     return self;
 }

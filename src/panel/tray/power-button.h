@@ -7,6 +7,11 @@ typedef struct PowerButton {
     GtkButton *button;
 
     PanelTrayMenu *menu;
+
+    GtkButton *shutdown;
+    GtkButton *restart;
+    GtkButton *lock;
+    GtkButton *logout;
 } PowerButton;
 
 PowerButton *power_button_new (gpointer panel_ptr);

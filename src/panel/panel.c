@@ -369,7 +369,7 @@ expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
     cairo_clip (cr);
 
     if (args->dark_mode) {
-        cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.7);
+        cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.5);
     } else {
         cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.5);
     }
