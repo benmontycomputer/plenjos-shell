@@ -15,21 +15,38 @@ void next (GtkButton *self, PlayerctlPlayer *player) {
 GtkWidget *generate_player (PlayerctlPlayer *player) {
     GtkGrid *grid = GTK_GRID (gtk_grid_new ());
 
-    gtk_widget_set_name (GTK_WIDGET (grid), "media_player_grid");
+    gtk_grid_set_column_homogeneous (grid, TRUE);
 
-    GtkButton *previous_button = gtk_button_new_from_icon_name ("media-playback-skip-backward", GTK_ICON_SIZE_DND);
+    gtk_widget_set_name (GTK_WIDGET (grid), "media_player_grid");
+    gtk_widget_set_hexpand (GTK_WIDGET (grid), FALSE);
+    gtk_widget_set_halign (GTK_WIDGET (grid), GTK_ALIGN_CENTER);
+
+    GtkButton *previous_button = gtk_button_new_from_icon_name ("media-skip-backward", GTK_ICON_SIZE_DND);
     GtkButton *play_button = gtk_button_new_from_icon_name ("media-playback-start", GTK_ICON_SIZE_DND);
-    GtkButton *next_button = gtk_button_new_from_icon_name ("media-playback-skip-forward", GTK_ICON_SIZE_DND);
+    GtkButton *next_button = gtk_button_new_from_icon_name ("media-skip-forward", GTK_ICON_SIZE_DND);
+
+    gtk_widget_set_name (GTK_WIDGET (previous_button), "media_player_button");
+    gtk_widget_set_name (GTK_WIDGET (play_button), "media_player_button");
+    gtk_widget_set_name (GTK_WIDGET (next_button), "media_player_button");
+
 
     g_signal_connect (previous_button, "clicked", previous, player);
     g_signal_connect (play_button, "clicked", play_pause, player);
     g_signal_connect (next_button, "clicked", next, player);
 
-    gtk_grid_attach (grid, )
+    gtk_grid_attach (grid, GTK_WIDGET (previous_button), 0, 1, 1, 1);
+    gtk_grid_attach (grid, GTK_WIDGET (play_button), 1, 1, 1, 1);
+    gtk_grid_attach (grid, GTK_WIDGET (next_button), 2, 1, 1, 1);
 
-    gtk_widget_show_all (box);
+    GtkLabel *label = GTK_LABEL (gtk_label_new ("Loading..."));
 
-    return box;
+    gtk_grid_attach (grid, GTK_WIDGET (label), 1, 0, 1, 1);
+
+    gtk_container_set_focus_chain (GTK_CONTAINER (grid), NULL);
+
+    gtk_widget_show_all (grid);
+
+    return grid;
 }
 
 void on_name_appeared (PlayerctlPlayerManager *manager, PlayerctlPlayerName *name, MediaControl *self) {
@@ -46,6 +63,10 @@ void on_player_vanished (PlayerctlPlayerManager *manager, PlayerctlPlayer *playe
     
 }
 
+void add_name (PlayerctlPlayerName *name, MediaControl *self) {
+    on_name_appeared (NULL, name, self);
+}
+
 MediaControl *media_control_new () {
     MediaControl *self = malloc (sizeof (MediaControl));
 
@@ -55,6 +76,10 @@ MediaControl *media_control_new () {
     g_signal_connect (self->manager, "player-vanished", on_player_vanished, self);
 
     self->box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+
+    GList *names = playerctl_list_players (NULL);
+
+    g_list_foreach (names, add_name, self);
 
     return self;
 }

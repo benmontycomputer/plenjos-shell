@@ -40,7 +40,7 @@ panel_tray_menu_new (gpointer panel_ptr) {
 
     gtk_layer_set_keyboard_mode (
         self->window,
-        GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE); // NONE is default
+        GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND); // NONE is default
 
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_BOTTOM, TRUE);
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);

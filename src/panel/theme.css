@@ -69,3 +69,14 @@
     background-color: transparent;
     background-image: none;
 }
+
+#media_player_grid {
+}
+
+#media_player_button {
+    background-color: transparent;
+    background-image: none;
+
+    border-radius: 16px;
+    padding: 4px 16px;
+}
