@@ -1,6 +1,7 @@
 #include "panel-tray.h"
 
-void show_control_center (GtkButton *button, PanelTray *self) {
+void
+show_control_center (GtkButton *button, PanelTray *self) {
     gtk_stack_set_visible_child_name (self->stack, "control-center");
 
     panel_tray_menu_toggle_show (self->menu, 0, 4);
@@ -20,8 +21,13 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_grid_set_row_homogeneous (self->control_center_grid, TRUE);
     gtk_grid_set_column_homogeneous (self->control_center_grid, TRUE);
 
-    self->control_center_button = GTK_BUTTON (gtk_button_new ());
-    g_signal_connect (self->control_center_button, "clicked", show_control_center, self);
+    self->control_center_button = GTK_BUTTON (
+        gtk_button_new_from_icon_name ("tweaks-app", GTK_ICON_SIZE_DND));
+
+    gtk_widget_set_name (self->control_center_button, "panel_button");
+
+    g_signal_connect (self->control_center_button, "clicked",
+                      show_control_center, self);
 
     gtk_stack_add_titled (self->stack, GTK_WIDGET (self->control_center_grid),
                           "control-center", "Control Center");
@@ -30,8 +36,8 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->menu = panel_tray_menu_new (panel_ptr);
 
-    gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->media_control->box), FALSE,
-                        FALSE, 0);
+    gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->media_control->box),
+                        FALSE, FALSE, 0);
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->stack), FALSE,
                         FALSE, 0);
 
@@ -53,11 +59,11 @@ panel_tray_new (gpointer panel_ptr) {
                      GTK_WIDGET (self->network_button->button), 1, 0, 1, 1);
     gtk_grid_attach (self->control_center_grid,
                      GTK_WIDGET (self->power_button->button), 0, 1, 1, 1);
-    
-    gtk_box_pack_start (self->box,
-                        GTK_WIDGET (self->control_center_button), FALSE, FALSE, 0);
-    gtk_box_pack_start (self->box,
-                        GTK_WIDGET (self->clock->label), FALSE, FALSE, 0);
+
+    gtk_box_pack_start (self->box, GTK_WIDGET (self->control_center_button),
+                        FALSE, FALSE, 0);
+    gtk_box_pack_start (self->box, GTK_WIDGET (self->clock->label), FALSE,
+                        FALSE, 0);
 
     gtk_widget_show_all (GTK_WIDGET (self->control_center_grid));
 
