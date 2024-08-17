@@ -370,7 +370,7 @@ panel_taskbar_toplevel_button_gtk_run (PanelTaskbarToplevelButton *self) {
         return;
 
     self->rendered = gtk_button_new ();
-    gtk_widget_set_name (self->rendered, "taskbar_button");
+    gtk_widget_set_name (self->rendered, "panel_button");
     g_signal_connect (self->rendered, "clicked", (GCallback)button_click,
                       self);
 

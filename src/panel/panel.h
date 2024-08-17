@@ -8,7 +8,7 @@
 #include <glib.h>
 
 #include "taskbar/panel-taskbar.h"
-#include "clock/panel-clock.h"
+#include "tray/panel-tray.h"
 
 #include "applications-menu/panel-applications-menu.h"
 

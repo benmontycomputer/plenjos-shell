@@ -1,7 +1,7 @@
-#include "panel-clock.h"
+#include "clock.h"
 
-PanelClock *panel_clock_new () {
-    PanelClock *self = malloc (sizeof (PanelClock));
+Clock *clock_new () {
+    Clock *self = malloc (sizeof (Clock));
 
     self->label = GTK_LABEL (gtk_label_new ("Loading..."));
     gtk_label_set_justify (self->label, GTK_JUSTIFY_RIGHT);
@@ -9,7 +9,7 @@ PanelClock *panel_clock_new () {
     return self;
 }
 
-gboolean panel_clock_update (PanelClock *self) {
+gboolean clock_update (Clock *self) {
     time (&self->rawtime);
     self->timeinfo = localtime (&self->rawtime);
 

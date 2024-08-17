@@ -1,7 +1,7 @@
 #include <gtk/gtk.h>
 #include <glib.h>
 
-typedef struct {
+typedef struct Clock {
     GtkLabel *label;
 
     time_t rawtime;
@@ -11,8 +11,8 @@ typedef struct {
 
     char min[3];
     char sec[3];
-} PanelClock;
+} Clock;
 
-PanelClock *panel_clock_new ();
+Clock *clock_new ();
 
-gboolean panel_clock_update (PanelClock *self);
+gboolean clock_update (Clock *self);

@@ -526,7 +526,7 @@ GtkWidget *panel_applications_menu_get_launcher_button (PanelApplicationsMenu *s
   if (!self->launcher_button) {
     self->launcher_button = gtk_button_new ();
 
-    gtk_widget_set_name (self->launcher_button, "taskbar_button");
+    gtk_widget_set_name (self->launcher_button, "panel_button");
     
     gtk_button_set_image (GTK_BUTTON (self->launcher_button), gtk_image_new_from_icon_name ("view-app-grid", GTK_ICON_SIZE_DND));
 

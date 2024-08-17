@@ -416,12 +416,10 @@ activate (GtkApplication *app, void *_data) {
     GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (task, panel_taskbar, NULL);
     g_task_run_in_thread (task, (GTaskThreadFunc)panel_taskbar_run_wrap);
+    
+    PanelTray *panel_tray = panel_tray_new ();
 
-    PanelClock *panel_clock = panel_clock_new ();
-
-    g_timeout_add (500, (GSourceFunc)panel_clock_update, panel_clock);
-
-    gtk_box_pack_end (panel_box, GTK_WIDGET (panel_clock->label), FALSE, FALSE,
+    gtk_box_pack_end (panel_box, GTK_WIDGET (panel_tray->box), FALSE, FALSE,
                       0);
 
     gtk_container_add (GTK_CONTAINER (gtk_window), GTK_WIDGET (panel_box));
