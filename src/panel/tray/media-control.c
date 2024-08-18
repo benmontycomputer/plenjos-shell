@@ -12,7 +12,55 @@ void next (GtkButton *self, PlayerctlPlayer *player) {
     playerctl_player_next (player, NULL);
 }
 
-GtkWidget *generate_player (PlayerctlPlayer *player) {
+// "<song> - <artist> (<album>)"
+
+void on_metadata (PlayerctlPlayer *player, GVariant *metadata, GtkLabel *label) {
+    char *title = playerctl_player_get_title (player, NULL);
+    char *artist = playerctl_player_get_artist (player, NULL);
+    char *album = playerctl_player_get_album (player, NULL);
+
+    printf("test\n");
+    fflush(stdout);
+
+    if (title == NULL) {
+        title = "(unknown)";
+    }
+
+    if (artist == NULL) {
+        if (album == NULL) {
+            size_t formatted_len = strlen (title) + 1;
+            char *formatted = malloc (formatted_len);
+
+            snprintf (formatted, formatted_len, "%s", title);
+
+            gtk_label_set_text (label, formatted);
+        }
+    } else if (album == NULL) {
+        size_t formatted_len = strlen (title) + strlen (artist) + strlen (" - ") + 1;
+        char *formatted = malloc (formatted_len);
+
+        snprintf (formatted, formatted_len, "%s - %s", title, artist);
+
+        gtk_label_set_text (label, formatted);
+    } else {
+        size_t formatted_len = strlen (title) + strlen (artist) + strlen (album) + strlen (" -  ()") + 1;
+        char *formatted = malloc (formatted_len);
+
+        snprintf (formatted, formatted_len, "%s - %s (%s)", title, artist, album);
+
+        gtk_label_set_text (label, formatted);
+    }
+}
+
+typedef struct GtkPlayer {
+    GtkWidget *widget;
+
+    MediaControl *self;
+
+    PlayerctlPlayer *player;
+} GtkPlayer;
+
+GtkPlayer *generate_player (PlayerctlPlayer *player) {
     GtkGrid *grid = GTK_GRID (gtk_grid_new ());
 
     gtk_grid_set_column_homogeneous (grid, TRUE);
@@ -40,27 +88,47 @@ GtkWidget *generate_player (PlayerctlPlayer *player) {
 
     GtkLabel *label = GTK_LABEL (gtk_label_new ("Loading..."));
 
-    gtk_grid_attach (grid, GTK_WIDGET (label), 1, 0, 1, 1);
+    gtk_grid_attach (grid, GTK_WIDGET (label), 0, 0, 3, 1);
 
     gtk_container_set_focus_chain (GTK_CONTAINER (grid), NULL);
 
     gtk_widget_show_all (grid);
 
-    return grid;
+    g_signal_connect (player, "metadata", on_metadata, label);
+
+    on_metadata (player, NULL, label);
+
+    GtkPlayer *return_val = malloc (sizeof (GtkPlayer *));
+
+    return_val->player = player;
+    return_val->widget = grid;
+
+    return return_val;
 }
 
 void on_name_appeared (PlayerctlPlayerManager *manager, PlayerctlPlayerName *name, MediaControl *self) {
     PlayerctlPlayer *player = playerctl_player_new_from_name (name, NULL);
 
-    GtkWidget *player_gtk = generate_player (player);
+    playerctl_player_manager_manage_player (self->manager, player);
 
-    gtk_box_pack_start (self->box, player_gtk, FALSE, FALSE, 0);
+    GtkPlayer *player_gtk = generate_player (player);
+
+    gtk_box_pack_start (self->box, player_gtk->widget, FALSE, FALSE, 0);
+
+    self->gtk_players = g_list_append (self->gtk_players, player_gtk);
 
     gtk_widget_show_all (self->box);
 }
 
+void player_vanished_foreach (GtkPlayer *player, PlayerctlPlayer *remove_player) {
+    if (player->player == remove_player) {
+        gtk_container_remove (gtk_widget_get_parent (player->widget), player->widget);
+        g_object_unref (player->widget);
+    }
+}
+
 void on_player_vanished (PlayerctlPlayerManager *manager, PlayerctlPlayer *player, MediaControl *self) {
-    
+    g_list_foreach (self->gtk_players, player_vanished_foreach, player);
 }
 
 void add_name (PlayerctlPlayerName *name, MediaControl *self) {
@@ -69,6 +137,8 @@ void add_name (PlayerctlPlayerName *name, MediaControl *self) {
 
 MediaControl *media_control_new () {
     MediaControl *self = malloc (sizeof (MediaControl));
+
+    self->gtk_players = NULL;
 
     self->manager = playerctl_player_manager_new (NULL);
 
