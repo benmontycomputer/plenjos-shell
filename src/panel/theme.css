@@ -11,6 +11,17 @@
     border-radius: 10px;
 }
 
+#panel_tray_menu_button {
+    padding: 16px;
+
+    border-radius: 12px;
+
+    background-image: none;
+
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
 #panel_clock {
     padding: 0px 4px;
     margin: 2px 1px;
@@ -62,7 +73,7 @@
 }
 
 #panel_tray_menu_window_box {
-    padding: 8px;
+    padding: 16px;
 }
 
 #panel_power_menu_button {
@@ -70,7 +81,14 @@
     background-image: none;
 }
 
-#media_player_grid {
+#media_player_box {
+    padding: 16px;
+
+    border-radius: 12px;
+
+    margin-top: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.4);
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 #media_player_button {
@@ -79,4 +97,8 @@
 
     border-radius: 16px;
     padding: 4px 16px;
+}
+
+#control_center_grid {
+    margin-top: -10px;
 }

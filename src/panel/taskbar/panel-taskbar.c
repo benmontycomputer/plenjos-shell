@@ -238,7 +238,7 @@ panel_taskbar_run (PanelTaskbar *self) {
         // for ()
         //  TODO: finish this part
 
-        printf ("Timeout %d\n", timeout_msecs);
+        //printf ("Timeout %d\n", timeout_msecs);
 
         // Process pending Wayland events
         wl_display_dispatch_pending (self->display);
@@ -250,12 +250,12 @@ panel_taskbar_run (PanelTaskbar *self) {
             if (fds[0].revents) {
                 wl_display_dispatch (self->display);
                 fds[0].revents = 0;
-                printf ("Poll %d\n", ret);
-                fflush (stdout);
+                //printf ("Poll %d\n", ret);
+                //fflush (stdout);
             }
         } else if (ret == 0) {
-            printf ("Timeout\n");
-            fflush (stdout);
+            //printf ("Timeout\n");
+            //fflush (stdout);
         } else {
             printf ("Poll failed %d\n", ret);
             fflush (stdout);

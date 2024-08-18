@@ -28,7 +28,7 @@ PowerButton *power_button_new (GtkStack *stack) {
 
     self->button = gtk_button_new_from_icon_name ("system-shutdown", GTK_ICON_SIZE_DND);
 
-    gtk_widget_set_name (self->button, "panel_button");
+    gtk_widget_set_name (self->button, "panel_tray_menu_button");
 
     g_signal_connect (self->button, "clicked", show_power_menu, self);
 

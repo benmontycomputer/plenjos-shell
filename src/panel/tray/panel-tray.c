@@ -15,11 +15,16 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->control_center_grid = GTK_GRID (gtk_grid_new ());
 
+    gtk_widget_set_name (GTK_WIDGET (self->control_center_grid), "control_center_grid");
+
     gtk_widget_set_hexpand (GTK_WIDGET (self->control_center_grid), TRUE);
     gtk_widget_set_vexpand (GTK_WIDGET (self->control_center_grid), TRUE);
 
-    gtk_grid_set_row_homogeneous (self->control_center_grid, TRUE);
+    // gtk_grid_set_row_homogeneous (self->control_center_grid, TRUE);
     gtk_grid_set_column_homogeneous (self->control_center_grid, TRUE);
+
+    gtk_grid_set_row_spacing (self->control_center_grid, 10);
+    gtk_grid_set_column_spacing (self->control_center_grid, 10);
 
     self->control_center_button = GTK_BUTTON (
         gtk_button_new_from_icon_name ("tweaks-app", GTK_ICON_SIZE_DND));
@@ -36,8 +41,12 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->menu = panel_tray_menu_new (panel_ptr);
 
-    gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->media_control->box),
-                        FALSE, FALSE, 0);
+    self->back_box = (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2));
+
+    self->back_button = (gtk_button_new_from_icon_name ("go-previous"));
+
+    self->back_label = GTK_LABEL (gtk_label_new ("Back"));
+
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->stack), FALSE,
                         FALSE, 0);
 
@@ -54,11 +63,14 @@ panel_tray_new (gpointer panel_ptr) {
     g_timeout_add (500, (GSourceFunc)clock_update, self->clock);
 
     gtk_grid_attach (self->control_center_grid,
-                     GTK_WIDGET (self->audio_button->button), 0, 0, 1, 1);
+                     GTK_WIDGET (self->media_control->box), 0, 0, 3, 1);
+
     gtk_grid_attach (self->control_center_grid,
-                     GTK_WIDGET (self->network_button->button), 1, 0, 1, 1);
+                     GTK_WIDGET (self->audio_button->button), 0, 1, 1, 1);
     gtk_grid_attach (self->control_center_grid,
-                     GTK_WIDGET (self->power_button->button), 0, 1, 1, 1);
+                     GTK_WIDGET (self->network_button->button), 1, 1, 1, 1);
+    gtk_grid_attach (self->control_center_grid,
+                     GTK_WIDGET (self->power_button->button), 2, 1, 1, 1);
 
     gtk_box_pack_start (self->box, GTK_WIDGET (self->control_center_button),
                         FALSE, FALSE, 0);

@@ -31,6 +31,10 @@ typedef struct PanelTray {
     Clock *clock;
 
     MediaControl *media_control;
+
+    GtkBox *back_box;
+    GtkLabel *back_label;
+    GtkButton *back_button;
 } PanelTray;
 
 PanelTray *panel_tray_new (gpointer panel_ptr);
