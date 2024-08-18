@@ -15,7 +15,8 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->control_center_grid = GTK_GRID (gtk_grid_new ());
 
-    gtk_widget_set_name (GTK_WIDGET (self->control_center_grid), "control_center_grid");
+    gtk_widget_set_name (GTK_WIDGET (self->control_center_grid),
+                         "control_center_grid");
 
     gtk_widget_set_hexpand (GTK_WIDGET (self->control_center_grid), TRUE);
     gtk_widget_set_vexpand (GTK_WIDGET (self->control_center_grid), TRUE);
@@ -41,12 +42,20 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->menu = panel_tray_menu_new (panel_ptr);
 
-    self->back_box = (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2));
+    self->back_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
-    self->back_button = (gtk_button_new_from_icon_name ("go-previous"));
+    self->back_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+        "go-previous", GTK_ICON_SIZE_LARGE_TOOLBAR));
 
     self->back_label = GTK_LABEL (gtk_label_new ("Back"));
 
+    gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_button), FALSE,
+                        FALSE, 0);
+    gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_label), FALSE,
+                        FALSE, 0);
+
+    gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->back_box), FALSE,
+                        FALSE, 0);
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->stack), FALSE,
                         FALSE, 0);
 
