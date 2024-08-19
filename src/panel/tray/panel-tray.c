@@ -2,9 +2,14 @@
 
 static void
 show_control_center (GtkButton *button, PanelTray *self) {
-    gtk_stack_set_visible_child_name (self->stack, "control-center");
+    gtk_stack_set_visible_child_name (self->stack, "Control Center");
 
     panel_tray_menu_toggle_show (self->menu);
+}
+
+static void
+go_back (GtkButton *button, PanelTray *self) {
+    gtk_stack_set_visible_child_name (self->stack, "Control Center");
 }
 
 static void stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
@@ -57,9 +62,14 @@ panel_tray_new (gpointer panel_ptr) {
     self->back_button = GTK_BUTTON (gtk_button_new_from_icon_name (
         "go-previous", GTK_ICON_SIZE_LARGE_TOOLBAR));
 
+    gtk_widget_set_name (GTK_WIDGET (self->back_button), "control_center_back_button");
+
+    g_signal_connect (self->back_button, "clicked",
+                      go_back, self);
+
     self->back_label = GTK_LABEL (gtk_label_new ("Back"));
-    gtk_widget_set_margin_bottom (GTK_WIDGET (self->back_button), 10);
-    gtk_widget_set_margin_bottom (GTK_WIDGET (self->back_label), 10);
+
+    gtk_widget_set_name (GTK_WIDGET (self->back_label), "control_center_back_label");
 
     gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_button), FALSE,
                         FALSE, 0);
