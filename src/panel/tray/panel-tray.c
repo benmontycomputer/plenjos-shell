@@ -1,10 +1,20 @@
 #include "panel-tray.h"
 
-void
+static void
 show_control_center (GtkButton *button, PanelTray *self) {
     gtk_stack_set_visible_child_name (self->stack, "control-center");
 
-    panel_tray_menu_toggle_show (self->menu, 0, 4);
+    panel_tray_menu_toggle_show (self->menu);
+}
+
+static void stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
+    gtk_label_set_text (self->back_label, gtk_stack_get_visible_child_name (stack));
+
+    if (strcmp (gtk_stack_get_visible_child_name (stack), "control-center") == 0) {
+        gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
+    } else {
+        gtk_widget_set_visible (GTK_WIDGET (self->back_button), TRUE);
+    }
 }
 
 PanelTray *
@@ -48,18 +58,24 @@ panel_tray_new (gpointer panel_ptr) {
         "go-previous", GTK_ICON_SIZE_LARGE_TOOLBAR));
 
     self->back_label = GTK_LABEL (gtk_label_new ("Back"));
+    gtk_widget_set_margin_bottom (GTK_WIDGET (self->back_button), 10);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (self->back_label), 10);
 
     gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_button), FALSE,
                         FALSE, 0);
     gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_label), FALSE,
                         FALSE, 0);
 
+    g_signal_connect (self->stack, "notify::visible-child", stack_child_changed, self);
+
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->back_box), FALSE,
                         FALSE, 0);
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->stack), FALSE,
                         FALSE, 0);
-
+    
     gtk_widget_show_all (GTK_WIDGET (self->menu->box));
+
+    gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
 
     self->audio_button = audio_button_new (self->stack);
     self->network_button = network_button_new ();

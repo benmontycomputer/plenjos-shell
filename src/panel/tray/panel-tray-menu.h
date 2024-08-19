@@ -21,5 +21,4 @@ typedef struct PanelTrayMenu {
 
 PanelTrayMenu *panel_tray_menu_new (gpointer panel_ptr);
 
-void *panel_tray_menu_toggle_show (PanelTrayMenu *self, gint bottom,
-                                   gint right);
+void *panel_tray_menu_toggle_show (PanelTrayMenu *self);
