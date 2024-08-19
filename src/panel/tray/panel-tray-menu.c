@@ -12,13 +12,15 @@ check_escape (GtkWidget *widget, GdkEventKey *event, PanelTrayMenu *self) {
     return FALSE;
 }
 
-static void
+static gboolean
 focus_out_event (GtkWidget *widget, GdkEventFocus *event,
                  PanelTrayMenu *self) {
     (void)event;
 
     if (self->visible)
         panel_tray_menu_toggle_show (self);
+
+    return FALSE;
 }
 
 static gboolean
@@ -33,8 +35,8 @@ configure_event (GtkWidget *win, GdkEventConfigure *event,
                                            gdk_window),
         &geo);
 
-    self->x = geo.width - 4 - gdk_window_get_width (gdk_window);
-    self->y = geo.height - gdk_window_get_height (gdk_window);
+    self->x = geo.width - 4 - event->width;
+    self->y = geo.height - event->height;
 
     return FALSE;
 }

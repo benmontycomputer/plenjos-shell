@@ -187,6 +187,7 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     return_val->player = player;
     return_val->widget = box;
+    return_val->self = self;
 
     return return_val;
 }
@@ -206,9 +207,12 @@ on_name_appeared (PlayerctlPlayerManager *manager, PlayerctlPlayerName *name,
 void
 player_vanished_foreach (GtkPlayer *player, PlayerctlPlayer *remove_player) {
     if (player->player == remove_player) {
-        gtk_container_remove (gtk_widget_get_parent (player->widget),
+        gtk_container_remove (GTK_CONTAINER (gtk_widget_get_parent (player->widget)),
                               player->widget);
-        g_object_unref (player->widget);
+
+        g_object_unref (remove_player);
+
+        player->self->gtk_players = g_list_remove (player->self->gtk_players, player);
 
         free (player);
     }
