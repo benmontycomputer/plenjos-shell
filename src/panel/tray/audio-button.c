@@ -10,7 +10,7 @@ audio_button_new (GtkStack *stack) {
     
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-    self->button = GTK_BUTTON (gtk_button_new_from_icon_name ("audio-volume-medium",
+    self->button = GTK_BUTTON (gtk_button_new_from_icon_name ("audio-volume-medium-symbolic",
                                                   GTK_ICON_SIZE_DND));
 
     gtk_widget_set_name (self->button, "panel_tray_menu_button");
