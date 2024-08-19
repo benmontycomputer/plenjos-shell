@@ -17,7 +17,8 @@
         "panel-taskbar-icon.h": "c",
         "panel.h": "c",
         "stdio.h": "c",
-        "power-button.h": "c"
+        "power-button.h": "c",
+        "audio-button.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}"
 }

@@ -1,6 +1,6 @@
 #include "power-button.h"
 
-void show_power_menu (GtkButton *button, PowerButton *self) {
+static void show_power_menu (GtkButton *button, PowerButton *self) {
     gtk_stack_set_visible_child_name (self->stack, "Power");
 }
 

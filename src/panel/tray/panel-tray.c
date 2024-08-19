@@ -28,6 +28,8 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->stack = GTK_STACK (gtk_stack_new ());
 
+    gtk_stack_set_transition_type (self->stack, GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+
     self->control_center_grid = GTK_GRID (gtk_grid_new ());
 
     gtk_widget_set_name (GTK_WIDGET (self->control_center_grid),
@@ -88,7 +90,7 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
 
     self->audio_button = audio_button_new (self->stack);
-    self->network_button = network_button_new ();
+    self->network_button = network_button_new (self->stack);
     self->power_button = power_button_new (self->stack);
 
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));

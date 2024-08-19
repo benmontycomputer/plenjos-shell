@@ -1,6 +1,6 @@
 #include "audio-button.h"
 
-void show_audio_menu (GtkButton *button, AudioButton *self) {
+static void show_audio_menu (GtkButton *button, AudioButton *self) {
     gtk_stack_set_visible_child_name (self->stack, "Sound");
 }
 
