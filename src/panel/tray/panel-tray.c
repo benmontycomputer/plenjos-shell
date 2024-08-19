@@ -8,7 +8,7 @@ show_control_center (GtkButton *button, PanelTray *self) {
 }
 
 static void stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
-    gtk_label_set_text (self->back_label, gtk_stack_v (stack));
+    gtk_label_set_text (self->back_label, gtk_stack_get_visible_child_name (stack));
 
     if (strcmp (gtk_stack_get_visible_child_name (stack), "Control Center") == 0) {
         gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
