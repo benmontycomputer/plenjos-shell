@@ -8,9 +8,9 @@ show_control_center (GtkButton *button, PanelTray *self) {
 }
 
 static void stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
-    gtk_label_set_text (self->back_label, gtk_stack_get_visible_child_name (stack));
+    gtk_label_set_text (self->back_label, gtk_stack_v (stack));
 
-    if (strcmp (gtk_stack_get_visible_child_name (stack), "control-center") == 0) {
+    if (strcmp (gtk_stack_get_visible_child_name (stack), "Control Center") == 0) {
         gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
     } else {
         gtk_widget_set_visible (GTK_WIDGET (self->back_button), TRUE);
@@ -46,7 +46,7 @@ panel_tray_new (gpointer panel_ptr) {
                       show_control_center, self);
 
     gtk_stack_add_titled (self->stack, GTK_WIDGET (self->control_center_grid),
-                          "control-center", "Control Center");
+                          "Control Center", "Control Center");
 
     self->media_control = media_control_new ();
 

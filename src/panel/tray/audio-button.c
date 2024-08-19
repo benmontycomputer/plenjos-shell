@@ -1,7 +1,7 @@
 #include "audio-button.h"
 
 void show_audio_menu (GtkButton *button, AudioButton *self) {
-    gtk_stack_set_visible_child_name (self->stack, "audio-settings");
+    gtk_stack_set_visible_child_name (self->stack, "Sound");
 }
 
 AudioButton *
@@ -29,7 +29,7 @@ audio_button_new (GtkStack *stack) {
 
     gtk_widget_show_all (GTK_WIDGET (self->box));
 
-    gtk_stack_add_titled (stack, GTK_WIDGET (self->box), "audio-settings", "Sound");
+    gtk_stack_add_titled (stack, GTK_WIDGET (self->box), "Sound", "Sound");
 
     self->stack = stack;
 

@@ -1,7 +1,7 @@
 #include "power-button.h"
 
 void show_power_menu (GtkButton *button, PowerButton *self) {
-    gtk_stack_set_visible_child_name (self->stack, "power-menu");
+    gtk_stack_set_visible_child_name (self->stack, "Power");
 }
 
 GtkButton *power_button_menu_button_new (char *icon, char *label) {
@@ -44,7 +44,7 @@ PowerButton *power_button_new (GtkStack *stack) {
 
     gtk_widget_show_all (GTK_WIDGET (self->box));
 
-    gtk_stack_add_titled (stack, GTK_WIDGET (self->box), "power-menu", "Power");
+    gtk_stack_add_titled (stack, GTK_WIDGET (self->box), "Power", "Power");
 
     self->stack = stack;
 
