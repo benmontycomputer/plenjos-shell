@@ -67,21 +67,25 @@ activate (GtkApplication *app, void *_data) {
     GSettings *bg_settings = g_settings_new ("org.gnome.desktop.background");
 
     char *bg = NULL;
-    if (!strcmp (g_settings_get_string (settings, "color-scheme"), "prefer-dark")) {
+    if (!strcmp (g_settings_get_string (settings, "color-scheme"),
+                 "prefer-dark")) {
         bg = g_settings_get_string (bg_settings, "picture-uri-dark");
     } else {
         bg = g_settings_get_string (bg_settings, "picture-uri");
     }
 
-    gtk_container_add (GTK_CONTAINER (gtk_window), gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size (bg + 7, 2560, -1, NULL)));
+    gtk_container_add (
+        GTK_CONTAINER (gtk_window),
+        gtk_image_new_from_pixbuf (
+            gdk_pixbuf_new_from_file_at_size (bg + 7, 2560, -1, NULL)));
 
     gtk_widget_show_all (GTK_WIDGET (gtk_window));
 }
 
 int
 main (int argc, char **argv) {
-    GtkApplication *app = gtk_application_new ("com.plenjos.plenjos-desktop",
-                                               G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app
+        = gtk_application_new ("com.plenjos.plenjos-desktop", 0);
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
     int status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);

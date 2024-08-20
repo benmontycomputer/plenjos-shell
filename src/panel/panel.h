@@ -1,3 +1,5 @@
+#pragma once
+
 #include <gtk-layer-shell.h>
 #include <gtk/gtk.h>
 
@@ -7,10 +9,8 @@
 
 #include <glib.h>
 
-#include "taskbar/panel-taskbar.h"
-#include "tray/panel-tray.h"
-#include "tray/panel-tray-menu.h"
+#include <math.h>
 
-#include "applications-menu/panel-applications-menu.h"
+#include "blur/stack-blur.h"
 
 #define UNUSED(x) (void)(x)

@@ -5,17 +5,21 @@ gboolean expose_draw_tray_menu (GtkWidget *widget, cairo_t *cr,
 
 static gboolean
 check_escape (GtkWidget *widget, GdkEventKey *event, PanelTrayMenu *self) {
+    UNUSED (widget);
+
     if (self->visible && event->keyval == GDK_KEY_Escape) {
         panel_tray_menu_toggle_show (self);
         return TRUE;
     }
+
     return FALSE;
 }
 
 static gboolean
 focus_out_event (GtkWidget *widget, GdkEventFocus *event,
                  PanelTrayMenu *self) {
-    (void)event;
+    UNUSED (widget);
+    UNUSED (event);
 
     if (self->visible)
         panel_tray_menu_toggle_show (self);
@@ -26,6 +30,8 @@ focus_out_event (GtkWidget *widget, GdkEventFocus *event,
 static gboolean
 configure_event (GtkWidget *win, GdkEventConfigure *event,
                  PanelTrayMenu *self) {
+    UNUSED (win);
+
     GdkWindow *gdk_window = gtk_widget_get_window (GTK_WIDGET (self->window));
 
     GdkRectangle geo;
@@ -53,15 +59,18 @@ panel_tray_menu_new (gpointer panel_ptr) {
 
     self->window = GTK_WINDOW (gtk_window_new (GTK_WINDOW_TOPLEVEL));
 
+    g_signal_connect (self->window, "configure-event",
+                      G_CALLBACK (configure_event), self);
+
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (self->window);
 
     // Order below normal windows
     gtk_layer_set_layer (self->window, GTK_LAYER_SHELL_LAYER_OVERLAY);
 
-    gtk_layer_set_keyboard_mode (
-        self->window,
-        GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND); // NONE is default
+    //gtk_layer_set_keyboard_mode (
+    //    self->window,
+    //    GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND); // NONE is default
 
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_BOTTOM, TRUE);
     gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
@@ -73,12 +82,10 @@ panel_tray_menu_new (gpointer panel_ptr) {
     g_signal_connect (self->window, "draw", G_CALLBACK (expose_draw_tray_menu),
                       self);
 
-    g_signal_connect (self->window, "key_press_event",
-                      G_CALLBACK (check_escape), self);
-    g_signal_connect (self->window, "focus-out-event",
-                      G_CALLBACK (focus_out_event), self);
-    g_signal_connect (self->window, "configure-event",
-                      G_CALLBACK (configure_event), self);
+    //g_signal_connect (self->window, "key_press_event",
+    //                  G_CALLBACK (check_escape), self);
+    //g_signal_connect (self->window, "focus-out-event",
+    //                  G_CALLBACK (focus_out_event), self);
 
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
@@ -90,7 +97,7 @@ panel_tray_menu_new (gpointer panel_ptr) {
     return self;
 }
 
-void *
+void
 panel_tray_menu_toggle_show (PanelTrayMenu *self) {
     if (self->visible) {
         gtk_widget_hide (GTK_WIDGET (self->window));

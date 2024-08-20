@@ -2,6 +2,8 @@
 
 static void
 show_control_center (GtkButton *button, PanelTray *self) {
+    UNUSED (button);
+
     gtk_stack_set_visible_child_name (self->stack, "Control Center");
 
     panel_tray_menu_toggle_show (self->menu);
@@ -9,13 +11,20 @@ show_control_center (GtkButton *button, PanelTray *self) {
 
 static void
 go_back (GtkButton *button, PanelTray *self) {
+    UNUSED (button);
+
     gtk_stack_set_visible_child_name (self->stack, "Control Center");
 }
 
-static void stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
-    gtk_label_set_text (self->back_label, gtk_stack_get_visible_child_name (stack));
+static void
+stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
+    UNUSED (child);
 
-    if (strcmp (gtk_stack_get_visible_child_name (stack), "Control Center") == 0) {
+    gtk_label_set_text (self->back_label,
+                        gtk_stack_get_visible_child_name (stack));
+
+    if (strcmp (gtk_stack_get_visible_child_name (stack), "Control Center")
+        == 0) {
         gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
     } else {
         gtk_widget_set_visible (GTK_WIDGET (self->back_button), TRUE);
@@ -28,7 +37,8 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->stack = GTK_STACK (gtk_stack_new ());
 
-    gtk_stack_set_transition_type (self->stack, GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
+    gtk_stack_set_transition_type (self->stack,
+                                   GTK_STACK_TRANSITION_TYPE_SLIDE_LEFT_RIGHT);
 
     self->control_center_grid = GTK_GRID (gtk_grid_new ());
 
@@ -38,7 +48,7 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_widget_set_hexpand (GTK_WIDGET (self->control_center_grid), TRUE);
     gtk_widget_set_vexpand (GTK_WIDGET (self->control_center_grid), TRUE);
 
-    // gtk_grid_set_row_homogeneous (self->control_center_grid, TRUE);
+    gtk_grid_set_row_homogeneous (self->control_center_grid, FALSE);
     gtk_grid_set_column_homogeneous (self->control_center_grid, TRUE);
 
     gtk_grid_set_row_spacing (self->control_center_grid, 10);
@@ -47,10 +57,11 @@ panel_tray_new (gpointer panel_ptr) {
     self->control_center_button = GTK_BUTTON (
         gtk_button_new_from_icon_name ("tweaks-app", GTK_ICON_SIZE_DND));
 
-    gtk_widget_set_name (self->control_center_button, "panel_button");
+    gtk_widget_set_name (GTK_WIDGET (self->control_center_button),
+                         "panel_button");
 
     g_signal_connect (self->control_center_button, "clicked",
-                      show_control_center, self);
+                      G_CALLBACK (show_control_center), self);
 
     gtk_stack_add_titled (self->stack, GTK_WIDGET (self->control_center_grid),
                           "Control Center", "Control Center");
@@ -64,27 +75,29 @@ panel_tray_new (gpointer panel_ptr) {
     self->back_button = GTK_BUTTON (gtk_button_new_from_icon_name (
         "go-previous", GTK_ICON_SIZE_LARGE_TOOLBAR));
 
-    gtk_widget_set_name (GTK_WIDGET (self->back_button), "control_center_back_button");
+    gtk_widget_set_name (GTK_WIDGET (self->back_button),
+                         "control_center_back_button");
 
-    g_signal_connect (self->back_button, "clicked",
-                      go_back, self);
+    g_signal_connect (self->back_button, "clicked", G_CALLBACK (go_back), self);
 
     self->back_label = GTK_LABEL (gtk_label_new ("Back"));
 
-    gtk_widget_set_name (GTK_WIDGET (self->back_label), "control_center_back_label");
+    gtk_widget_set_name (GTK_WIDGET (self->back_label),
+                         "control_center_back_label");
 
     gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_button), FALSE,
                         FALSE, 0);
     gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_label), FALSE,
                         FALSE, 0);
 
-    g_signal_connect (self->stack, "notify::visible-child", stack_child_changed, self);
+    g_signal_connect (self->stack, "notify::visible-child",
+                      G_CALLBACK (stack_child_changed), self);
 
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->back_box), FALSE,
                         FALSE, 0);
     gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->stack), FALSE,
                         FALSE, 0);
-    
+
     gtk_widget_show_all (GTK_WIDGET (self->menu->box));
 
     gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);

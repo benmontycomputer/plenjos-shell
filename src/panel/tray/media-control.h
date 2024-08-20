@@ -1,6 +1,10 @@
+#pragma once
+
 #include <gtk/gtk.h>
 
 #include <playerctl.h>
+
+#include "../panel.h"
 
 typedef struct MediaControl {
     PlayerctlPlayerManager *manager;

@@ -1,6 +1,8 @@
 #include "network-button.h"
 
 static void show_network_menu (GtkButton *button, NetworkButton *self) {
+    UNUSED (button);
+
     gtk_stack_set_visible_child_name (self->stack, "Network");
 }
 
@@ -13,7 +15,7 @@ NetworkButton *network_button_new (GtkStack *stack) {
 
     gtk_widget_set_name (GTK_WIDGET (self->button), "panel_tray_menu_button");
 
-    g_signal_connect (self->button, "clicked", show_network_menu, self);
+    g_signal_connect (self->button, "clicked", G_CALLBACK (show_network_menu), self);
 
     gtk_widget_show_all (GTK_WIDGET (self->box));
 

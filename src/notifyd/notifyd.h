@@ -8,3 +8,5 @@
 #include <dbus/dbus.h>
 
 #include "plenjos-notifyd-fdo-gbus.h"
+
+#define UNUSED(x) (void)(x)

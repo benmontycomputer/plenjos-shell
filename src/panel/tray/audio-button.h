@@ -1,4 +1,8 @@
+#pragma once
+
 #include <gtk/gtk.h>
+
+#include "../panel.h"
 
 typedef struct AudioButton {
     GtkStack *stack;

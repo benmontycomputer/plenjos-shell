@@ -93,6 +93,8 @@ on_get_server_information (PlenjosNotifyFdoGBusSkeleton *skeleton,
 static void
 on_name_acquired (GDBusConnection *connection, const char *name,
                   gpointer user_data) {
+    UNUSED (user_data);
+
     PlenjosNotifyFdoGBusSkeleton *skeleton
         = plenjos_notify_fdo_gbus_skeleton_new ();
 
@@ -130,6 +132,12 @@ on_name_acquired (GDBusConnection *connection, const char *name,
 
 int
 main (int argc, char **argv) {
+    for (int i = 0; i < argc; i++) {
+        printf("%d: %s\n", argv[i]);
+    }
+
+    fflush (stdout);
+
     gtk_init (NULL, NULL);
 
     GMainLoop *loop;

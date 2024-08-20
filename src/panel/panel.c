@@ -23,6 +23,12 @@
 
 #include "panel.h"
 
+#include "taskbar/panel-taskbar.h"
+#include "tray/panel-tray-menu.h"
+#include "tray/panel-tray.h"
+
+#include "applications-menu/panel-applications-menu.h"
+
 typedef struct {
     PanelTaskbar *taskbar;
 
@@ -93,11 +99,15 @@ expose_draw_panel (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
     args->blurred = self->blurred;
 
-    GdkWindow *gdk_window = gtk_widget_get_window (GTK_WIDGET (self->gtk_window));
+    GdkWindow *gdk_window
+        = gtk_widget_get_window (GTK_WIDGET (self->gtk_window));
 
     GdkRectangle geo;
 
-    gdk_monitor_get_geometry (gdk_display_get_monitor_at_window (gdk_window_get_display (gdk_window), gdk_window), &geo);
+    gdk_monitor_get_geometry (
+        gdk_display_get_monitor_at_window (gdk_window_get_display (gdk_window),
+                                           gdk_window),
+        &geo);
 
     args->x = 0;
     args->y = geo.height - 64;
@@ -111,6 +121,8 @@ expose_draw_panel (GtkWidget *widget, cairo_t *cr, Panel *self) {
 
 gboolean
 expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
+    UNUSED (widget);
+
     cairo_save (cr);
 
     // Adapted from
@@ -554,8 +566,7 @@ activate (GtkApplication *app, void *_data) {
 
 int
 main (int argc, char **argv) {
-    GtkApplication *app = gtk_application_new ("com.plenjos.plenjos-panel",
-                                               G_APPLICATION_FLAGS_NONE);
+    GtkApplication *app = gtk_application_new ("com.plenjos.plenjos-panel", 0);
     g_signal_connect (app, "activate", G_CALLBACK (activate), NULL);
     int status = g_application_run (G_APPLICATION (app), argc, argv);
     g_object_unref (app);

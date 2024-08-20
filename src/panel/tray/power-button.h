@@ -1,5 +1,9 @@
+#pragma once
+
 #include <gtk/gtk.h>
 #include <glib.h>
+
+#include "../panel.h"
 
 typedef struct PowerButton {
     GtkButton *button;

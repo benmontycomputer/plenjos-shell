@@ -18,7 +18,11 @@
         "panel.h": "c",
         "stdio.h": "c",
         "power-button.h": "c",
-        "audio-button.h": "c"
+        "audio-button.h": "c",
+        "playerctl.h": "c",
+        "math.h": "c"
     },
-    "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}"
+    "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}",
+    "editor.tabSize": 4,
+    "editor.detectIndentation": true
 }

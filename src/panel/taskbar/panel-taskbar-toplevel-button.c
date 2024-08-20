@@ -25,7 +25,8 @@ remove_spaces (char *s) {
     } while ((*s++ = *d++));
 }
 
-char *shorten_label (char *label) {
+char *
+shorten_label (char *label) {
     if (strlen (label) > 24) {
         return g_strdup (label);
     } else {
@@ -37,7 +38,8 @@ void
 toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
     char *icon = NULL;
 
-    char *current_theme = g_settings_get_string (self->m_taskbar->settings, "icon-theme");
+    char *current_theme
+        = g_settings_get_string (self->m_taskbar->settings, "icon-theme");
 
     // Is this icon already loaded?
     // TODO: actually check if icon is already loaded
@@ -136,7 +138,8 @@ toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
 
             if (found != NULL) {
                 icon = suggested_icon_for_id (
-                    ((icon_exec_map_item *)found->data)->icon, 32, current_theme);
+                    ((icon_exec_map_item *)found->data)->icon, 32,
+                    current_theme);
             }
         }
 
@@ -144,7 +147,8 @@ toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
                           (GDestroyNotify)free_icon_exec_map_item);
     }
     if (icon == NULL) {
-        icon = suggested_icon_for_id ("emblem-dialog-question", 32, current_theme);
+        icon = suggested_icon_for_id ("emblem-dialog-question", 32,
+                                      current_theme);
     }
 
     self->m_icon_path = icon;
@@ -240,6 +244,8 @@ static void
 toplevel_handle_state (void *data,
                        struct zwlr_foreign_toplevel_handle_v1 *toplevel_handle,
                        struct wl_array *state) {
+    UNUSED (toplevel_handle);
+
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
 
     uint32_t *entry;
@@ -371,7 +377,7 @@ panel_taskbar_toplevel_button_gtk_run (PanelTaskbarToplevelButton *self) {
 
     self->rendered = gtk_button_new ();
     gtk_widget_set_name (self->rendered, "panel_button");
-    g_signal_connect (self->rendered, "clicked", (GCallback)button_click,
+    g_signal_connect (self->rendered, "clicked", G_CALLBACK (button_click),
                       self);
 
     button_rerender_app_id_and_icon_gtk (self);

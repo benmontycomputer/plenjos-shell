@@ -7,6 +7,8 @@
 
 #include <gtk-layer-shell.h>
 
+#include "../panel.h"
+
 typedef struct PanelTrayMenu {
     GtkBox *box;
 
@@ -21,4 +23,4 @@ typedef struct PanelTrayMenu {
 
 PanelTrayMenu *panel_tray_menu_new (gpointer panel_ptr);
 
-void *panel_tray_menu_toggle_show (PanelTrayMenu *self);
+void panel_tray_menu_toggle_show (PanelTrayMenu *self);

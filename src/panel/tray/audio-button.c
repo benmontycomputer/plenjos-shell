@@ -1,25 +1,30 @@
 #include "audio-button.h"
 
-static void show_audio_menu (GtkButton *button, AudioButton *self) {
+static void
+show_audio_menu (GtkButton *button, AudioButton *self) {
+    UNUSED (button);
+
     gtk_stack_set_visible_child_name (self->stack, "Sound");
 }
 
 AudioButton *
 audio_button_new (GtkStack *stack) {
     AudioButton *self = malloc (sizeof (AudioButton));
-    
+
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-    self->button = GTK_BUTTON (gtk_button_new_from_icon_name ("audio-volume-medium-symbolic",
-                                                  GTK_ICON_SIZE_DND));
+    self->button = GTK_BUTTON (gtk_button_new_from_icon_name (
+        "audio-volume-medium-symbolic", GTK_ICON_SIZE_DND));
 
-    gtk_widget_set_name (self->button, "panel_tray_menu_button");
+    gtk_widget_set_name (GTK_WIDGET (self->button), "panel_tray_menu_button");
 
-    g_signal_connect (self->button, "clicked", show_audio_menu, self);
+    g_signal_connect (self->button, "clicked", G_CALLBACK (show_audio_menu),
+                      self);
 
     GtkAdjustment *adjustment = gtk_adjustment_new (50, 0, 100, 1, 1, 0);
 
-    self->volume = GTK_SCALE (gtk_scale_new (GTK_ORIENTATION_HORIZONTAL, adjustment));
+    self->volume
+        = GTK_SCALE (gtk_scale_new (GTK_ORIENTATION_HORIZONTAL, adjustment));
 
     gtk_scale_set_digits (self->volume, 0);
 

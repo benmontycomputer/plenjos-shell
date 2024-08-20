@@ -2,16 +2,22 @@
 
 void
 previous (GtkButton *self, PlayerctlPlayer *player) {
+    UNUSED (self);
+
     playerctl_player_previous (player, NULL);
 }
 
 void
 play_pause (GtkButton *self, PlayerctlPlayer *player) {
+    UNUSED (self);
+
     playerctl_player_play_pause (player, NULL);
 }
 
 void
 next (GtkButton *self, PlayerctlPlayer *player) {
+    UNUSED (self);
+
     playerctl_player_next (player, NULL);
 }
 
@@ -19,6 +25,8 @@ next (GtkButton *self, PlayerctlPlayer *player) {
 
 void
 on_metadata (PlayerctlPlayer *player, GVariant *metadata, GtkLabel *label) {
+    UNUSED (metadata);
+
     char *title
         = playerctl_player_print_metadata_prop (player, "xesam:title", NULL);
     char *artist
@@ -133,20 +141,20 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     gtk_widget_set_hexpand (GTK_WIDGET (box), TRUE);
     gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_FILL);
 
-    GtkButton *previous_button = gtk_button_new_from_icon_name (
-        "media-skip-backward", GTK_ICON_SIZE_DND);
-    GtkButton *play_button = gtk_button_new_from_icon_name (
-        "media-playback-start", GTK_ICON_SIZE_DND);
-    GtkButton *next_button = gtk_button_new_from_icon_name (
-        "media-skip-forward", GTK_ICON_SIZE_DND);
+    GtkButton *previous_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+        "media-skip-backward", GTK_ICON_SIZE_DND));
+    GtkButton *play_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+        "media-playback-start", GTK_ICON_SIZE_DND));
+    GtkButton *next_button = GTK_BUTTON (gtk_button_new_from_icon_name (
+        "media-skip-forward", GTK_ICON_SIZE_DND));
 
     gtk_widget_set_name (GTK_WIDGET (previous_button), "media_player_button");
     gtk_widget_set_name (GTK_WIDGET (play_button), "media_player_button");
     gtk_widget_set_name (GTK_WIDGET (next_button), "media_player_button");
 
-    g_signal_connect (previous_button, "clicked", previous, player);
-    g_signal_connect (play_button, "clicked", play_pause, player);
-    g_signal_connect (next_button, "clicked", next, player);
+    g_signal_connect (previous_button, "clicked", G_CALLBACK (previous), player);
+    g_signal_connect (play_button, "clicked", G_CALLBACK (play_pause), player);
+    g_signal_connect (next_button, "clicked", G_CALLBACK (next), player);
 
     GtkBox *controls_box
         = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2));
@@ -160,16 +168,16 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     GtkLabel *label = GTK_LABEL (gtk_label_new ("Loading..."));
 
-    gtk_widget_set_hexpand (label, TRUE);
-    gtk_label_set_max_width_chars (label, 0);
+    gtk_widget_set_hexpand (GTK_WIDGET (label), TRUE);
     gtk_label_set_line_wrap (label, TRUE);
     gtk_label_set_line_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
 
-    GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (name->name, GTK_ICON_SIZE_DIALOG));
+    GtkImage *icon = GTK_IMAGE (
+        gtk_image_new_from_icon_name (name->name, GTK_ICON_SIZE_DIALOG));
 
     gtk_widget_set_halign (GTK_WIDGET (icon), GTK_ALIGN_START);
 
-    GtkBox *info_box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2);
+    GtkBox *info_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2));
 
     gtk_container_add (GTK_CONTAINER (info_box), GTK_WIDGET (icon));
     gtk_container_add (GTK_CONTAINER (info_box), GTK_WIDGET (label));
@@ -177,16 +185,16 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     gtk_container_add (GTK_CONTAINER (box), GTK_WIDGET (info_box));
     gtk_container_add (GTK_CONTAINER (box), GTK_WIDGET (controls_box));
 
-    gtk_widget_show_all (box);
+    gtk_widget_show_all (GTK_WIDGET (box));
 
-    g_signal_connect (player, "metadata", on_metadata, label);
+    g_signal_connect (player, "metadata", G_CALLBACK (on_metadata), label);
 
     on_metadata (player, NULL, label);
 
     GtkPlayer *return_val = malloc (sizeof (GtkPlayer *));
 
     return_val->player = player;
-    return_val->widget = box;
+    return_val->widget = GTK_WIDGET (box);
     return_val->self = self;
 
     return return_val;
@@ -195,24 +203,28 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 void
 on_name_appeared (PlayerctlPlayerManager *manager, PlayerctlPlayerName *name,
                   MediaControl *self) {
+    UNUSED (manager);
+
     GtkPlayer *player_gtk = generate_player (name, self);
 
     gtk_box_pack_start (self->box, player_gtk->widget, FALSE, FALSE, 0);
 
     self->gtk_players = g_list_append (self->gtk_players, player_gtk);
 
-    gtk_widget_show_all (self->box);
+    gtk_widget_show_all (GTK_WIDGET (self->box));
 }
 
 void
 player_vanished_foreach (GtkPlayer *player, PlayerctlPlayer *remove_player) {
     if (player->player == remove_player) {
-        gtk_container_remove (GTK_CONTAINER (gtk_widget_get_parent (player->widget)),
-                              player->widget);
+        gtk_container_remove (
+            GTK_CONTAINER (gtk_widget_get_parent (player->widget)),
+            player->widget);
 
         g_object_unref (remove_player);
 
-        player->self->gtk_players = g_list_remove (player->self->gtk_players, player);
+        player->self->gtk_players
+            = g_list_remove (player->self->gtk_players, player);
 
         free (player);
     }
@@ -221,7 +233,9 @@ player_vanished_foreach (GtkPlayer *player, PlayerctlPlayer *remove_player) {
 void
 on_player_vanished (PlayerctlPlayerManager *manager, PlayerctlPlayer *player,
                     MediaControl *self) {
-    g_list_foreach (self->gtk_players, player_vanished_foreach, player);
+    UNUSED (manager);
+
+    g_list_foreach (self->gtk_players, (GFunc)player_vanished_foreach, player);
 }
 
 void
@@ -237,15 +251,16 @@ media_control_new () {
 
     self->manager = playerctl_player_manager_new (NULL);
 
-    g_signal_connect (self->manager, "name-appeared", on_name_appeared, self);
-    g_signal_connect (self->manager, "player-vanished", on_player_vanished,
-                      self);
+    g_signal_connect (self->manager, "name-appeared",
+                      G_CALLBACK (on_name_appeared), self);
+    g_signal_connect (self->manager, "player-vanished",
+                      G_CALLBACK (on_player_vanished), self);
 
-    self->box = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+    self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
     GList *names = playerctl_list_players (NULL);
 
-    g_list_foreach (names, add_name, self);
+    g_list_foreach (names, (GFunc)add_name, self);
 
     return self;
 }
