@@ -102,8 +102,8 @@ panel_tray_new (gpointer panel_ptr) {
 
     gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
 
-    self->audio_button = audio_button_new (self->stack);
     self->network_button = network_button_new (self->stack);
+    self->audio_button = audio_button_new (self->stack);
     self->power_button = power_button_new (self->stack);
 
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
@@ -116,9 +116,9 @@ panel_tray_new (gpointer panel_ptr) {
                      GTK_WIDGET (self->media_control->box), 0, 0, 3, 1);
 
     gtk_grid_attach (self->control_center_grid,
-                     GTK_WIDGET (self->audio_button->button), 0, 1, 1, 1);
+                     GTK_WIDGET (self->network_button->button), 0, 1, 1, 1);
     gtk_grid_attach (self->control_center_grid,
-                     GTK_WIDGET (self->network_button->button), 1, 1, 1, 1);
+                     GTK_WIDGET (self->audio_button->button), 1, 1, 1, 1);
     gtk_grid_attach (self->control_center_grid,
                      GTK_WIDGET (self->power_button->button), 2, 1, 1, 1);
 

@@ -40,13 +40,17 @@ typedef struct GtkPlayer {
 
 static void
 gtk_player_update_pbuf (GtkPlayer *gtk_player) {
-    gdk_pixbuf_unref (gtk_player->pbuf_blurred);
+    if (gtk_player->pbuf_blurred)
+        g_object_unref (gtk_player->pbuf_blurred);
 
     GdkPixbuf *pbuf = NULL;
 
-    pbuf = gdk_pixbuf_new_from_file_at_scale (
-        gtk_player->bg_path + 7,
-        gtk_widget_get_allocated_width (gtk_player->widget) + 96, -1, TRUE, NULL);
+    if (gtk_player->bg_path && strlen (gtk_player->bg_path) > 7) {
+        pbuf = gdk_pixbuf_new_from_file_at_scale (
+            gtk_player->bg_path + 7,
+            gtk_widget_get_allocated_width (gtk_player->widget) + 96, -1, TRUE,
+            NULL);
+    }
 
     cairo_surface_t *surfaceold
         = gdk_cairo_surface_create_from_pixbuf (pbuf, 1, NULL);
@@ -446,21 +450,23 @@ on_metadata (PlayerctlPlayer *player, GVariant *metadata,
 static void
 on_playback_status (PlayerctlPlayer *player,
                     PlayerctlPlaybackStatus playback_status, GtkPlayer *self) {
-    printf ("%d\n", playback_status);
-    fflush (stdout);
+    UNUSED (player);
 
     switch (playback_status) {
     case PLAYERCTL_PLAYBACK_STATUS_PAUSED:
-        gtk_button_set_image (self->play_button, gtk_image_new_from_icon_name ("media-playback-start",
-                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_image (self->play_button,
+                              gtk_image_new_from_icon_name (
+                                  "media-playback-start", GTK_ICON_SIZE_DND));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_PLAYING:
-        gtk_button_set_image (self->play_button, gtk_image_new_from_icon_name ("media-playback-pause",
-                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_image (self->play_button,
+                              gtk_image_new_from_icon_name (
+                                  "media-playback-pause", GTK_ICON_SIZE_DND));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_STOPPED:
-        gtk_button_set_image (self->play_button, gtk_image_new_from_icon_name ("media-playback-start",
-                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_image (self->play_button,
+                              gtk_image_new_from_icon_name (
+                                  "media-playback-start", GTK_ICON_SIZE_DND));
         break;
     }
 }
@@ -512,23 +518,27 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     gtk_label_set_line_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
 
     GValue playback_status_val = G_VALUE_INIT;
-    g_object_get_property (player, "playback-status", &playback_status_val);
+    g_object_get_property (G_OBJECT (player), "playback-status",
+                           &playback_status_val);
 
     PlayerctlPlaybackStatus playback_status
         = g_value_get_enum (&playback_status_val);
 
     switch (playback_status) {
     case PLAYERCTL_PLAYBACK_STATUS_PAUSED:
-        gtk_button_set_image (play_button, gtk_image_new_from_icon_name ("media-playback-start",
-                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_image (
+            play_button, gtk_image_new_from_icon_name ("media-playback-start",
+                                                       GTK_ICON_SIZE_DND));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_PLAYING:
-        gtk_button_set_image (play_button, gtk_image_new_from_icon_name ("media-playback-pause",
-                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_image (
+            play_button, gtk_image_new_from_icon_name ("media-playback-pause",
+                                                       GTK_ICON_SIZE_DND));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_STOPPED:
-        gtk_button_set_image (play_button, gtk_image_new_from_icon_name ("media-playback-start",
-                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_image (
+            play_button, gtk_image_new_from_icon_name ("media-playback-start",
+                                                       GTK_ICON_SIZE_DND));
         break;
     }
 
@@ -556,6 +566,7 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     return_val->bg_path = NULL;
     return_val->width = 0;
     return_val->play_button = play_button;
+    return_val->pbuf_blurred = NULL;
 
     g_signal_connect (box, "draw", G_CALLBACK (expose_draw_media_control_box),
                       return_val);
@@ -635,7 +646,7 @@ media_control_new () {
 
     g_list_foreach (names, (GFunc)add_name, self);
 
-    g_list_free (names);
+    g_list_free_full (names, (GDestroyNotify)playerctl_player_name_free);
 
     return self;
 }

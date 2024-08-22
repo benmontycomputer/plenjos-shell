@@ -14,13 +14,13 @@ wayland_scanner = dependency('wayland-scanner', version: '>=1.10.0', native: tru
 
 wayland_protocols = dependency('wayland-protocols', version: '>=1.16')
 
-dbus = dependency('dbus-1', version: '>=1.12.0')
-
 cc = meson.get_compiler('c')
 
 m = cc.find_library('m', required : true)
 
 playerctl = dependency('playerctl', version: '>=2.4.1')
+
+alsa = dependency('alsa', version: '>=1.2.8')
 
 test('basic', exe)
 
