@@ -509,6 +509,9 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
         g_list_free (applications);
 
         gtk_widget_show_all (GTK_WIDGET (self->apps_flow_box));
+
+        free_string_list (data_dirs_list);
+        free (data_dirs);
     }
 
     /*gchar **favorites = g_settings_get_strv (self->settings,

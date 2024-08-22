@@ -512,13 +512,17 @@ activate (GtkApplication *app, void *_data) {
     GSettings *bg_settings = g_settings_new ("org.gnome.desktop.background");
 
     char *bg = NULL;
-    if (!strcmp (g_settings_get_string (settings, "color-scheme"),
-                 "prefer-dark")) {
-        bg = g_settings_get_string (bg_settings, "picture-uri-dark");
-        self->dark_mode = TRUE;
-    } else {
-        bg = g_settings_get_string (bg_settings, "picture-uri");
-        self->dark_mode = FALSE;
+    char *dark = g_settings_get_string (settings, "color-scheme");
+    if (dark) {
+        if (!strcmp (dark, "prefer-dark")) {
+            bg = g_settings_get_string (bg_settings, "picture-uri-dark");
+            self->dark_mode = TRUE;
+        } else {
+            bg = g_settings_get_string (bg_settings, "picture-uri");
+            self->dark_mode = FALSE;
+        }
+
+        free (dark);
     }
 
     GdkPixbuf *pbuf = NULL;

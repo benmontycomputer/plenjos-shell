@@ -152,6 +152,8 @@ toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
     }
 
     self->m_icon_path = icon;
+
+    free (current_theme);
 }
 
 gboolean
@@ -217,12 +219,18 @@ gboolean
 handle_closed_gtk (gpointer user_data) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)user_data;
 
-    gtk_container_remove (
-        GTK_CONTAINER (gtk_widget_get_parent (self->rendered)),
-        self->rendered);
-
     panel_taskbar_application_remove_toplevel (self->m_application, self);
     self->m_application = NULL;
+
+    if (self->m_title) {
+        free (self->m_title);
+    }
+
+    if (self->m_id) {
+        free (self->m_id);
+    }
+
+    free (self);
 
     return FALSE;
 }
@@ -314,16 +322,16 @@ gboolean
 button_rerender_app_id_and_icon_gtk (gpointer user_data) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)user_data;
 
-    if (self->icon) {
+    if (GTK_IS_WIDGET (self->icon)) {
         gtk_container_remove (
             GTK_CONTAINER (gtk_widget_get_parent (self->icon)), self->icon);
     }
-    if (self->label) {
+    if (GTK_IS_WIDGET (self->label)) {
         gtk_container_remove (
             GTK_CONTAINER (gtk_widget_get_parent (self->label)), self->label);
     }
 
-    if (self->box) {
+    if (GTK_IS_WIDGET (self->box)) {
         gtk_container_remove (
             GTK_CONTAINER (gtk_widget_get_parent (self->box)), self->box);
     }
