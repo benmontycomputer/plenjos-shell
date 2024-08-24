@@ -119,6 +119,63 @@ expose_draw_panel (GtkWidget *widget, cairo_t *cr, Panel *self) {
     return return_val;
 }
 
+static void
+draw_linear_shadow (cairo_t *cr, double x, double y, double dx, double dy,
+                    double clip_x, double clip_y, double clip_w,
+                    double clip_h) {
+    cairo_pattern_t *pattern
+        = cairo_pattern_create_linear (x, y, x + dx, y + dy);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    cairo_rectangle (cr, clip_x, clip_y, clip_w, clip_h);
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+}
+
+static void
+draw_radial_shadow (cairo_t *cr, double x, double y, double r1, double r2,
+                    int quadrant) {
+    cairo_pattern_t *pattern
+        = cairo_pattern_create_radial (x, y, r1, x, y, r2);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
+    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
+
+    cairo_save (cr);
+
+    if (quadrant == 1) {
+        cairo_rectangle (cr, x, y - r2, r2, r2);
+    } else if (quadrant == 2) {
+        cairo_rectangle (cr, x, y, r2, r2);
+    } else if (quadrant == 3) {
+        cairo_rectangle (cr, x - r2, y, r2, r2);
+    } else if (quadrant == 4) {
+        cairo_rectangle (cr, x - r2, y - r2, r2, r2);
+    }
+
+    cairo_clip (cr);
+
+    cairo_set_source (cr, pattern);
+    cairo_mask (cr, pattern);
+
+    cairo_pattern_destroy (pattern);
+
+    cairo_restore (cr);
+}
+
 gboolean
 expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
     UNUSED (widget);
@@ -160,175 +217,24 @@ expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
 
     cairo_stroke (cr);*/
 
-    cairo_pattern_t *pattern = cairo_pattern_create_radial (
-        x + radius, y + radius, radius, x + radius, y + radius, radius + 6.0);
+    // Corner shadows (top right, bottom right, bottom left, top left)
+    draw_radial_shadow (cr, x + width - radius, y + radius, radius,
+                        radius + 6.0, 1);
+    draw_radial_shadow (cr, x + width - radius, y + height - radius, radius,
+                        radius + 6.0, 2);
+    draw_radial_shadow (cr, x + radius, y + height - radius, radius,
+                        radius + 6.0, 3);
+    draw_radial_shadow (cr, x + radius, y + radius, radius, radius + 6.0, 4);
 
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x - 6.0, y - 6.0, radius + 6.0, radius + 6.0);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    pattern = cairo_pattern_create_radial (x + width - radius, y + radius,
-                                           radius, x + width - radius,
-                                           y + radius, radius + 6.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + width - radius, y - 6.0, radius + 6.0,
-                     radius + 6.0);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    pattern = cairo_pattern_create_radial (
-        x + width - radius, y + height - radius, radius, x + width - radius,
-        y + height - radius, radius + 6.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + width - radius, y + height - radius, radius + 6.0,
-                     radius + 6.0);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    pattern = cairo_pattern_create_radial (x + radius, y + height - radius,
-                                           radius, x + radius,
-                                           y + height - radius, radius + 6.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x - 6.0, y + height - radius, radius + 6.0,
-                     radius + 6.0);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Bottom shadow
-    pattern = cairo_pattern_create_linear (x + (width / 2), y + height,
-                                           x + (width / 2), y + height + 6.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + radius, y + height, width - (2 * radius), 6.0);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Top shadow
-    pattern = cairo_pattern_create_linear (x + (width / 2), y, x + (width / 2),
-                                           y - 6.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + radius, y - 6.0, width - (2 * radius), 6.0);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Left shadow
-    pattern = cairo_pattern_create_linear (x, y + (height / 2), x - 6.0,
-                                           y + (height / 2));
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x - 6.0, y + radius, 6.0, height - (2 * radius));
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Right shadow
-    pattern = cairo_pattern_create_linear (x + width, y + (height / 2),
-                                           x + width + 6.0, y + (height / 2));
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + width, y + radius, 6.0, height - (2 * radius));
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
+    // Bottom, top, left, right shadows
+    draw_linear_shadow (cr, x + (width / 2), y + height, 0, 6.0, x + radius,
+                        y + height, width - (2 * radius), 6.0);
+    draw_linear_shadow (cr, x + (width / 2), y, 0, -6.0, x + radius, y - 6.0,
+                        width - (2 * radius), 6.0);
+    draw_linear_shadow (cr, x, y + (height / 2), -6.0, 0, x - 6.0, y + radius,
+                        6.0, height - (2 * radius));
+    draw_linear_shadow (cr, x + width, y + (height / 2), 6.0, 0, x + width,
+                        y + radius, 6.0, height - (2 * radius));
 
     cairo_arc (cr, x + width - radius, y + radius, radius + 0.5, -90 * degrees,
                0 * degrees);
@@ -367,18 +273,6 @@ expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
     cairo_paint (cr);
-
-    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
-               270 * degrees);
-    cairo_close_path (cr);
-
-    cairo_clip (cr);
 
     if (args->dark_mode) {
         cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.5);
