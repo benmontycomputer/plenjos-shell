@@ -13,4 +13,4 @@
 
 #include "blur/stack-blur.h"
 
-#define UNUSED(x) (void)(x)
+#include "panel-common.h"

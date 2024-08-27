@@ -29,17 +29,6 @@
 
 #include "applications-menu/panel-applications-menu.h"
 
-typedef struct {
-    PanelTaskbar *taskbar;
-
-    GdkPixbuf *blurred;
-
-    GtkWindow *gtk_window;
-
-    bool supports_alpha;
-    bool dark_mode;
-} Panel;
-
 void
 panel_taskbar_run_wrap (GTask *task, GObject *source_object,
                         gpointer task_data, GCancellable *cancellable) {
@@ -64,29 +53,6 @@ typedef struct DrawArgs {
 } DrawArgs;
 
 gboolean expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args);
-
-gboolean
-expose_draw_tray_menu (GtkWidget *widget, cairo_t *cr, PanelTrayMenu *menu) {
-    Panel *self = (Panel *)menu->panel_ptr;
-
-    DrawArgs *args = malloc (sizeof (DrawArgs));
-
-    args->gtk_window = menu->window;
-
-    args->dark_mode = self->dark_mode;
-    args->supports_alpha = self->supports_alpha;
-
-    args->blurred = self->blurred;
-
-    args->x = menu->x;
-    args->y = menu->y;
-
-    gboolean return_val = expose_draw_raw (widget, cr, args);
-
-    free (args);
-
-    return return_val;
-}
 
 gboolean
 expose_draw_panel (GtkWidget *widget, cairo_t *cr, Panel *self) {
@@ -119,147 +85,11 @@ expose_draw_panel (GtkWidget *widget, cairo_t *cr, Panel *self) {
     return return_val;
 }
 
-static void
-draw_linear_shadow (cairo_t *cr, double x, double y, double dx, double dy,
-                    double clip_x, double clip_y, double clip_w,
-                    double clip_h) {
-    cairo_pattern_t *pattern
-        = cairo_pattern_create_linear (x, y, x + dx, y + dy);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, clip_x, clip_y, clip_w, clip_h);
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-}
-
-static void
-draw_radial_shadow (cairo_t *cr, double x, double y, double r1, double r2,
-                    int quadrant) {
-    cairo_pattern_t *pattern
-        = cairo_pattern_create_radial (x, y, r1, x, y, r2);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    if (quadrant == 1) {
-        cairo_rectangle (cr, x, y - r2, r2, r2);
-    } else if (quadrant == 2) {
-        cairo_rectangle (cr, x, y, r2, r2);
-    } else if (quadrant == 3) {
-        cairo_rectangle (cr, x - r2, y, r2, r2);
-    } else if (quadrant == 4) {
-        cairo_rectangle (cr, x - r2, y - r2, r2, r2);
-    }
-
-    cairo_clip (cr);
-
-    cairo_set_source (cr, pattern);
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-}
-
 gboolean
 expose_draw_raw (GtkWidget *widget, cairo_t *cr, DrawArgs *args) {
     UNUSED (widget);
 
     cairo_save (cr);
-
-    // Adapted from
-    // https://stackoverflow.com/questions/4183546/how-can-i-draw-image-with-rounded-corners-in-cairo-gtk
-    double width, height, radius;
-    int wi, hi;
-    gtk_window_get_size (args->gtk_window, &wi, &hi);
-
-    width = (double)wi;
-    height = (double)hi;
-    radius = 12;
-
-    double x = 0.0;
-    double y = 0.0;
-
-    x += 6.0;
-    y += 6.0;
-    width -= 12.0;
-    height -= 12.0;
-
-    double degrees = M_PI / 180.0;
-
-    // cairo_set_source_rgba (cr, 0.0, 0.0, 0.0, 1.0);
-
-    /*cairo_set_line_width (cr, 2.0);
-    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
-               270 * degrees);
-    cairo_line_to (cr, x + width - radius, y);
-
-    cairo_stroke (cr);*/
-
-    // Corner shadows (top right, bottom right, bottom left, top left)
-    draw_radial_shadow (cr, x + width - radius, y + radius, radius,
-                        radius + 6.0, 1);
-    draw_radial_shadow (cr, x + width - radius, y + height - radius, radius,
-                        radius + 6.0, 2);
-    draw_radial_shadow (cr, x + radius, y + height - radius, radius,
-                        radius + 6.0, 3);
-    draw_radial_shadow (cr, x + radius, y + radius, radius, radius + 6.0, 4);
-
-    // Bottom, top, left, right shadows
-    draw_linear_shadow (cr, x + (width / 2), y + height, 0, 6.0, x + radius,
-                        y + height, width - (2 * radius), 6.0);
-    draw_linear_shadow (cr, x + (width / 2), y, 0, -6.0, x + radius, y - 6.0,
-                        width - (2 * radius), 6.0);
-    draw_linear_shadow (cr, x, y + (height / 2), -6.0, 0, x - 6.0, y + radius,
-                        6.0, height - (2 * radius));
-    draw_linear_shadow (cr, x + width, y + (height / 2), 6.0, 0, x + width,
-                        y + radius, 6.0, height - (2 * radius));
-
-    cairo_arc (cr, x + width - radius, y + radius, radius + 0.5, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius + 0.5,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius + 0.5, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius + 0.5, 180 * degrees,
-               270 * degrees);
-    cairo_close_path (cr);
-    cairo_set_line_width (cr, 1.0);
-    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.4);
-    cairo_stroke (cr);
-
-    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
-               270 * degrees);
-    cairo_close_path (cr);
-
-    cairo_clip (cr);
 
     if (GDK_IS_PIXBUF (args->blurred)) {
         gdk_cairo_set_source_pixbuf (cr, args->blurred, -args->x, -args->y);
@@ -348,10 +178,10 @@ activate (GtkApplication *app, void *_data) {
 
     // The margins are the gaps around the window's edges
     // Margins and anchors can be set like this...
-    static const gint margins[] = { 2, 2, 2, 2 };
+    /*static const gint margins[] = { 2, 2, 2, 2 };
     for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
         gtk_layer_set_margin (gtk_window, i, margins[i]);
-    }
+    }*/
 
     // ... or like this
     // Anchors are if the window is pinned to each edge of the output
@@ -360,7 +190,7 @@ activate (GtkApplication *app, void *_data) {
         gtk_layer_set_anchor (gtk_window, i, anchors[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 64);
+    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
     gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
 
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
