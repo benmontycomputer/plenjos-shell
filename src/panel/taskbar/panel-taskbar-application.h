@@ -9,8 +9,21 @@ typedef struct {
     PanelTaskbar *taskbar;
 
     char *id;
+    char *icon_path;
 
     GtkBox *items_box;
+
+    GtkBox *taskbar_item_box;
+
+    GtkButton *taskbar_item_button;
+
+    GtkImage *icon;
+
+    GtkPopover *popover;
+
+    gboolean pinned;
+
+    GtkWidget *indicator;
 } PanelTaskbarApplication;
 
 enum panel_taskbar_toplevel_state_field {
@@ -43,8 +56,15 @@ typedef struct PanelTaskbarToplevelButton {
     uint32_t state;
 } PanelTaskbarToplevelButton;
 
-PanelTaskbarApplication *panel_taskbar_application_new (char *id, PanelTaskbar *taskbar);
+PanelTaskbarApplication *panel_taskbar_application_new (char *id,
+                                                        PanelTaskbar *taskbar);
 
-void panel_taskbar_application_add_toplevel (PanelTaskbarApplication *self, PanelTaskbarToplevelButton *toplevel);
+void
+panel_taskbar_application_add_toplevel (PanelTaskbarApplication *self,
+                                        PanelTaskbarToplevelButton *toplevel);
 
-void panel_taskbar_application_remove_toplevel (PanelTaskbarApplication *self, PanelTaskbarToplevelButton *toplevel);
+void panel_taskbar_application_remove_toplevel (
+    PanelTaskbarApplication *self, PanelTaskbarToplevelButton *toplevel);
+
+void panel_taskbar_application_set_pinned (PanelTaskbarApplication *self,
+                                           gboolean pinned);

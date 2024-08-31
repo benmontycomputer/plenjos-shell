@@ -8,11 +8,9 @@ gboolean
 handle_application_gtk (PanelTaskbarToplevelButton *toplevel_button) {
     panel_taskbar_toplevel_button_gtk_run (toplevel_button);
 
-    gtk_container_add (
-        GTK_CONTAINER (toplevel_button->m_taskbar->taskbar_box),
+    gtk_box_append (
+        toplevel_button->m_taskbar->taskbar_box,
         toplevel_button->rendered);
-    gtk_widget_show_all (
-        GTK_WIDGET (toplevel_button->m_taskbar->taskbar_box));
 
     return FALSE;
 }

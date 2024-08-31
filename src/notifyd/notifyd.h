@@ -3,7 +3,7 @@
 #include <glib.h>
 #include <gtk/gtk.h>
 
-#include <gtk-layer-shell.h>
+#include <gtk4-layer-shell.h>
 
 #include <dbus/dbus.h>
 

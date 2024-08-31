@@ -36,8 +36,10 @@ audio_button_new (GtkStack *stack) {
 
     g_signal_connect (self->box, "destroy", G_CALLBACK (destroy), self);
 
-    self->button = GTK_BUTTON (gtk_button_new_from_icon_name (
-        "audio-volume-medium-symbolic", GTK_ICON_SIZE_DND));
+    self->button = GTK_BUTTON (
+        gtk_button_new_from_icon_name ("audio-volume-medium-symbolic"));
+
+    gtk_widget_set_size_request (GTK_WIDGET (self->button), 32, 32);
 
     gtk_widget_set_name (GTK_WIDGET (self->button), "panel_tray_menu_button");
 
@@ -56,9 +58,7 @@ audio_button_new (GtkStack *stack) {
 
     gtk_widget_set_size_request (GTK_WIDGET (self->volume), 240, -1);
 
-    gtk_box_pack_start (self->box, GTK_WIDGET (self->volume), FALSE, FALSE, 0);
-
-    gtk_widget_show_all (GTK_WIDGET (self->box));
+    gtk_box_append (self->box, GTK_WIDGET (self->volume));
 
     gtk_stack_add_titled (stack, GTK_WIDGET (self->box), "Sound", "Sound");
 
@@ -84,7 +84,7 @@ audio_button_new (GtkStack *stack) {
     snd_mixer_selem_get_playback_volume (self->elem, 0, &vol);
 
     gtk_range_set_value (GTK_RANGE (self->volume),
-                         round(((double)vol * 100.0) / (double)max));
+                         round (((double)vol * 100.0) / (double)max));
 
     self->stack = stack;
 

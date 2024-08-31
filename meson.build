@@ -5,8 +5,8 @@ project('plenjos-session', 'c',
 exe = executable('plenjos_session', 'plenjos_session.c',
   install : true)
 
-gtk = dependency('gtk+-3.0', version: '>=3.24.0')
-gtk_layer_shell = dependency('gtk-layer-shell-0', version: '>=0.7.0')
+gtk = dependency('gtk4', version: '>=4.8.0')
+gtk_layer_shell = dependency('gtk4-layer-shell-0', version: '>=1.0.2')
 
 wayland_client = dependency('wayland-client', version: '>=1.10.0')
 

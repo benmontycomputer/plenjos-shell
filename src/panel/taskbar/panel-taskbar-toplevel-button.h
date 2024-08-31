@@ -25,3 +25,5 @@ void panel_taskbar_toplevel_button_rerender (PanelTaskbarToplevelButton *self,
                                              bool update_app_id_and_icon);
 
 void panel_taskbar_toplevel_button_gtk_run (PanelTaskbarToplevelButton *self);
+
+char *get_icon_from_app_id (PanelTaskbar *taskbar, char *id);

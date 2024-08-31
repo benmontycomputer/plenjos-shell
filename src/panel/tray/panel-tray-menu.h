@@ -5,7 +5,7 @@
 
 #include <gtk/gtk.h>
 
-#include <gtk-layer-shell.h>
+#include <gtk4-layer-shell.h>
 
 #include "../panel-common.h"
 
@@ -17,8 +17,6 @@ typedef struct PanelTrayMenu {
     bool visible;
 
     Panel *panel;
-
-    gint x, y;
 } PanelTrayMenu;
 
 PanelTrayMenu *panel_tray_menu_new (Panel *panel);

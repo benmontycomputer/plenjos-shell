@@ -63,9 +63,7 @@ on_notify (PlenjosNotifyFdoGBusSkeleton *skeleton,
     gtk_window_set_deletable (win, FALSE);
     gtk_window_set_resizable (win, FALSE);
 
-    gtk_container_add (GTK_CONTAINER (win), gtk_label_new (body));
-
-    gtk_widget_show_all (GTK_WIDGET (win));
+    gtk_window_set_child (win, gtk_label_new (body));
 
     gtk_window_present (win);
     

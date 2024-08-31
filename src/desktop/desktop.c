@@ -74,12 +74,9 @@ activate (GtkApplication *app, void *_data) {
         bg = g_settings_get_string (bg_settings, "picture-uri");
     }
 
-    gtk_container_add (
-        GTK_CONTAINER (gtk_window),
-        gtk_image_new_from_pixbuf (
-            gdk_pixbuf_new_from_file_at_size (bg + 7, 2560, -1, NULL)));
-
-    gtk_widget_show_all (GTK_WIDGET (gtk_window));
+    gtk_window_set_child (gtk_window, gtk_image_new_from_pixbuf (
+                                          gdk_pixbuf_new_from_file_at_size (
+                                              bg + 7, 2560, -1, NULL)));
 }
 
 int

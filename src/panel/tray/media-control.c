@@ -52,7 +52,7 @@ gtk_player_update_pbuf (GtkPlayer *gtk_player) {
             NULL);
     }
 
-    cairo_surface_t *surfaceold
+    /* cairo_surface_t *surfaceold
         = gdk_cairo_surface_create_from_pixbuf (pbuf, 1, NULL);
 
     cairo_surface_t *surface = cairo_image_surface_create (
@@ -77,244 +77,9 @@ gtk_player_update_pbuf (GtkPlayer *gtk_player) {
 
     g_object_unref (pbuf);
     cairo_surface_destroy (surfaceold);
-    cairo_surface_destroy (surface);
-}
+    cairo_surface_destroy (surface); */
 
-gboolean
-expose_draw_media_control_box (GtkWidget *widget, cairo_t *cr,
-                               GtkPlayer *self) {
-    UNUSED (widget);
-
-    cairo_save (cr);
-
-    if (self->pbuf_blurred) {
-        if (self->width != gtk_widget_get_allocated_width (self->widget)) {
-            self->width = gtk_widget_get_allocated_width (self->widget);
-
-            gtk_player_update_pbuf (self);
-        }
-
-        gdk_cairo_set_source_pixbuf (cr, self->pbuf_blurred, 0, 0);
-    } else {
-        if (self->width != gtk_widget_get_allocated_width (self->widget)) {
-            self->width = gtk_widget_get_allocated_width (self->widget);
-        }
-
-        cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 1.0);
-    }
-
-    double radius = 12.0;
-
-    double x = 12.0;
-    double y = 12.0;
-    double width = (double)self->width - 24.0;
-    double height = (double)gtk_widget_get_allocated_height (widget) - 24.0;
-
-    double degrees = M_PI / 180.0;
-
-    cairo_pattern_t *pattern = cairo_pattern_create_radial (
-        x + radius, y + radius, radius, x + radius, y + radius, radius + 12.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x - 12.0, y - 12.0, radius + 12.0, radius + 12.0);
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    pattern = cairo_pattern_create_radial (x + width - radius, y + radius,
-                                           radius, x + width - radius,
-                                           y + radius, radius + 12.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + width - radius, y - 12.0, radius + 12.0,
-                     radius + 12.0);
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    pattern = cairo_pattern_create_radial (
-        x + width - radius, y + height - radius, radius, x + width - radius,
-        y + height - radius, radius + 12.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + width - radius, y + height - radius,
-                     radius + 12.0, radius + 12.0);
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    pattern = cairo_pattern_create_radial (x + radius, y + height - radius,
-                                           radius, x + radius,
-                                           y + height - radius, radius + 12.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x - 12.0, y + height - radius, radius + 12.0,
-                     radius + 12.0);
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Bottom shadow
-    pattern = cairo_pattern_create_linear (x + (width / 2), y + height,
-                                           x + (width / 2), y + height + 12.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + radius, y + height, width - (2 * radius), 12.0);
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Top shadow
-    pattern = cairo_pattern_create_linear (x + (width / 2), y, x + (width / 2),
-                                           y - 12.0);
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + radius, y - 12.0, width - (2 * radius), 12.0);
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Left shadow
-    pattern = cairo_pattern_create_linear (x, y + (height / 2), x - 12.0,
-                                           y + (height / 2));
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x - 12.0, y + radius, 12.0, height - (2 * radius));
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    // Right shadow
-    pattern = cairo_pattern_create_linear (x + width, y + (height / 2),
-                                           x + width + 12.0, y + (height / 2));
-
-    cairo_pattern_add_color_stop_rgba (pattern, 0, 0, 0, 0, 0.6);
-    cairo_pattern_add_color_stop_rgba (pattern, 0.6, 0, 0, 0, 0.2);
-    cairo_pattern_add_color_stop_rgba (pattern, 1, 0, 0, 0, 0.0);
-
-    cairo_save (cr);
-
-    cairo_rectangle (cr, x + width, y + radius, 12.0, height - (2 * radius));
-
-    cairo_clip (cr);
-
-    cairo_mask (cr, pattern);
-
-    cairo_pattern_destroy (pattern);
-
-    cairo_restore (cr);
-
-    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
-               270 * degrees);
-    cairo_close_path (cr);
-
-    cairo_clip (cr);
-
-    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-
-    cairo_paint (cr);
-
-    x += 1.0;
-    y += 1.0;
-    width -= 2.0;
-    height -= 2.0;
-
-    cairo_set_operator (cr, CAIRO_OPERATOR_ATOP);
-
-    cairo_arc (cr, x + width - radius, y + radius, radius, -90 * degrees,
-               0 * degrees);
-    cairo_arc (cr, x + width - radius, y + height - radius, radius,
-               0 * degrees, 90 * degrees);
-    cairo_arc (cr, x + radius, y + height - radius, radius, 90 * degrees,
-               180 * degrees);
-    cairo_arc (cr, x + radius, y + radius, radius, 180 * degrees,
-               270 * degrees);
-    cairo_close_path (cr);
-
-    cairo_reset_clip (cr);
-    cairo_set_source_rgba (cr, 0, 0, 0, 0.4);
-    cairo_set_line_width (cr, 2.0);
-    cairo_stroke (cr);
-
-    cairo_restore (cr);
-
-    return FALSE;
+    gtk_player->pbuf_blurred = pbuf;
 }
 
 // "<song> - <artist> (<album>)"
@@ -334,20 +99,6 @@ on_metadata (PlayerctlPlayer *player, GVariant *metadata,
         = playerctl_player_print_metadata_prop (player, "xesam:url", NULL);
     char *art_url
         = playerctl_player_print_metadata_prop (player, "mpris:artUrl", NULL);
-    // char *track = playerctl_player_print_metadata_prop (player,
-    // "mpris:trackid", NULL);
-
-    /* if (title == NULL) {
-        title = playerctl_player_get_title (player, NULL);
-    }
-
-    if (artist == NULL) {
-        artist = playerctl_player_get_artist (player, NULL);
-    }
-
-    if (album == NULL) {
-        album = playerctl_player_get_album (player, NULL);
-    } */
 
     if (title == NULL) {
         title = url;
@@ -437,8 +188,6 @@ on_metadata (PlayerctlPlayer *player, GVariant *metadata,
 
         if (update_pbuf) {
             gtk_player_update_pbuf (gtk_player);
-
-            gtk_widget_queue_draw (gtk_player->widget);
         }
 
         free (art_url);
@@ -454,19 +203,16 @@ on_playback_status (PlayerctlPlayer *player,
 
     switch (playback_status) {
     case PLAYERCTL_PLAYBACK_STATUS_PAUSED:
-        gtk_button_set_image (self->play_button,
-                              gtk_image_new_from_icon_name (
-                                  "media-playback-start", GTK_ICON_SIZE_DND));
+        gtk_button_set_child (self->play_button, gtk_image_new_from_icon_name (
+                                                     "media-playback-start"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_PLAYING:
-        gtk_button_set_image (self->play_button,
-                              gtk_image_new_from_icon_name (
-                                  "media-playback-pause", GTK_ICON_SIZE_DND));
+        gtk_button_set_child (self->play_button, gtk_image_new_from_icon_name (
+                                                     "media-playback-pause"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_STOPPED:
-        gtk_button_set_image (self->play_button,
-                              gtk_image_new_from_icon_name (
-                                  "media-playback-start", GTK_ICON_SIZE_DND));
+        gtk_button_set_child (self->play_button, gtk_image_new_from_icon_name (
+                                                     "media-playback-start"));
         break;
     }
 }
@@ -479,18 +225,19 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
 
-    gtk_widget_set_app_paintable (GTK_WIDGET (box), TRUE);
+    // gtk_widget_app (GTK_WIDGET (box), TRUE);
 
     gtk_widget_set_name (GTK_WIDGET (box), "media_player_box");
     gtk_widget_set_hexpand (GTK_WIDGET (box), TRUE);
     gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_FILL);
 
-    GtkButton *previous_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-        "media-skip-backward", GTK_ICON_SIZE_DND));
-    GtkButton *play_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-        "media-playback-start", GTK_ICON_SIZE_DND));
-    GtkButton *next_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-        "media-skip-forward", GTK_ICON_SIZE_DND));
+    // DND icons
+    GtkButton *previous_button
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-backward"));
+    GtkButton *play_button
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-playback-start"));
+    GtkButton *next_button
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-forward"));
 
     gtk_widget_set_name (GTK_WIDGET (previous_button), "media_player_button");
     gtk_widget_set_name (GTK_WIDGET (play_button), "media_player_button");
@@ -506,16 +253,15 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     gtk_widget_set_halign (GTK_WIDGET (controls_box), GTK_ALIGN_CENTER);
 
-    gtk_container_add (GTK_CONTAINER (controls_box),
-                       GTK_WIDGET (previous_button));
-    gtk_container_add (GTK_CONTAINER (controls_box), GTK_WIDGET (play_button));
-    gtk_container_add (GTK_CONTAINER (controls_box), GTK_WIDGET (next_button));
+    gtk_box_append (controls_box, GTK_WIDGET (previous_button));
+    gtk_box_append (controls_box, GTK_WIDGET (play_button));
+    gtk_box_append (controls_box, GTK_WIDGET (next_button));
 
     GtkLabel *label = GTK_LABEL (gtk_label_new ("Loading..."));
 
     gtk_widget_set_hexpand (GTK_WIDGET (label), TRUE);
-    gtk_label_set_line_wrap (label, TRUE);
-    gtk_label_set_line_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
+    gtk_label_set_wrap (label, TRUE);
+    gtk_label_set_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
 
     GValue playback_status_val = G_VALUE_INIT;
     g_object_get_property (G_OBJECT (player), "playback-status",
@@ -526,36 +272,31 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     switch (playback_status) {
     case PLAYERCTL_PLAYBACK_STATUS_PAUSED:
-        gtk_button_set_image (
-            play_button, gtk_image_new_from_icon_name ("media-playback-start",
-                                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_child (play_button, gtk_image_new_from_icon_name (
+                                               "media-playback-start"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_PLAYING:
-        gtk_button_set_image (
-            play_button, gtk_image_new_from_icon_name ("media-playback-pause",
-                                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_child (play_button, gtk_image_new_from_icon_name (
+                                               "media-playback-pause"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_STOPPED:
-        gtk_button_set_image (
-            play_button, gtk_image_new_from_icon_name ("media-playback-start",
-                                                       GTK_ICON_SIZE_DND));
+        gtk_button_set_child (play_button, gtk_image_new_from_icon_name (
+                                               "media-playback-start"));
         break;
     }
 
-    GtkImage *icon = GTK_IMAGE (
-        gtk_image_new_from_icon_name (name->name, GTK_ICON_SIZE_DIALOG));
+    // Dialog icon
+    GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (name->name));
 
     gtk_widget_set_halign (GTK_WIDGET (icon), GTK_ALIGN_START);
 
     GtkBox *info_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2));
 
-    gtk_container_add (GTK_CONTAINER (info_box), GTK_WIDGET (icon));
-    gtk_container_add (GTK_CONTAINER (info_box), GTK_WIDGET (label));
+    gtk_box_append (info_box, GTK_WIDGET (icon));
+    gtk_box_append (info_box, GTK_WIDGET (label));
 
-    gtk_container_add (GTK_CONTAINER (box), GTK_WIDGET (info_box));
-    gtk_container_add (GTK_CONTAINER (box), GTK_WIDGET (controls_box));
-
-    gtk_widget_show_all (GTK_WIDGET (box));
+    gtk_box_append (box, GTK_WIDGET (info_box));
+    gtk_box_append (box, GTK_WIDGET (controls_box));
 
     GtkPlayer *return_val = malloc (sizeof (GtkPlayer));
 
@@ -567,9 +308,6 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     return_val->width = 0;
     return_val->play_button = play_button;
     return_val->pbuf_blurred = NULL;
-
-    g_signal_connect (box, "draw", G_CALLBACK (expose_draw_media_control_box),
-                      return_val);
 
     g_signal_connect (player, "metadata", G_CALLBACK (on_metadata),
                       return_val);
@@ -588,19 +326,16 @@ on_name_appeared (PlayerctlPlayerManager *manager, PlayerctlPlayerName *name,
 
     GtkPlayer *player_gtk = generate_player (name, self);
 
-    gtk_box_pack_start (self->box, player_gtk->widget, FALSE, FALSE, 0);
+    gtk_box_append (self->box, player_gtk->widget);
 
     self->gtk_players = g_list_append (self->gtk_players, player_gtk);
-
-    gtk_widget_show_all (GTK_WIDGET (self->box));
 }
 
 void
 player_vanished_foreach (GtkPlayer *player, PlayerctlPlayer *remove_player) {
     if (player->player == remove_player) {
-        gtk_container_remove (
-            GTK_CONTAINER (gtk_widget_get_parent (player->widget)),
-            player->widget);
+        gtk_box_remove (GTK_BOX (gtk_widget_get_parent (player->widget)),
+                        player->widget);
 
         g_object_unref (remove_player);
 

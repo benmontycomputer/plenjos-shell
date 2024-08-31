@@ -39,8 +39,6 @@ struct _PanelApplicationsMenu {
 
     GdkPixbuf *desktop_blurred;
 
-    GdkRectangle monitor_geometry;
-
     GSettings *settings;
 
     GtkWidget *launcher_button;
@@ -64,15 +62,9 @@ panel_applications_menu_class_init (PanelApplicationsMenuClass *klass) {
                                           scrolled_window);
 }
 
-static int
-applications_menu_hide (GtkWidget *widget) {
-    gtk_widget_hide (widget);
-    return FALSE;
-}
-
 void
 hide_applications_menu (PanelApplicationsMenu *self) {
-    applications_menu_hide (GTK_WIDGET (&self->parent_instance));
+    gtk_widget_hide (GTK_WIDGET (&self->parent_instance));
 }
 
 void
@@ -81,21 +73,26 @@ show_applications_menu (PanelApplicationsMenu *self) {
 }
 
 static gboolean
-check_escape (GtkWidget *widget, GdkEventKey *event, gpointer data) {
-    (void)data;
-    if (event->keyval == GDK_KEY_Escape) {
-        applications_menu_hide (widget);
+check_escape (GtkEventControllerKey *key_controller, guint keyval,
+              guint keycode, GdkModifierType state,
+              PanelApplicationsMenu *self) {
+    UNUSED (key_controller);
+    UNUSED (keycode);
+    UNUSED (state);
+
+    if (keyval == GDK_KEY_Escape) {
+        hide_applications_menu (self);
         return TRUE;
     }
     return FALSE;
 }
 
 static void
-focus_out_event (GtkWidget *widget, GdkEventFocus *event, gpointer user_data) {
-    (void)event;
-    (void)user_data;
+focus_out_event (GtkEventControllerFocus *focus_controller,
+                 PanelApplicationsMenu *self) {
+    UNUSED (focus_controller);
 
-    applications_menu_hide (widget);
+    hide_applications_menu (self);
 }
 
 typedef struct {
@@ -104,11 +101,8 @@ typedef struct {
 } ClickedArgs;
 
 static void
-applications_menu_app_clicked (GtkWidget *widget, GdkEventButton *event,
-                               ClickedArgs *args) {
-    // stops unused parameter warning
-    (void)event;
-    (void)widget;
+applications_menu_app_clicked (GtkButton *widget, ClickedArgs *args) {
+    UNUSED (widget);
 
     hide_applications_menu (args->self);
     size_t new_exec_len = strlen (args->exec) + 3;
@@ -131,62 +125,80 @@ applications_menu_render_app (PanelApplicationsMenu *self, char *icon_name,
 
     if (icon_name) {
         if (access (icon_name, F_OK) == 0) {
-            GdkPixbuf *icon_unscaled = gdk_pixbuf_new_from_file_at_size (
+            GdkPixbuf *icon_pbuf = gdk_pixbuf_new_from_file_at_size (
                 icon_name, self->icon_size, self->icon_size, NULL);
 
-            if (icon_unscaled) {
-                cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf (
-                    icon_unscaled, 0,
-                    gtk_widget_get_window (GTK_WIDGET (icon)));
+            if (icon) {
+                gtk_image_set_from_pixbuf (icon, icon_pbuf);
 
-                if (s) {
-                    gtk_image_set_from_surface (icon, s);
-                    cairo_surface_destroy (s);
+                fallback = false;
 
-                    fallback = false;
-                }
-
-                g_object_unref (icon_unscaled);
+                g_object_unref (icon_pbuf);
             }
         }
 
         if (fallback) {
-            GdkPixbuf *icon_unscaled = gtk_icon_theme_load_icon_for_scale (
-                self->icon_theme, icon_name, self->icon_size, self->scale, 0,
-                NULL);
+            if (gtk_icon_theme_has_icon (self->icon_theme, icon_name)) {
+                GtkIconPaintable *icon_paintable = gtk_icon_theme_lookup_icon (
+                    self->icon_theme, icon_name, NULL, self->icon_size,
+                    self->scale, GTK_TEXT_DIR_LTR, 0);
 
-            if (icon_unscaled) {
-                cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf (
-                    icon_unscaled, 0,
-                    gtk_widget_get_window (GTK_WIDGET (icon)));
+                GFile *file = gtk_icon_paintable_get_file (icon_paintable);
 
-                if (s) {
-                    gtk_image_set_from_surface (icon, s);
-                    cairo_surface_destroy (s);
+                gchar *filename = g_file_get_path (file);
+
+                GdkPixbuf *icon_pbuf = gdk_pixbuf_new_from_file_at_size (
+                    filename, self->icon_size, self->icon_size, NULL);
+
+                if (icon) {
+                    gtk_image_set_from_pixbuf (icon, icon_pbuf);
 
                     fallback = false;
+
+                    g_object_unref (icon_pbuf);
                 }
 
-                g_object_unref (icon_unscaled);
+                free (filename);
+
+                g_object_unref (file);
+
+                fallback = false;
+
+                g_object_unref (icon_paintable);
             }
         }
     }
     if (fallback) {
-        GdkPixbuf *icon_unscaled = gtk_icon_theme_load_icon_for_scale (
-            self->icon_theme, "dialog-question", self->icon_size, self->scale,
-            0, NULL);
+        // Don't need to check if the icon theme contains "dialog-question"
+        // because gtk_icon_theme_lookup_icon will return a placeholder if
+        // it doesn't exist.
 
-        if (icon_unscaled) {
-            cairo_surface_t *s = gdk_cairo_surface_create_from_pixbuf (
-                icon_unscaled, 0, gtk_widget_get_window (GTK_WIDGET (icon)));
+        GtkIconPaintable *icon_paintable = gtk_icon_theme_lookup_icon (
+            self->icon_theme, "dialog-question", NULL, self->icon_size,
+            self->scale, GTK_TEXT_DIR_LTR, 0);
 
-            if (s) {
-                gtk_image_set_from_surface (icon, s);
-                cairo_surface_destroy (s);
-            }
+        GFile *file = gtk_icon_paintable_get_file (icon_paintable);
 
-            g_object_unref (icon_unscaled);
+        gchar *filename = g_file_get_path (file);
+
+        GdkPixbuf *icon_pbuf = gdk_pixbuf_new_from_file_at_size (
+            filename, self->icon_size, self->icon_size, NULL);
+
+        if (icon) {
+            gtk_image_set_from_pixbuf (icon, icon_pbuf);
+
+            fallback = false;
+
+            g_object_unref (icon_pbuf);
         }
+
+        free (filename);
+
+        g_object_unref (file);
+
+        fallback = false;
+
+        g_object_unref (icon_paintable);
     }
 
     gtk_widget_set_size_request (GTK_WIDGET (icon), self->icon_size,
@@ -194,8 +206,8 @@ applications_menu_render_app (PanelApplicationsMenu *self, char *icon_name,
 
     GtkLabel *label = GTK_LABEL (gtk_label_new (""));
     gtk_widget_set_size_request (GTK_WIDGET (label), self->icon_size + 24, 30);
-    gtk_label_set_line_wrap (label, TRUE);
-    gtk_label_set_line_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
+    gtk_label_set_wrap (label, TRUE);
+    gtk_label_set_wrap_mode (label, PANGO_WRAP_WORD_CHAR);
     gtk_label_set_max_width_chars (label, 0);
     gtk_label_set_justify (label, GTK_JUSTIFY_CENTER);
 
@@ -222,17 +234,16 @@ applications_menu_render_app (PanelApplicationsMenu *self, char *icon_name,
 
     free (markup);
 
-    gtk_container_add (GTK_CONTAINER (box), GTK_WIDGET (icon));
-    gtk_container_add (GTK_CONTAINER (box), GTK_WIDGET (label));
-    gtk_widget_show_all (GTK_WIDGET (box));
-    gtk_button_set_image (button, GTK_WIDGET (box));
+    gtk_box_append (box, GTK_WIDGET (icon));
+    gtk_box_append (box, GTK_WIDGET (label));
+    gtk_button_set_child (button, GTK_WIDGET (box));
 
     ClickedArgs *clicked_args = malloc (sizeof (ClickedArgs));
 
     clicked_args->exec = g_strdup (exec_path);
     clicked_args->self = self;
 
-    g_signal_connect (button, "button-press-event",
+    g_signal_connect (button, "clicked",
                       G_CALLBACK (applications_menu_app_clicked),
                       clicked_args);
 
@@ -245,8 +256,7 @@ applications_menu_add_app_from (PanelApplicationsMenu *self, char *icon_name,
     GtkWidget *button = applications_menu_render_app (self, icon_name,
                                                       exec_path, display_name);
 
-    gtk_container_add (GTK_CONTAINER (self->apps_flow_box),
-                       GTK_WIDGET (button));
+    gtk_flow_box_append (self->apps_flow_box, GTK_WIDGET (button));
 
     self->items_count++;
 }
@@ -254,8 +264,6 @@ applications_menu_add_app_from (PanelApplicationsMenu *self, char *icon_name,
 void
 panel_applications_menu_set_bg (PanelApplicationsMenu *self, GdkPixbuf *bg) {
     self->desktop_blurred = bg;
-
-    gtk_widget_queue_draw (GTK_WIDGET (&self->parent_instance));
 }
 
 int
@@ -287,39 +295,6 @@ sort_apps (GKeyFile *kf1, GKeyFile *kf2) {
     free (name1);
     free (name2);
     return returnval;
-}
-
-gboolean
-expose_draw_dashboard (GtkWidget *widget, cairo_t *cr,
-                       PanelApplicationsMenu *self) {
-    cairo_save (cr);
-
-    if (GDK_IS_PIXBUF (self->desktop_blurred)) {
-        gint x_win, y_win;
-        gdk_window_get_position (gtk_widget_get_window (widget), &x_win,
-                                 &y_win);
-        gdk_cairo_set_source_pixbuf (cr, self->desktop_blurred, -x_win,
-                                     -y_win);
-    } else {
-        if (self->supports_alpha) {
-            cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 0.0);
-        } else {
-            cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
-        }
-    }
-
-    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint (cr);
-
-    cairo_set_source_rgba (cr, 0.2, 0.2, 0.2, 0.7);
-
-    cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-
-    cairo_paint (cr);
-
-    cairo_restore (cr);
-
-    return FALSE;
 }
 
 // https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
@@ -383,7 +358,8 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
         GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE); // NONE is default
 
     // Push other windows out of the way
-    gtk_layer_auto_exclusive_zone_enable (GTK_WINDOW (&self->parent_instance));
+    // gtk_layer_auto_exclusive_zone_enable (GTK_WINDOW
+    // (&self->parent_instance));
 
     // We don't need to get keyboard input
     // gtk_layer_set_keyboard_mode (gtk_window,
@@ -396,30 +372,39 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
                               (GtkLayerShellEdge)i, anchors[i]);
     }
 
-    g_signal_connect (&self->parent_instance, "key_press_event",
-                      G_CALLBACK (check_escape), NULL);
-    g_signal_connect (&self->parent_instance, "focus-out-event",
-                      G_CALLBACK (focus_out_event), NULL);
+    GtkEventController *key_controller = gtk_event_controller_key_new ();
+    GtkEventController *focus_controller = gtk_event_controller_focus_new ();
 
-    g_signal_connect (&self->parent_instance, "draw",
-                      G_CALLBACK (expose_draw_dashboard), self);
+    gtk_widget_add_controller (GTK_WIDGET (&self->parent_instance),
+                               key_controller);
+    gtk_widget_add_controller (GTK_WIDGET (&self->parent_instance),
+                               focus_controller);
+
+    g_signal_connect (key_controller, "key-pressed", G_CALLBACK (check_escape),
+                      self);
+    g_signal_connect (focus_controller, "leave", G_CALLBACK (focus_out_event),
+                      self);
 
     gtk_widget_show (GTK_WIDGET (&self->parent_instance));
 
+    GdkRectangle geo;
     gdk_monitor_get_geometry (
-        gdk_display_get_monitor_at_window (
-            gtk_widget_get_display (GTK_WIDGET (&self->parent_instance)),
-            gtk_widget_get_window (GTK_WIDGET (&self->parent_instance))),
-        &self->monitor_geometry);
+        gdk_display_get_monitor_at_surface (
+            gdk_display_get_default (),
+            gtk_native_get_surface (GTK_NATIVE (&self->parent_instance))),
+        &geo);
 
-    // gtk_widget_set_size_request (GTK_WIDGET (&self->parent_instance),
-    // self->monitor_geometry.width, self->monitor_geometry.height);
-    gtk_window_set_keep_above (GTK_WINDOW (&self->parent_instance), TRUE);
+    gtk_widget_set_size_request (GTK_WIDGET (&self->parent_instance),
+                                 geo.width, geo.height);
+
+    // TODO: is this line needed?
+    // gtk_window_set_keep_above (GTK_WINDOW (&self->parent_instance), TRUE);
 
     // TODO: possibly keep the window always open or loaded so it doesn't
     // reload apps and icons every time
 
-    self->icon_theme = gtk_icon_theme_get_default ();
+    self->icon_theme = gtk_icon_theme_get_for_display (
+        gtk_widget_get_display (GTK_WIDGET (&self->parent_instance)));
     self->icon_size = 96;
     self->scale
         = gtk_widget_get_scale_factor (GTK_WIDGET (&self->parent_instance));
@@ -508,8 +493,6 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
 
         g_list_free (applications);
 
-        gtk_widget_show_all (GTK_WIDGET (self->apps_flow_box));
-
         free_string_list (data_dirs_list);
         free (data_dirs);
     }
@@ -551,9 +534,9 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
     free_string_list (favorites);*/
 
     gtk_widget_set_margin_start (GTK_WIDGET (self->scrolled_window),
-                                 self->monitor_geometry.width / 6);
+                                 geo.width / 6);
     gtk_widget_set_margin_end (GTK_WIDGET (self->scrolled_window),
-                               self->monitor_geometry.width / 6);
+                               geo.width / 6);
 }
 
 void
@@ -570,9 +553,34 @@ panel_applications_menu_get_launcher_button (PanelApplicationsMenu *self) {
 
         gtk_widget_set_name (self->launcher_button, "panel_button");
 
-        gtk_button_set_image (
-            GTK_BUTTON (self->launcher_button),
-            gtk_image_new_from_icon_name ("view-app-grid", GTK_ICON_SIZE_DND));
+        gtk_widget_set_valign (self->launcher_button, GTK_ALIGN_START);
+
+        const char *fallbacks[1];
+
+        fallbacks[0] = "view-app-grid-symbolic";
+
+        GtkIconPaintable *icon_info = gtk_icon_theme_lookup_icon (
+            self->icon_theme, "view-app-grid", fallbacks, 48, 1,
+            GTK_TEXT_DIR_LTR, 0);
+
+        GFile *file = gtk_icon_paintable_get_file (icon_info);
+
+        char *path = g_file_get_path (file);
+        printf ("%s\n", path);
+
+        GdkPixbuf *pbuf
+            = gdk_pixbuf_new_from_file_at_size (path, 48, 48, NULL);
+
+        GtkWidget *img = gtk_image_new_from_pixbuf (pbuf);
+
+        g_object_unref (pbuf);
+
+        free (path);
+
+        g_object_unref (file);
+
+        gtk_widget_set_size_request (img, 48, 48);
+        gtk_button_set_child (GTK_BUTTON (self->launcher_button), img);
 
         g_signal_connect (self->launcher_button, "clicked",
                           G_CALLBACK (show_wrap), self);

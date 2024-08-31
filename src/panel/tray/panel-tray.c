@@ -54,8 +54,13 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_grid_set_row_spacing (self->control_center_grid, 10);
     gtk_grid_set_column_spacing (self->control_center_grid, 10);
 
-    self->control_center_button = GTK_BUTTON (
-        gtk_button_new_from_icon_name ("tweaks-app", GTK_ICON_SIZE_DND));
+    // Icon size DND
+    self->control_center_button
+        = GTK_BUTTON (gtk_button_new ());
+    
+    GtkImage *img = GTK_IMAGE (gtk_image_new_from_icon_name ("tweaks-app"));
+    gtk_button_set_child (self->control_center_button, GTK_WIDGET (img));
+    gtk_widget_set_valign (GTK_WIDGET (self->control_center_button), GTK_ALIGN_START);
 
     gtk_widget_set_name (GTK_WIDGET (self->control_center_button),
                          "panel_button");
@@ -72,33 +77,29 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->back_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
-    self->back_button = GTK_BUTTON (gtk_button_new_from_icon_name (
-        "go-previous", GTK_ICON_SIZE_LARGE_TOOLBAR));
+    // Icon size LARGE_TOOLBAR
+    self->back_button
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("go-previous"));
 
     gtk_widget_set_name (GTK_WIDGET (self->back_button),
                          "control_center_back_button");
 
-    g_signal_connect (self->back_button, "clicked", G_CALLBACK (go_back), self);
+    g_signal_connect (self->back_button, "clicked", G_CALLBACK (go_back),
+                      self);
 
     self->back_label = GTK_LABEL (gtk_label_new ("Back"));
 
     gtk_widget_set_name (GTK_WIDGET (self->back_label),
                          "control_center_back_label");
 
-    gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_button), FALSE,
-                        FALSE, 0);
-    gtk_box_pack_start (self->back_box, GTK_WIDGET (self->back_label), FALSE,
-                        FALSE, 0);
+    gtk_box_append (self->back_box, GTK_WIDGET (self->back_button));
+    gtk_box_append (self->back_box, GTK_WIDGET (self->back_label));
 
     g_signal_connect (self->stack, "notify::visible-child",
                       G_CALLBACK (stack_child_changed), self);
 
-    gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->back_box), FALSE,
-                        FALSE, 0);
-    gtk_box_pack_start (self->menu->box, GTK_WIDGET (self->stack), FALSE,
-                        FALSE, 0);
-
-    gtk_widget_show_all (GTK_WIDGET (self->menu->box));
+    gtk_box_append (self->menu->box, GTK_WIDGET (self->back_box));
+    gtk_box_append (self->menu->box, GTK_WIDGET (self->stack));
 
     gtk_widget_set_visible (GTK_WIDGET (self->back_button), FALSE);
 
@@ -122,12 +123,8 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_grid_attach (self->control_center_grid,
                      GTK_WIDGET (self->power_button->button), 2, 1, 1, 1);
 
-    gtk_box_pack_start (self->box, GTK_WIDGET (self->control_center_button),
-                        FALSE, FALSE, 0);
-    gtk_box_pack_start (self->box, GTK_WIDGET (self->clock->label), FALSE,
-                        FALSE, 0);
-
-    gtk_widget_show_all (GTK_WIDGET (self->control_center_grid));
+    gtk_box_append (self->box, GTK_WIDGET (self->control_center_button));
+    gtk_box_append (self->box, GTK_WIDGET (self->clock->label));
 
     return self;
 }

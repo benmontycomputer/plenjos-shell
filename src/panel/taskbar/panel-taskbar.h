@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gtk-layer-shell.h>
+#include <gtk4-layer-shell.h>
 #include <gtk/gtk.h>
 
 #include <wayland-client.h>

@@ -34,16 +34,45 @@ shorten_label (char *label) {
     }
 }
 
-void
-toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
+char *
+get_icon_from_app_id (PanelTaskbar *taskbar, char *id) {
     char *icon = NULL;
 
     char *current_theme
-        = g_settings_get_string (self->m_taskbar->settings, "icon-theme");
+        = g_settings_get_string (taskbar->settings, "icon-theme");
 
     // Is this icon already loaded?
     // TODO: actually check if icon is already loaded
 
+    if (icon == NULL) {
+        GList *icon_exec_map = init_icon_exec_map ();
+
+        GList *found = g_list_find_custom (icon_exec_map, id,
+                                           (GCompareFunc)icon_exec_map_finder);
+
+        if (found != NULL) {
+            icon = suggested_icon_for_id (
+                ((icon_exec_map_item *)found->data)->icon, 32, current_theme);
+        } else {
+            char *mod_id = g_strdup (id);
+
+            for (size_t i = 0; mod_id[i]; i++) {
+                mod_id[i] = tolower (mod_id[i]);
+            }
+
+            found = g_list_find_custom (icon_exec_map, mod_id,
+                                        (GCompareFunc)icon_exec_map_finder);
+
+            if (found != NULL) {
+                icon = suggested_icon_for_id (
+                    ((icon_exec_map_item *)found->data)->icon, 32,
+                    current_theme);
+            }
+        }
+
+        g_list_free_full (icon_exec_map,
+                          (GDestroyNotify)free_icon_exec_map_item);
+    }
     if (icon == NULL) {
         icon = suggested_icon_for_id (id, 32, current_theme);
     }
@@ -118,46 +147,18 @@ toplevel_update_icon_from_app_id (PanelTaskbarToplevelButton *self, char *id) {
         free (mod_id);
     }
     if (icon == NULL) {
-        GList *icon_exec_map = init_icon_exec_map ();
-
-        GList *found = g_list_find_custom (icon_exec_map, id,
-                                           (GCompareFunc)icon_exec_map_finder);
-
-        if (found != NULL) {
-            icon = suggested_icon_for_id (
-                ((icon_exec_map_item *)found->data)->icon, 32, current_theme);
-        } else {
-            char *mod_id = g_strdup (id);
-
-            for (size_t i = 0; mod_id[i]; i++) {
-                mod_id[i] = tolower (mod_id[i]);
-            }
-
-            found = g_list_find_custom (icon_exec_map, mod_id,
-                                        (GCompareFunc)icon_exec_map_finder);
-
-            if (found != NULL) {
-                icon = suggested_icon_for_id (
-                    ((icon_exec_map_item *)found->data)->icon, 32,
-                    current_theme);
-            }
-        }
-
-        g_list_free_full (icon_exec_map,
-                          (GDestroyNotify)free_icon_exec_map_item);
-    }
-    if (icon == NULL) {
         icon = suggested_icon_for_id ("emblem-dialog-question", 32,
                                       current_theme);
     }
 
-    self->m_icon_path = icon;
-
     free (current_theme);
+
+    return icon;
 }
 
 gboolean
 toplevel_handle_app_id_gtk (gpointer *data) {
+    // TODO: run less code in here to make GUI more resposive
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
 
     if (!self->rendered)
@@ -208,11 +209,11 @@ toplevel_handle_app_id (
 
     self->m_id = g_strdup (id);
 
-    toplevel_update_icon_from_app_id (self, self->m_id);
+    self->m_icon_path = get_icon_from_app_id (self->m_taskbar, self->m_id);
 
     panel_taskbar_toplevel_button_rerender (self, false, true);
 
-    gdk_threads_add_idle ((GSourceFunc)toplevel_handle_app_id_gtk, self);
+    g_idle_add ((GSourceFunc)toplevel_handle_app_id_gtk, self);
 }
 
 gboolean
@@ -242,7 +243,7 @@ toplevel_handle_closed (
 
     UNUSED (toplevel_handle);
 
-    gdk_threads_add_idle ((GSourceFunc)handle_closed_gtk, self);
+    g_idle_add ((GSourceFunc)handle_closed_gtk, self);
 }
 
 void
@@ -274,6 +275,11 @@ toplevel_handle_state (void *data,
             self->state |= TOPLEVEL_STATE_FULLSCREEN;
         }
     }
+
+    if (self->m_application && self->state & TOPLEVEL_STATE_ACTIVATED) {
+        self->m_application->toplevels = g_list_remove (self->m_application->toplevels, self);
+        self->m_application->toplevels = g_list_prepend (self->m_application->toplevels, self);
+    }
 }
 
 static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
@@ -288,7 +294,7 @@ static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
           .state = toplevel_handle_state,
       };
 
-gboolean
+static gboolean
 button_click (GtkButton *button, PanelTaskbarToplevelButton *self) {
     UNUSED (button);
 
@@ -308,7 +314,7 @@ button_click (GtkButton *button, PanelTaskbarToplevelButton *self) {
     return FALSE;
 }
 
-gboolean
+static gboolean
 button_rerender_title_gtk (gpointer user_data) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)user_data;
 
@@ -318,45 +324,48 @@ button_rerender_title_gtk (gpointer user_data) {
     return FALSE;
 }
 
-gboolean
+static gboolean
 button_rerender_app_id_and_icon_gtk (gpointer user_data) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)user_data;
 
     if (GTK_IS_WIDGET (self->icon)) {
-        gtk_container_remove (
-            GTK_CONTAINER (gtk_widget_get_parent (self->icon)), self->icon);
+        gtk_box_remove (GTK_BOX (gtk_widget_get_parent (self->icon)),
+                        self->icon);
     }
     if (GTK_IS_WIDGET (self->label)) {
-        gtk_container_remove (
-            GTK_CONTAINER (gtk_widget_get_parent (self->label)), self->label);
+        gtk_box_remove (GTK_BOX (gtk_widget_get_parent (self->label)),
+                        self->label);
     }
 
     if (GTK_IS_WIDGET (self->box)) {
-        gtk_container_remove (
-            GTK_CONTAINER (gtk_widget_get_parent (self->box)), self->box);
+        gtk_box_remove (GTK_BOX (gtk_widget_get_parent (self->box)),
+                        self->box);
     }
 
-    if (self->m_icon_path) {
-        self->icon
-            = gtk_image_new_from_pixbuf (gdk_pixbuf_new_from_file_at_size (
-                self->m_icon_path, 32, 32, NULL));
+    GdkPixbuf *pbuf = NULL;
+    if (self->m_icon_path)
+        pbuf = gdk_pixbuf_new_from_file_at_size (self->m_icon_path, 48, 48, NULL);
+
+    if (pbuf) {
+        self->icon = gtk_image_new_from_pixbuf (pbuf);
+        
+        g_object_unref (pbuf);
     } else {
         self->icon = gtk_image_new ();
     }
+
+    gtk_widget_set_size_request (self->icon, 32, 32);
+
     self->label = gtk_label_new (self->m_title);
 
     gtk_widget_set_size_request (self->label, 60, 32);
 
     self->box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
 
-    gtk_box_pack_start (GTK_BOX (self->box), self->icon, FALSE, FALSE, 0);
-    gtk_box_pack_start (GTK_BOX (self->box), self->label, FALSE, FALSE, 8);
-    // gtk_widget_set_size_request (self->box, 120, -1);
-    gtk_widget_show_all (self->box);
+    gtk_box_append (GTK_BOX (self->box), self->icon);
+    gtk_box_append (GTK_BOX (self->box), self->label);
 
-    gtk_button_set_image (GTK_BUTTON (self->rendered), self->box);
-
-    gtk_widget_show_all (self->rendered);
+    gtk_button_set_child (GTK_BUTTON (self->rendered), self->box);
 
     return FALSE;
 }
@@ -369,12 +378,11 @@ panel_taskbar_toplevel_button_rerender (PanelTaskbarToplevelButton *self,
         return;
 
     if (update_title) {
-        gdk_threads_add_idle ((GSourceFunc)button_rerender_title_gtk, self);
+        g_idle_add ((GSourceFunc)button_rerender_title_gtk, self);
     }
 
     if (update_app_id_and_icon) {
-        gdk_threads_add_idle ((GSourceFunc)button_rerender_app_id_and_icon_gtk,
-                              self);
+        g_idle_add ((GSourceFunc)button_rerender_app_id_and_icon_gtk, self);
     }
 }
 
@@ -384,7 +392,7 @@ panel_taskbar_toplevel_button_gtk_run (PanelTaskbarToplevelButton *self) {
         return;
 
     self->rendered = gtk_button_new ();
-    gtk_widget_set_name (self->rendered, "panel_button");
+    gtk_widget_set_name (self->rendered, "panel_popover_button");
     g_signal_connect (self->rendered, "clicked", G_CALLBACK (button_click),
                       self);
 
