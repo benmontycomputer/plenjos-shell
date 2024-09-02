@@ -42,6 +42,35 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
 }
 
 static void
+draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
+    double width = (double)wi;
+    double height = (double)hi - 36.0;
+
+    double x = 0.0;
+    double y = 36.0;
+
+    double inset_x = 24.0;
+
+    cairo_save (cr);
+
+    cairo_move_to (cr, x + inset_x, y);
+    cairo_line_to (cr, x + width - inset_x, y);
+    cairo_line_to (cr, x + width, y + height);
+    cairo_line_to (cr, x, y + height);
+    cairo_line_to (cr, x + inset_x, y);
+
+    cairo_clip (cr);
+
+    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.8);
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+
+    cairo_paint (cr);
+
+    cairo_restore (cr);
+}
+
+static void
 activate (GtkApplication *app, void *_data) {
     (void)_data;
 
@@ -146,12 +175,32 @@ activate (GtkApplication *app, void *_data) {
 
     PanelTray *panel_tray = panel_tray_new ((gpointer)self);
 
-    gtk_box_append (panel_box, GTK_WIDGET (panel_tray->box));
+    // gtk_box_append (panel_box, GTK_WIDGET (panel_tray->box));
 
     gtk_widget_set_halign (GTK_WIDGET (panel_tray->box), GTK_ALIGN_END);
     gtk_widget_set_hexpand (GTK_WIDGET (panel_tray->box), TRUE);
 
-    gtk_window_set_child (gtk_window, GTK_WIDGET (panel_box));
+    GtkBox *box2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_halign (box2, GTK_ALIGN_CENTER);
+
+    GtkDrawingArea *da = gtk_drawing_area_new ();
+
+    gtk_widget_set_size_request (da, -1, 64);
+
+    gtk_widget_set_halign (da, GTK_ALIGN_FILL);
+    gtk_widget_set_hexpand (da, TRUE);
+
+    gtk_widget_set_margin_bottom (da, -76);
+
+    gtk_widget_set_hexpand (da, TRUE);
+    gtk_widget_set_vexpand (da, TRUE);
+
+    gtk_drawing_area_set_draw_func (da, draw, self, NULL);
+
+    gtk_box_append (box2, da);
+    gtk_box_append (box2, panel_box);
+
+    gtk_window_set_child (gtk_window, GTK_WIDGET (box2));
 
     gtk_widget_show (GTK_WIDGET (gtk_window));
     gtk_widget_show (GTK_WIDGET (gtk_window_2));

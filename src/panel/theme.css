@@ -4,12 +4,25 @@
 
 #panel_box {
     /*box-shadow: 0px 0px 3px 0px rgba(0, 0, 0, 0.6);*/
-    border: 1px solid rgba(160, 160, 160, 0.5);
-    padding: 1px 3px 0px 3px;
-    margin: 6px;
-    padding-right: 4px;
+    /*border: 1px solid rgba(160, 160, 160, 0.5);*/
+    margin-top: 8px;
+    margin-bottom: 4px;
     border-radius: 16px;
-    background-color: rgba(51, 51, 51, 0.5);
+    background-color: rgba(51, 51, 51, 0.0);
+
+    margin-left: 24px;
+    margin-right: 24px;
+}
+
+@keyframes box_animate {
+    
+}
+
+#panel_box {
+    animation-name: box_animate;
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(1, 0, 0, 1);
+    animation-iteration-count: 1;
 }
 
 #panel_popover {
@@ -19,6 +32,29 @@
 #indicator {
     border-radius: 4px;
     background-color: rgba(220, 220, 220, 1.0);
+    border: 1px solid black;
+}
+
+@keyframes bouncy {
+    0% {
+        transform: translate(0px, 0px);
+    }
+    40% {
+        transform: translate(0px, -16px);
+    }
+    80% {
+        transform: translate(0px, 8px);
+    }
+    100% {
+        transform: translate(0px, 0px);
+    }
+}
+
+.bouncy {
+    animation-name: bouncy;
+    animation-duration: 1s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: infinite;
 }
 
 #panel_button, #panel_popover_button {
@@ -33,8 +69,49 @@
     -gtk-icon-size: 48px;
 }
 
+@keyframes move_in {
+    0% {
+        transform: translate(0px, 64px);
+        margin-right: -56px;
+    }
+    80% {
+        transform: translate(0px, -16px);
+        margin-right: -10px;
+    }
+    100% {
+        transform: translate(0px, 0px);
+    }
+}
+
+@keyframes move_out {
+    100% {
+        transform: translate(0px, 64px);
+        margin-right: -56px;
+    }
+    20% {
+        transform: translate(0px, -16px);
+        margin-right: -10px;
+    }
+    0% {
+        transform: translate(0px, 0px);
+    }
+}
+
+#panel_button {
+    animation-name: move_in;
+    animation-duration: 0.4s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;
+}
+
+#panel_button:disabled {
+    animation-name: move_out;
+}
+
 #panel_button {
     margin-top: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 #panel_popover_button {

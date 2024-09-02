@@ -122,7 +122,7 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
 
     self->indicator = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_name (self->indicator, "indicator");
-    gtk_widget_set_size_request (self->indicator, 4, 4);
+    gtk_widget_set_size_request (self->indicator, 6, 6);
     gtk_widget_set_halign (self->indicator, GTK_ALIGN_CENTER);
     gtk_widget_set_valign (self->indicator, GTK_ALIGN_CENTER);
 
@@ -170,7 +170,9 @@ panel_taskbar_application_remove_toplevel (
         if (self->pinned) {
             gtk_widget_set_opacity (self->indicator, 0.0);
         } else {
-            remove_app (self);
+            gtk_widget_set_state_flags (self->taskbar_item_button, GTK_STATE_FLAG_INSENSITIVE, TRUE);
+            
+            g_timeout_add_once (400, remove_app, self);
         }
     }
 }
