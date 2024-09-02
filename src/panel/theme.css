@@ -71,11 +71,11 @@
 
 @keyframes move_in {
     0% {
-        transform: translate(0px, 64px);
+        transform: translate(0px, 64px) rotate(56deg);
         margin-right: -56px;
     }
     80% {
-        transform: translate(0px, -16px);
+        transform: translate(0px, -16px) rotate(56deg);
         margin-right: -10px;
     }
     100% {
@@ -85,11 +85,11 @@
 
 @keyframes move_out {
     100% {
-        transform: translate(0px, 64px);
+        transform: translate(0px, 64px) rotate(56deg);
         margin-right: -56px;
     }
     20% {
-        transform: translate(0px, -16px);
+        transform: translate(0px, -16px) rotate(56deg);
         margin-right: -10px;
     }
     0% {
