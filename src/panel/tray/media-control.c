@@ -204,15 +204,15 @@ on_playback_status (PlayerctlPlayer *player,
     switch (playback_status) {
     case PLAYERCTL_PLAYBACK_STATUS_PAUSED:
         gtk_button_set_child (self->play_button, gtk_image_new_from_icon_name (
-                                                     "media-playback-start"));
+                                                     "media-playback-start-symbolic"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_PLAYING:
         gtk_button_set_child (self->play_button, gtk_image_new_from_icon_name (
-                                                     "media-playback-pause"));
+                                                     "media-playback-pause-symbolic"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_STOPPED:
         gtk_button_set_child (self->play_button, gtk_image_new_from_icon_name (
-                                                     "media-playback-start"));
+                                                     "media-playback-start-symbolic"));
         break;
     }
 }
@@ -225,19 +225,17 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
 
-    // gtk_widget_app (GTK_WIDGET (box), TRUE);
-
-    gtk_widget_set_name (GTK_WIDGET (box), "media_player_box");
+    gtk_widget_set_name (GTK_WIDGET (box), "control_center_card");
     gtk_widget_set_hexpand (GTK_WIDGET (box), TRUE);
     gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_FILL);
 
     // DND icons
     GtkButton *previous_button
-        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-backward"));
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-backward-symbolic"));
     GtkButton *play_button
-        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-playback-start"));
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-playback-start-symbolic"));
     GtkButton *next_button
-        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-forward"));
+        = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-forward-symbolic"));
 
     gtk_widget_set_name (GTK_WIDGET (previous_button), "media_player_button");
     gtk_widget_set_name (GTK_WIDGET (play_button), "media_player_button");
@@ -273,15 +271,15 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     switch (playback_status) {
     case PLAYERCTL_PLAYBACK_STATUS_PAUSED:
         gtk_button_set_child (play_button, gtk_image_new_from_icon_name (
-                                               "media-playback-start"));
+                                               "media-playback-start-symbolic"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_PLAYING:
         gtk_button_set_child (play_button, gtk_image_new_from_icon_name (
-                                               "media-playback-pause"));
+                                               "media-playback-pause-symbolic"));
         break;
     case PLAYERCTL_PLAYBACK_STATUS_STOPPED:
         gtk_button_set_child (play_button, gtk_image_new_from_icon_name (
-                                               "media-playback-start"));
+                                               "media-playback-start-symbolic"));
         break;
     }
 
@@ -373,9 +371,6 @@ media_control_new () {
                       G_CALLBACK (on_player_vanished), self);
 
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-
-    gtk_widget_set_name (GTK_WIDGET (self->box),
-                         "media_players_container_box");
 
     GList *names = playerctl_list_players (NULL);
 

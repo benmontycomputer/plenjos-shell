@@ -27,7 +27,7 @@ gboolean clock_update (Clock *self) {
         snprintf (self->sec, 3, "0%d", self->timeinfo->tm_sec);
     }
 
-    snprintf (self->text, 256, "%d:%s:%s\n%d/%d/%d", self->timeinfo->tm_hour, self->min, self->sec, self->timeinfo->tm_mon + 1, self->timeinfo->tm_mday, self->timeinfo->tm_year + 1900);
+    snprintf (self->text, 256, "%d/%d/%d %d:%s:%s", self->timeinfo->tm_mon + 1, self->timeinfo->tm_mday, self->timeinfo->tm_year + 1900, self->timeinfo->tm_hour, self->min, self->sec);
 
     gtk_label_set_text (self->label, self->text);
 

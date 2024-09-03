@@ -57,14 +57,15 @@
     animation-iteration-count: infinite;
 }
 
-#panel_button, #panel_popover_button {
+#panel_button, #panel_popover_button, #menu_bar_button {
     background-color: transparent;
     background-image: none;
     box-shadow: none;
-
-    padding: 2px;
-
     border: none;
+}
+
+#panel_button, #panel_popover_button {
+    padding: 2px;
 
     -gtk-icon-size: 48px;
 }
@@ -102,40 +103,22 @@
     animation-duration: 0.4s;
     animation-timing-function: ease-in-out;
     animation-iteration-count: 1;
+
+    margin-top: 2px;
+    margin-left: 2px;
+    margin-right: 2px;
 }
 
 #panel_button:disabled {
     animation-name: move_out;
 }
 
-#panel_button {
-    margin-top: 2px;
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
 #panel_popover_button {
     border-radius: 12px;
 }
 
-#panel_popover_button:hover {
+#panel_popover_button:hover, #menu_bar_button:hover {
     background-color: rgba(255, 255, 255, 0.1);
-}
-
-#panel_tray_menu_button {
-    padding: 16px;
-
-    border-radius: 12px;
-
-    background-image: none;
-
-    border: 2px solid rgba(0, 0, 0, 0.4);
-    background-color: rgba(0, 0, 0, 0.2);
-}
-
-#panel_clock {
-    padding: 0px 4px;
-    margin: 2px 1px;
 }
 
 #taskbar_box {
@@ -164,6 +147,46 @@
     padding: 0px 20px;
 }
 
+#menu_bar_box {
+    padding: 2px;
+}
+
+#menu_bar_button {
+    -gtk-icon-size: 16px;
+}
+
+#panel_tray_menu_button {
+    padding: 0px;
+    border-radius: 12px;
+
+    background-image: none;
+    border: none;
+    background-color: transparent;
+    box-shadow: none;
+
+    -gtk-icon-size: 24px;
+}
+
+#panel_tray_menu_button_image {
+    background-color: rgb(46, 124, 247);
+    border-radius: 24px;
+    margin: 0px;
+    border: none;
+}
+
+#panel_tray_menu_button_labels_box {
+    font-weight: bold;
+}
+
+#panel_tray_menu_button_labels_box > :last-child {
+    font-weight: lighter;
+}
+
+#panel_clock {
+    padding: 0px 4px;
+    margin: 2px 1px;
+}
+
 #panel_tray_menu_window_box {
     padding: 16px;
 }
@@ -173,45 +196,54 @@
     background-image: none;
 }
 
-#media_players_container_box {
-    margin: 0px -12px;
-
-    margin-bottom: -10px;
-
-    margin-right: -26px;
-    padding-right: 16px;
-}
-
-#media_player_box {
-    padding: 28px;
-
-    border-radius: 12px;
-
-    /*border: 2px solid rgba(0, 0, 0, 0.4);
-    background-color: rgba(0, 0, 0, 0.2);*/
-}
-
 #media_player_button {
     background-color: transparent;
     background-image: none;
 
+    box-shadow: none;
+    border: none;
+
     border-radius: 16px;
     padding: 4px 16px;
+
+    -gtk-icon-size: 25px;
 }
 
 #control_center_grid {
-    margin-top: -10px;
+    padding: 4px;
+}
+
+#control_center_back_box {
+    
 }
 
 #control_center_back_button {
     padding: 0px;
-
-    margin-bottom: 8px;
 }
 
 #control_center_back_label {
     font-size: 16px;
 
     margin: 2px;
-    margin-bottom: 10px;
+}
+
+#control_center_card {
+    padding: 8px;
+    border-radius: 12px;
+
+    background-color: rgba(255, 255, 255, 0.05);
+
+    border: 1px solid rgba(255, 255, 255, 0.1);
+
+    box-shadow: 0px 0px 4px 0px rgba(0, 0, 0, 0.4);
+}
+
+#control_center_popover {
+    margin-top: 8px;
+    margin-right: 6px;
+}
+
+#control_center_popover contents {
+    background-color: rgba(80, 80, 80, 0.9);
+    border-radius: 16px;
 }

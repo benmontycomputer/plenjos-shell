@@ -9,6 +9,7 @@
 
 #include "audio-button.h"
 #include "network-button.h"
+#include "bluetooth-button.h"
 #include "power-button.h"
 
 #include "media-control.h"
@@ -16,17 +17,20 @@
 #include "panel-tray-menu.h"
 
 typedef struct PanelTray {
-    GtkBox *box;
+    GtkCenterBox *tray_box;
 
     AudioButton *audio_button;
     NetworkButton *network_button;
+    BluetoothButton *bluetooth_button;
     PowerButton *power_button;
 
     GtkButton *control_center_button;
 
     GtkStack *stack;
 
-    PanelTrayMenu *menu;
+    // PanelTrayMenu *menu;
+    GtkPopover *control_center_popover;
+    GtkBox *control_center_popover_box;
 
     GtkGrid *control_center_grid;
 

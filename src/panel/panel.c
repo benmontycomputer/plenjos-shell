@@ -49,23 +49,47 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
     double x = 0.0;
     double y = 36.0;
 
-    double inset_x = 24.0;
+    double inset_x = 18.0;
 
     cairo_save (cr);
 
     cairo_move_to (cr, x + inset_x, y);
     cairo_line_to (cr, x + width - inset_x, y);
-    cairo_line_to (cr, x + width, y + height);
-    cairo_line_to (cr, x, y + height);
+    cairo_line_to (cr, x + width, y + height - 2.0);
+    cairo_line_to (cr, x, y + height - 2.0);
     cairo_line_to (cr, x + inset_x, y);
+
+    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 0.8);
+
+    cairo_stroke_preserve (cr);
 
     cairo_clip (cr);
 
-    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 0.8);
+    cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 1.0);
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
     cairo_paint (cr);
+
+    cairo_restore (cr);
+
+    cairo_save (cr);
+
+    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 1.0);
+    cairo_set_line_width (cr, 1.0);
+
+    cairo_move_to (cr, x, y + height - 2.0);
+    cairo_line_to (cr, x + width, y + height - 2.0);
+
+    cairo_stroke (cr);
+
+    cairo_move_to (cr, x, y + height - 1.0);
+    cairo_line_to (cr, x + width, y + height - 1.0);
+
+    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 1.0);
+
+    cairo_set_line_width (cr, 2.0);
+    cairo_stroke (cr);
 
     cairo_restore (cr);
 }
@@ -145,7 +169,7 @@ activate (GtkApplication *app, void *_data) {
         gtk_layer_set_anchor (gtk_window_2, i, anchors_2[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (gtk_window_2), 480, 24);
+    gtk_widget_set_size_request (GTK_WIDGET (gtk_window_2), 480, 32);
 
     // gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
     gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
@@ -153,6 +177,9 @@ activate (GtkApplication *app, void *_data) {
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
     gtk_widget_set_halign (GTK_WIDGET (panel_box), GTK_ALIGN_CENTER);
+
+    GtkBox *menu_bar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+    gtk_widget_set_name (GTK_WIDGET (menu_bar_box), "menu_bar_box");
 
     PanelApplicationsMenu *apps_menu
         = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
@@ -175,10 +202,9 @@ activate (GtkApplication *app, void *_data) {
 
     PanelTray *panel_tray = panel_tray_new ((gpointer)self);
 
-    // gtk_box_append (panel_box, GTK_WIDGET (panel_tray->box));
+    gtk_box_append (menu_bar_box, GTK_WIDGET (panel_tray->tray_box));
 
-    gtk_widget_set_halign (GTK_WIDGET (panel_tray->box), GTK_ALIGN_END);
-    gtk_widget_set_hexpand (GTK_WIDGET (panel_tray->box), TRUE);
+    gtk_widget_set_hexpand (GTK_WIDGET (panel_tray->tray_box), TRUE);
 
     GtkBox *box2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
     gtk_widget_set_halign (box2, GTK_ALIGN_CENTER);
@@ -190,7 +216,7 @@ activate (GtkApplication *app, void *_data) {
     gtk_widget_set_halign (da, GTK_ALIGN_FILL);
     gtk_widget_set_hexpand (da, TRUE);
 
-    gtk_widget_set_margin_bottom (da, -76);
+    gtk_widget_set_margin_bottom (da, -74);
 
     gtk_widget_set_hexpand (da, TRUE);
     gtk_widget_set_vexpand (da, TRUE);
@@ -201,6 +227,7 @@ activate (GtkApplication *app, void *_data) {
     gtk_box_append (box2, panel_box);
 
     gtk_window_set_child (gtk_window, GTK_WIDGET (box2));
+    gtk_window_set_child (gtk_window_2, GTK_WIDGET (menu_bar_box));
 
     gtk_widget_show (GTK_WIDGET (gtk_window));
     gtk_widget_show (GTK_WIDGET (gtk_window_2));
