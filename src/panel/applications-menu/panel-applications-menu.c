@@ -555,12 +555,8 @@ panel_applications_menu_get_launcher_button (PanelApplicationsMenu *self) {
 
         gtk_widget_set_valign (self->launcher_button, GTK_ALIGN_START);
 
-        const char *fallbacks[1];
-
-        fallbacks[0] = "view-app-grid-symbolic";
-
         GtkIconPaintable *icon_info = gtk_icon_theme_lookup_icon (
-            self->icon_theme, "view-app-grid", fallbacks, 48, 1,
+            self->icon_theme, "view-app-grid", NULL, 48, 1,
             GTK_TEXT_DIR_LTR, 0);
 
         GFile *file = gtk_icon_paintable_get_file (icon_info);

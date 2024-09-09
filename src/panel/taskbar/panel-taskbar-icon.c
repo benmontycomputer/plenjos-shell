@@ -1,6 +1,6 @@
 #include "panel-taskbar-icon.h"
 
-// https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
+/* // https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
 str_split_return_val
 str_split (char *a_str, const char a_delim) {
     char **result = 0;
@@ -11,7 +11,10 @@ str_split (char *a_str, const char a_delim) {
     delim[0] = a_delim;
     delim[1] = 0;
 
-    /* Count how many elements will be extracted. */
+    //printf("%s\n\n", a_str);
+    //fflush(stdout);
+
+    /* Count how many elements will be extracted. *//*
     while (*tmp) {
         if (a_delim == *tmp) {
             count++;
@@ -20,11 +23,11 @@ str_split (char *a_str, const char a_delim) {
         tmp++;
     }
 
-    /* Add space for trailing token. */
+    /* Add space for trailing token. *//*
     count += last_comma < (a_str + strlen (a_str) - 1);
 
     /* Add space for terminating null string so caller
-       knows where the list of returned strings ends. */
+       knows where the list of returned strings ends. *//*
     count++;
 
     result = malloc (sizeof (char *) * count);
@@ -45,6 +48,35 @@ str_split (char *a_str, const char a_delim) {
     str_split_return_val return_val;
     return_val.result = result;
     return_val.count = count - 1;
+
+    return return_val;
+}*/
+
+
+// https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c (but one of the other answers)
+str_split_return_val
+str_split (char *a_str, const char a_delim) {
+    str_split_return_val return_val;
+    return_val.result = NULL;
+    return_val.count = 0;
+
+    char delim[2];
+    delim[0] = a_delim;
+    delim[1] = 0;
+
+    char *token = NULL;
+
+    return_val.result = malloc ((return_val.count + 1) * sizeof (char *));
+
+    while ((token = strsep(&a_str, delim))) {
+        return_val.count++;
+
+        return_val.result = realloc (return_val.result, (return_val.count + 1) * sizeof (char *));
+
+        return_val.result[return_val.count - 1] = token;
+    }
+
+    return_val.result[return_val.count] = NULL;
 
     return return_val;
 }
@@ -117,8 +149,8 @@ read_index_theme_paths (char *path, int icon_size) {
                 paths_count++;
             }
 
-            free_string_list (split.result);
             free (substr);
+            free (split.result);
         } /* else if (g_regex_match (re_parents, line, 0, NULL)) {
             str_split_return_val split = str_split (g_strdup (line + 9), ',');
 
@@ -206,7 +238,8 @@ get_icon_for_theme (char *path, char *theme, char *icon_name, int icon_size) {
                 if (access (icon, F_OK) == 0) {
                     // printf("ICON: %s\n\n\n", icon);
                     // fflush(stdout);
-                    if (strstr (paths[i], icon_size_str) || strstr (paths[i], "scalable")) {
+                    if (strstr (paths[i], icon_size_str)
+                        || strstr (paths[i], "scalable")) {
                         free (new_path);
                         free_string_list (paths);
                         return icon;
@@ -256,7 +289,7 @@ suggested_icon_for_id (char *id, int icon_size, char *current_theme) {
         return g_strdup (id);
     }
     printf ("Icon for %s.\n", id);
-        fflush (stdout);
+    fflush (stdout);
 
     // char *icon;
 
@@ -304,7 +337,7 @@ suggested_icon_for_id (char *id, int icon_size, char *current_theme) {
 
                     if (icon) {
                         free_string_list (icon_theme_paths);
-                        free_string_list (str_split_result.result);
+                        free (str_split_result.result);
                         free (xdg_data_dirs);
 
                         return icon;
@@ -315,7 +348,7 @@ suggested_icon_for_id (char *id, int icon_size, char *current_theme) {
     }
 
     free (xdg_data_dirs);
-    free_string_list (str_split_result.result);
+    free (str_split_result.result);
     free_string_list (icon_theme_paths);
 
     return NULL;
@@ -366,7 +399,7 @@ init_icon_exec_map () {
 
         desktop_paths[i + 1] = NULL;
     }
-    free_string_list (str_split_result.result);
+    free (str_split_result.result);
 
     // Don't free.
     const char *home_path = getenv ("HOME");
@@ -408,6 +441,7 @@ init_icon_exec_map () {
                         GKeyFile *kf = g_key_file_new ();
                         g_key_file_load_from_file (kf, full_path,
                                                    G_KEY_FILE_NONE, NULL);
+                        free (full_path);
 
                         icon_exec_map_item *item
                             = malloc (sizeof (icon_exec_map_item));
@@ -421,6 +455,8 @@ init_icon_exec_map () {
 
                         if (item->exec && item->icon)
                             return_val = g_list_append (return_val, item);
+                        else
+                            free_icon_exec_map_item (item);
 
                         icon_exec_map_item *item_2
                             = malloc (sizeof (icon_exec_map_item));
@@ -433,6 +469,8 @@ init_icon_exec_map () {
 
                         if (item_2->exec && item_2->icon)
                             return_val = g_list_append (return_val, item_2);
+                        else
+                            free_icon_exec_map_item (item_2);
 
                         size_t underscore_pos;
 
@@ -461,20 +499,27 @@ init_icon_exec_map () {
                                 if (item_3->exec && item_3->icon)
                                     return_val
                                         = g_list_append (return_val, item_3);
+                                else
+                                    free_icon_exec_map_item (item_3);
 
                                 break;
                             }
                         }
+
+                        g_key_file_free (kf);
                     }
 
-                    free_string_list (fname_split_result.result);
+                    free (fname_split_result.result);
                     free (fname_split);
                 }
             }
         }
+
+        closedir (dfd);
     }
 
     free_string_list (desktop_paths);
+    free (xdg_data_dirs);
 
     return return_val;
 }

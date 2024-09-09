@@ -39,6 +39,11 @@ secondary_button_click (GtkGestureClick *click, gint n_press, gdouble x,
 }
 
 static void
+remove_app_finalize (GtkWidget *widget) {
+    gtk_box_remove (GTK_BOX (gtk_widget_get_parent (widget)), widget);
+}
+
+static void
 remove_app (PanelTaskbarApplication *self) {
     self->taskbar->applications
         = g_list_remove (self->taskbar->applications, self);
@@ -46,9 +51,18 @@ remove_app (PanelTaskbarApplication *self) {
     free (self->id);
     self->id = NULL;
     g_list_free (self->toplevels);
-    gtk_box_remove (self->taskbar->taskbar_box,
-                    GTK_WIDGET (self->taskbar_item_button));
+
+    if (self->icon_path) {
+        free (self->icon_path);
+        self->icon_path = NULL;
+    }
+
+    GtkWidget *last_widget = GTK_WIDGET (self->taskbar_item_button);
+    gtk_widget_set_sensitive (GTK_WIDGET (last_widget), FALSE);
+
     free (self);
+
+    g_timeout_add_once (400, (GSourceOnceFunc)remove_app_finalize, last_widget);
 }
 
 void
@@ -170,9 +184,7 @@ panel_taskbar_application_remove_toplevel (
         if (self->pinned) {
             gtk_widget_set_opacity (self->indicator, 0.0);
         } else {
-            gtk_widget_set_state_flags (self->taskbar_item_button, GTK_STATE_FLAG_INSENSITIVE, TRUE);
-            
-            g_timeout_add_once (400, remove_app, self);
+            remove_app (self);
         }
     }
 }

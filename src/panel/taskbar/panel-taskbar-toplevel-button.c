@@ -68,10 +68,14 @@ get_icon_from_app_id (PanelTaskbar *taskbar, char *id) {
                     ((icon_exec_map_item *)found->data)->icon, 32,
                     current_theme);
             }
+
+            free (mod_id);
         }
 
         g_list_free_full (icon_exec_map,
                           (GDestroyNotify)free_icon_exec_map_item);
+        
+        icon_exec_map = NULL;
     }
     if (icon == NULL) {
         icon = suggested_icon_for_id (id, 32, current_theme);
@@ -216,7 +220,7 @@ toplevel_handle_app_id (
     g_idle_add ((GSourceFunc)toplevel_handle_app_id_gtk, self);
 }
 
-gboolean
+static gboolean
 handle_closed_gtk (gpointer user_data) {
     PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)user_data;
 
@@ -231,6 +235,10 @@ handle_closed_gtk (gpointer user_data) {
         free (self->m_id);
     }
 
+    if (self->m_icon_path) {
+        free (self->m_icon_path);
+    }
+
     free (self);
 
     return FALSE;
@@ -243,11 +251,19 @@ toplevel_handle_closed (
 
     UNUSED (toplevel_handle);
 
-    g_idle_add ((GSourceFunc)handle_closed_gtk, self);
+    g_idle_add (G_SOURCE_FUNC (handle_closed_gtk), self);
 }
 
 void
 toplevel_excess () {}
+
+static gboolean
+handle_state_activated_main_thread (PanelTaskbarToplevelButton *self) {
+    self->m_application->toplevels = g_list_remove (self->m_application->toplevels, self);
+    self->m_application->toplevels = g_list_prepend (self->m_application->toplevels, self);
+
+    return FALSE;
+}
 
 static void
 toplevel_handle_state (void *data,
@@ -277,8 +293,7 @@ toplevel_handle_state (void *data,
     }
 
     if (self->m_application && self->state & TOPLEVEL_STATE_ACTIVATED) {
-        self->m_application->toplevels = g_list_remove (self->m_application->toplevels, self);
-        self->m_application->toplevels = g_list_prepend (self->m_application->toplevels, self);
+        g_idle_add (G_SOURCE_FUNC (handle_state_activated_main_thread), self);
     }
 }
 

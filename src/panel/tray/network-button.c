@@ -36,7 +36,7 @@ network_button_new (GtkStack *stack) {
     gtk_widget_set_name (GTK_WIDGET (labels), "panel_tray_menu_button_labels_box");
 
     gtk_box_append (button_box, img);
-    gtk_box_append (button_box, labels);
+    gtk_box_append (button_box, GTK_WIDGET (labels));
 
     gtk_button_set_child (self->button, GTK_WIDGET (button_box));
 

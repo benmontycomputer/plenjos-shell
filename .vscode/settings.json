@@ -24,7 +24,8 @@
         "panel-tray.h": "c",
         "stack-blur.h": "c",
         "panel-common.h": "c",
-        "gtk4-layer-shell.h": "c"
+        "gtk4-layer-shell.h": "c",
+        "functional": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}",
     "editor.tabSize": 4,

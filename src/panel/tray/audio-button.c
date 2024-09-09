@@ -56,7 +56,7 @@ audio_button_new (GtkStack *stack) {
     g_signal_connect (self->volume, "value-changed",
                       G_CALLBACK (value_changed), self);
 
-    gtk_widget_set_size_request (GTK_WIDGET (self->volume), 240, -1);
+    gtk_widget_set_size_request (GTK_WIDGET (self->volume), 240, 0);
 
     gtk_box_append (self->box, GTK_WIDGET (self->volume));
 

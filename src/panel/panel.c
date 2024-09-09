@@ -43,6 +43,9 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
 
 static void
 draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
+    UNUSED (drawing_area);
+    UNUSED (self);
+
     double width = (double)wi;
     double height = (double)hi - 36.0;
 
@@ -178,7 +181,8 @@ activate (GtkApplication *app, void *_data) {
     gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
     gtk_widget_set_halign (GTK_WIDGET (panel_box), GTK_ALIGN_CENTER);
 
-    GtkBox *menu_bar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+    GtkBox *menu_bar_box
+        = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (menu_bar_box), "menu_bar_box");
 
     PanelApplicationsMenu *apps_menu
@@ -206,25 +210,26 @@ activate (GtkApplication *app, void *_data) {
 
     gtk_widget_set_hexpand (GTK_WIDGET (panel_tray->tray_box), TRUE);
 
-    GtkBox *box2 = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_halign (box2, GTK_ALIGN_CENTER);
+    GtkBox *box2 = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
+    gtk_widget_set_halign (GTK_WIDGET (box2), GTK_ALIGN_CENTER);
 
-    GtkDrawingArea *da = gtk_drawing_area_new ();
+    GtkDrawingArea *da = GTK_DRAWING_AREA (gtk_drawing_area_new ());
 
-    gtk_widget_set_size_request (da, -1, 64);
+    gtk_widget_set_size_request (GTK_WIDGET (da), 0, 64);
 
-    gtk_widget_set_halign (da, GTK_ALIGN_FILL);
-    gtk_widget_set_hexpand (da, TRUE);
+    gtk_widget_set_halign (GTK_WIDGET (da), GTK_ALIGN_FILL);
+    gtk_widget_set_hexpand (GTK_WIDGET (da), TRUE);
 
-    gtk_widget_set_margin_bottom (da, -74);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (da), -74);
 
-    gtk_widget_set_hexpand (da, TRUE);
-    gtk_widget_set_vexpand (da, TRUE);
+    gtk_widget_set_hexpand (GTK_WIDGET (da), TRUE);
+    gtk_widget_set_vexpand (GTK_WIDGET (da), TRUE);
 
-    gtk_drawing_area_set_draw_func (da, draw, self, NULL);
+    gtk_drawing_area_set_draw_func (da, (GtkDrawingAreaDrawFunc)draw, self,
+                                    NULL);
 
-    gtk_box_append (box2, da);
-    gtk_box_append (box2, panel_box);
+    gtk_box_append (box2, GTK_WIDGET (da));
+    gtk_box_append (box2, GTK_WIDGET (panel_box));
 
     gtk_window_set_child (gtk_window, GTK_WIDGET (box2));
     gtk_window_set_child (gtk_window_2, GTK_WIDGET (menu_bar_box));
@@ -256,6 +261,8 @@ activate (GtkApplication *app, void *_data) {
     // "/usr/share/backgrounds/gnome/drool-d.svg"
     if (bg != NULL) {
         pbuf = gdk_pixbuf_new_from_file_at_size (bg + 7, 2560, -1, NULL);
+
+        free (bg);
     } else {
         pbuf = gdk_pixbuf_new_from_file_at_size (
             "/usr/share/backgrounds/gnome/drool-d.svg", 2560, -1, NULL);
