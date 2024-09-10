@@ -13,7 +13,7 @@ typedef struct {
 
     GtkBox *items_box;
 
-    GtkBox *taskbar_item_box;
+    GtkFixed *taskbar_item_fixed;
 
     GtkButton *taskbar_item_button;
 

@@ -19,6 +19,8 @@
 typedef struct PanelTray {
     GtkCenterBox *tray_box;
 
+    GtkBox *tray_end_box;
+
     AudioButton *audio_button;
     NetworkButton *network_button;
     BluetoothButton *bluetooth_button;

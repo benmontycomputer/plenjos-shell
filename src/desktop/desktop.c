@@ -60,7 +60,7 @@ activate (GtkApplication *app, void *_data) {
         gtk_layer_set_anchor (gtk_window, i, anchors[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
+    gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 2560, -1);
     gtk_widget_set_name (GTK_WIDGET (gtk_window), "desktop_window");
 
     GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
@@ -74,9 +74,12 @@ activate (GtkApplication *app, void *_data) {
         bg = g_settings_get_string (bg_settings, "picture-uri");
     }
 
-    gtk_window_set_child (gtk_window, gtk_image_new_from_pixbuf (
-                                          gdk_pixbuf_new_from_file_at_size (
-                                              bg + 7, 2560, -1, NULL)));
+    GtkWidget *img = gtk_image_new_from_file (bg + 7);
+    gtk_widget_set_size_request (GTK_WIDGET (img), 2560, 2560);
+
+    gtk_window_set_child (gtk_window, img);
+
+    gtk_window_present (gtk_window);
 }
 
 int

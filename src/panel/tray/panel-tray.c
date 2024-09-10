@@ -176,6 +176,8 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->tray_box = GTK_CENTER_BOX (gtk_center_box_new ());
 
+    self->tray_end_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+
     gtk_center_box_set_center_widget (self->tray_box,
                                       GTK_WIDGET (self->clock->label));
     gtk_center_box_set_end_widget (self->tray_box,

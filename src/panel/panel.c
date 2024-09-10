@@ -54,45 +54,90 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
 
     double inset_x = 18.0;
 
+    double radius = 6.0;
+    double degrees = M_PI / 180.0;
+
+    double angle = atan2 (inset_x, height);
+
     cairo_save (cr);
 
-    cairo_move_to (cr, x + inset_x, y);
+    cairo_move_to (cr, x + inset_x + radius, y);
+
+    cairo_line_to (cr, x + width - inset_x - radius, y);
+    cairo_arc (cr, x + width - inset_x - radius, y + radius, radius,
+               270 * degrees, (360 * degrees) - angle);
+
+    cairo_line_to (cr, x + width, y + height - 7.0);
+    cairo_line_to (cr, x + width, y + height - 4.0);
+    cairo_line_to (cr, x, y + height - 4.0);
+
+    cairo_move_to (cr, x + inset_x + radius, y);
+    cairo_arc_negative (cr, x + inset_x + radius, y + radius, radius,
+                        (270 * degrees), 180 * degrees + angle);
+
+    cairo_line_to (cr, x, y + height - 7.0);
+    cairo_line_to (cr, x, y + height - 4.0);
+
+    /* cairo_move_to (cr, x + inset_x, y);
     cairo_line_to (cr, x + width - inset_x, y);
     cairo_line_to (cr, x + width, y + height - 2.0);
     cairo_line_to (cr, x, y + height - 2.0);
-    cairo_line_to (cr, x + inset_x, y);
+    cairo_line_to (cr, x + inset_x, y); */
 
-    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 0.8);
+    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 0.5);
 
     cairo_stroke_preserve (cr);
 
     cairo_clip (cr);
 
-    cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 1.0);
+    // cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 1.0);
+
+    cairo_pattern_t *pattern = cairo_pattern_create_linear (0, y, 0, y + height - 4.0);
+
+    cairo_pattern_add_color_stop_rgba (pattern, 0.0, 0.6, 0.6, 0.6, 1.0);
+    cairo_pattern_add_color_stop_rgba (pattern, 1.0, 0.7, 0.7, 0.7, 1.0);
+
+    cairo_set_source (cr, pattern);
 
     cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
     cairo_paint (cr);
 
+    cairo_pattern_destroy (pattern);
+
     cairo_restore (cr);
 
     cairo_save (cr);
 
-    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 1.0);
-    cairo_set_line_width (cr, 1.0);
+    // cairo_move_to (cr, x, y + height - 4.0);
+    // cairo_line_to (cr, x + width, y + height - 4.0);
+    cairo_new_path (cr);
+    cairo_arc_negative (cr, x + 3.0, y + height - 7.0, 3.0, 180 * degrees,
+                        90 * degrees);
+    cairo_arc_negative (cr, x + width - 3.0, y + height - 7.0, 3.0, 90 * degrees,
+                        0 * degrees);
 
-    cairo_move_to (cr, x, y + height - 2.0);
-    cairo_line_to (cr, x + width, y + height - 2.0);
+    cairo_arc (cr, x + width - 3.0, y + height - 3.0, 3.0, 0, 90 * degrees);
+    cairo_arc (cr, x + 3.0, y + height - 3.0, 3.0, 90 * degrees,
+               180 * degrees);
+    cairo_close_path (cr);
 
-    cairo_stroke (cr);
+    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 0.5);
 
-    cairo_move_to (cr, x, y + height - 1.0);
+    cairo_stroke_preserve (cr);
+
+    cairo_clip (cr);
+
+    /*cairo_move_to (cr, x, y + height - 1.0);
     cairo_line_to (cr, x + width, y + height - 1.0);
 
     cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 1.0);
 
     cairo_set_line_width (cr, 2.0);
-    cairo_stroke (cr);
+    cairo_stroke (cr);*/
+    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 1.0);
+
+    cairo_paint (cr);
 
     cairo_restore (cr);
 }
@@ -220,7 +265,7 @@ activate (GtkApplication *app, void *_data) {
     gtk_widget_set_halign (GTK_WIDGET (da), GTK_ALIGN_FILL);
     gtk_widget_set_hexpand (GTK_WIDGET (da), TRUE);
 
-    gtk_widget_set_margin_bottom (GTK_WIDGET (da), -74);
+    gtk_widget_set_margin_bottom (GTK_WIDGET (da), -72);
 
     gtk_widget_set_hexpand (GTK_WIDGET (da), TRUE);
     gtk_widget_set_vexpand (GTK_WIDGET (da), TRUE);

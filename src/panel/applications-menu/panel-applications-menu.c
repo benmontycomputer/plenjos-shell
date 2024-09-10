@@ -555,25 +555,7 @@ panel_applications_menu_get_launcher_button (PanelApplicationsMenu *self) {
 
         gtk_widget_set_valign (self->launcher_button, GTK_ALIGN_START);
 
-        GtkIconPaintable *icon_info = gtk_icon_theme_lookup_icon (
-            self->icon_theme, "view-app-grid", NULL, 48, 1,
-            GTK_TEXT_DIR_LTR, 0);
-
-        GFile *file = gtk_icon_paintable_get_file (icon_info);
-
-        char *path = g_file_get_path (file);
-        printf ("%s\n", path);
-
-        GdkPixbuf *pbuf
-            = gdk_pixbuf_new_from_file_at_size (path, 48, 48, NULL);
-
-        GtkWidget *img = gtk_image_new_from_pixbuf (pbuf);
-
-        g_object_unref (pbuf);
-
-        free (path);
-
-        g_object_unref (file);
+        GtkWidget *img = gtk_image_new_from_icon_name ("view-app-grid");
 
         gtk_widget_set_size_request (img, 48, 48);
         gtk_button_set_child (GTK_BUTTON (self->launcher_button), img);
