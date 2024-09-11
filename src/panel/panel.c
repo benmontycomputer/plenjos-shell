@@ -84,7 +84,7 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
     cairo_line_to (cr, x, y + height - 2.0);
     cairo_line_to (cr, x + inset_x, y); */
 
-    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 0.5);
+    cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 0.5);
 
     cairo_stroke_preserve (cr);
 
@@ -94,8 +94,8 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
 
     cairo_pattern_t *pattern = cairo_pattern_create_linear (0, y, 0, y + height - 4.0);
 
-    cairo_pattern_add_color_stop_rgba (pattern, 0.0, 0.6, 0.6, 0.6, 1.0);
-    cairo_pattern_add_color_stop_rgba (pattern, 1.0, 0.7, 0.7, 0.7, 1.0);
+    cairo_pattern_add_color_stop_rgba (pattern, 0.0, 0.3, 0.3, 0.3, 0.5);
+    cairo_pattern_add_color_stop_rgba (pattern, 1.0, 0.4, 0.4, 0.4, 0.5);
 
     cairo_set_source (cr, pattern);
 
@@ -112,17 +112,17 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
     // cairo_move_to (cr, x, y + height - 4.0);
     // cairo_line_to (cr, x + width, y + height - 4.0);
     cairo_new_path (cr);
-    cairo_arc_negative (cr, x + 3.0, y + height - 7.0, 3.0, 180 * degrees,
+    cairo_arc_negative (cr, x + 3.0, y + height - 7.0, 2.0, 180 * degrees,
                         90 * degrees);
-    cairo_arc_negative (cr, x + width - 3.0, y + height - 7.0, 3.0, 90 * degrees,
+    cairo_arc_negative (cr, x + width - 3.0, y + height - 7.0, 2.0, 90 * degrees,
                         0 * degrees);
 
-    cairo_arc (cr, x + width - 3.0, y + height - 3.0, 3.0, 0, 90 * degrees);
-    cairo_arc (cr, x + 3.0, y + height - 3.0, 3.0, 90 * degrees,
+    cairo_arc (cr, x + width - 3.0, y + height - 3.0, 2.0, 0, 90 * degrees);
+    cairo_arc (cr, x + 3.0, y + height - 3.0, 2.0, 90 * degrees,
                180 * degrees);
     cairo_close_path (cr);
 
-    cairo_set_source_rgba (cr, 0.4, 0.4, 0.4, 0.5);
+    cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 0.5);
 
     cairo_stroke_preserve (cr);
 
@@ -135,7 +135,9 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
 
     cairo_set_line_width (cr, 2.0);
     cairo_stroke (cr);*/
-    cairo_set_source_rgba (cr, 0.8, 0.8, 0.8, 1.0);
+    cairo_set_source_rgba (cr, 0.45, 0.45, 0.45, 0.6);
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
 
     cairo_paint (cr);
 
