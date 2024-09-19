@@ -65,27 +65,26 @@ audio_button_new (GtkStack *stack) {
     const char *card = "default";
     const char *selem_name = "Master";
 
-    snd_mixer_open (&self->handle, 0);
-    snd_mixer_attach (self->handle, card);
-    snd_mixer_selem_register (self->handle, NULL, NULL);
-    snd_mixer_load (self->handle);
+    if (!snd_mixer_open (&self->handle, 0) && !snd_mixer_attach (self->handle, card)) {
+        snd_mixer_selem_register (self->handle, NULL, NULL);
+        snd_mixer_load (self->handle);
 
-    snd_mixer_selem_id_alloca (&self->sid);
-    snd_mixer_selem_id_set_index (self->sid, 0);
-    snd_mixer_selem_id_set_name (self->sid, selem_name);
+        snd_mixer_selem_id_alloca (&self->sid);
+        snd_mixer_selem_id_set_index (self->sid, 0);
+        snd_mixer_selem_id_set_name (self->sid, selem_name);
 
-    self->elem = snd_mixer_find_selem (self->handle, self->sid);
+        self->elem = snd_mixer_find_selem (self->handle, self->sid);
 
-    long min, max;
+        long min, max;
 
-    snd_mixer_selem_get_playback_volume_range (self->elem, &min, &max);
+        snd_mixer_selem_get_playback_volume_range (self->elem, &min, &max);
 
-    long vol = 0;
-    snd_mixer_selem_get_playback_volume (self->elem, 0, &vol);
+        long vol = 0;
+        snd_mixer_selem_get_playback_volume (self->elem, 0, &vol);
 
-    gtk_range_set_value (GTK_RANGE (self->volume),
-                         round (((double)vol * 100.0) / (double)max));
-
+        gtk_range_set_value (GTK_RANGE (self->volume),
+                            round (((double)vol * 100.0) / (double)max));
+    }
     self->stack = stack;
 
     return self;
