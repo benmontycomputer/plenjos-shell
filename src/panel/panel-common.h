@@ -16,3 +16,5 @@ typedef struct {
 } Panel;
 
 #define UNUSED(x) (void)(x)
+
+#define DATA_DIRS_DEFAULT "/usr/share"

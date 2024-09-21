@@ -411,6 +411,12 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
 
     char *data_dirs = g_strdup (getenv ("XDG_DATA_DIRS"));
 
+    if (!data_dirs) {
+        size_t len = strlen (DATA_DIRS_DEFAULT) + 1;
+        data_dirs = malloc (len);
+        snprintf (data_dirs, len, "%s", DATA_DIRS_DEFAULT);
+    }
+
     GList *applications = NULL;
 
     if (!data_dirs) {

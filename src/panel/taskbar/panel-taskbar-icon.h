@@ -6,6 +6,7 @@
 #include <gtk/gtk.h>
 
 #include "panel-taskbar.h"
+#include "panel-common.h"
 
 typedef struct {
     char **result;

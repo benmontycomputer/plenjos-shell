@@ -26,8 +26,7 @@
 #include <gtk4-layer-shell.h>
 
 #include "../taskbar/panel-taskbar-icon.h"
-
-#define UNUSED(x) (void)(x)
+#include "../panel-common.h"
 
 G_BEGIN_DECLS
 
