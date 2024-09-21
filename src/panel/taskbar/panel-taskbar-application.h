@@ -10,6 +10,7 @@ typedef struct {
 
     char *id;
     char *icon_path;
+    char *exec;
 
     GtkBox *items_box;
 

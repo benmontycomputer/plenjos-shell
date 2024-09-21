@@ -7,7 +7,15 @@ button_click (GtkButton *button, PanelTaskbarApplication *self) {
     UNUSED (self);
 
     if (!self->toplevels || !self->toplevels->data) {
-        // TODO: execute the app
+        if (self->exec) {
+            size_t len = strlen (self->exec) + strlen (" &") + 1;
+            char *new_exec = malloc (len);
+            snprintf (new_exec, len, "%s &", self->exec);
+
+            system (new_exec);
+
+            free (new_exec);
+        }
 
         return FALSE;
     }
@@ -86,6 +94,7 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
     self->icon_path = NULL;
 
     self->icon = NULL;
+    self->exec = NULL;
 
     self->toplevels = NULL;
 

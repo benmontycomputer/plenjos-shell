@@ -53,9 +53,6 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_widget_set_name (GTK_WIDGET (self->control_center_grid),
                          "control_center_grid");
 
-    gtk_widget_set_hexpand (GTK_WIDGET (self->control_center_grid), TRUE);
-    gtk_widget_set_vexpand (GTK_WIDGET (self->control_center_grid), TRUE);
-
     gtk_grid_set_row_homogeneous (self->control_center_grid, FALSE);
     gtk_grid_set_column_homogeneous (self->control_center_grid, TRUE);
 
@@ -99,9 +96,6 @@ panel_tray_new (gpointer panel_ptr) {
                            GTK_WIDGET (self->control_center_popover_box));
 
     gtk_popover_set_has_arrow (self->control_center_popover, FALSE);
-
-    gtk_box_append (control_center_button_box,
-                    GTK_WIDGET (self->control_center_popover));
 
     self->back_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
@@ -178,10 +172,16 @@ panel_tray_new (gpointer panel_ptr) {
 
     self->tray_end_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
 
+    gtk_box_append (self->tray_end_box,
+                    GTK_WIDGET (self->control_center_button));
+
+    gtk_box_append (self->tray_end_box,
+                    GTK_WIDGET (self->control_center_popover));
+
     gtk_center_box_set_center_widget (self->tray_box,
                                       GTK_WIDGET (self->clock->label));
     gtk_center_box_set_end_widget (self->tray_box,
-                                   GTK_WIDGET (self->control_center_button));
+                                   GTK_WIDGET (self->tray_end_box));
 
     return self;
 }
