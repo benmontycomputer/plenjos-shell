@@ -1,5 +1,5 @@
 {
-    "C_Cpp.default.compileCommands": "/home/plenjamin/Projects/plenjos-session/builddir/compile_commands.json",
+    "C_Cpp.default.compileCommands": "/home/plenjamin/Projects/plenjos-shell/builddir/compile_commands.json",
     "C_Cpp.default.configurationProvider": "mesonbuild.mesonbuild",
     "files.associations": {
         "wayland-client-protocol.h": "c",

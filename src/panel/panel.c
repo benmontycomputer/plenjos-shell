@@ -92,7 +92,8 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
 
     // cairo_set_source_rgba (cr, 0.7, 0.7, 0.7, 1.0);
 
-    cairo_pattern_t *pattern = cairo_pattern_create_linear (0, y, 0, y + height - 4.0);
+    cairo_pattern_t *pattern
+        = cairo_pattern_create_linear (0, y, 0, y + height - 4.0);
 
     cairo_pattern_add_color_stop_rgba (pattern, 0.0, 0.3, 0.3, 0.3, 0.5);
     cairo_pattern_add_color_stop_rgba (pattern, 1.0, 0.4, 0.4, 0.4, 0.5);
@@ -114,8 +115,8 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
     cairo_new_path (cr);
     cairo_arc_negative (cr, x + 3.0, y + height - 7.0, 2.0, 180 * degrees,
                         90 * degrees);
-    cairo_arc_negative (cr, x + width - 3.0, y + height - 7.0, 2.0, 90 * degrees,
-                        0 * degrees);
+    cairo_arc_negative (cr, x + width - 3.0, y + height - 7.0, 2.0,
+                        90 * degrees, 0 * degrees);
 
     cairo_arc (cr, x + width - 3.0, y + height - 3.0, 2.0, 0, 90 * degrees);
     cairo_arc (cr, x + 3.0, y + height - 3.0, 2.0, 90 * degrees,
