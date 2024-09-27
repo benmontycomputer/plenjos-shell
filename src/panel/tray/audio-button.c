@@ -75,15 +75,17 @@ audio_button_new (GtkStack *stack) {
 
         self->elem = snd_mixer_find_selem (self->handle, self->sid);
 
-        long min, max;
+        if (self->elem) {
+            long min, max;
 
-        snd_mixer_selem_get_playback_volume_range (self->elem, &min, &max);
+            snd_mixer_selem_get_playback_volume_range (self->elem, &min, &max);
 
-        long vol = 0;
-        snd_mixer_selem_get_playback_volume (self->elem, 0, &vol);
+            long vol = 0;
+            snd_mixer_selem_get_playback_volume (self->elem, 0, &vol);
 
-        gtk_range_set_value (GTK_RANGE (self->volume),
-                            round (((double)vol * 100.0) / (double)max));
+            gtk_range_set_value (GTK_RANGE (self->volume),
+                                round (((double)vol * 100.0) / (double)max));
+        }
     }
     self->stack = stack;
 

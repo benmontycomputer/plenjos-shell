@@ -553,7 +553,8 @@ show_wrap (GtkButton *button, PanelApplicationsMenu *self) {
 }
 
 GtkWidget *
-panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self) {
+panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self,
+                                                GtkBox *box) {
     if (!self->launcher_button) {
         self->launcher_button = gtk_button_new ();
 
@@ -569,6 +570,8 @@ panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self) {
         g_signal_connect (self->launcher_button, "clicked",
                           G_CALLBACK (show_wrap), self);
     }
+
+    gtk_box_prepend (box, self->launcher_button);
 
     return self->launcher_button;
 }

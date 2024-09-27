@@ -1,4 +1,4 @@
-#panel_window {
+#panel_window, #panel_topbar_window {
     background-color: transparent;
 }
 
@@ -157,6 +157,7 @@
 
 #menu_bar_box {
     padding: 2px;
+    background-color: transparent;
 }
 
 #menu_bar_button {

@@ -40,4 +40,4 @@ void panel_applications_menu_set_bg (PanelApplicationsMenu *self, GdkPixbuf *bg)
 void hide_applications_menu (PanelApplicationsMenu *self);
 void show_applications_menu (PanelApplicationsMenu *self);
 
-GtkWidget *panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self);
+GtkWidget *panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self, GtkBox *box);

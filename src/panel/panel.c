@@ -224,6 +224,7 @@ activate (GtkApplication *app, void *_data) {
 
     // gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
     gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
+    gtk_widget_set_name (GTK_WIDGET (gtk_window_2), "panel_topbar_window");
 
     GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
@@ -238,9 +239,7 @@ activate (GtkApplication *app, void *_data) {
 
     hide_applications_menu (apps_menu);
 
-    gtk_box_prepend (
-        panel_box,
-        GTK_WIDGET (panel_applications_menu_get_launcher_button (apps_menu)));
+    panel_applications_menu_insert_launcher_button (apps_menu, panel_box);
 
     PanelTaskbar *panel_taskbar = panel_taskbar_init ();
 
