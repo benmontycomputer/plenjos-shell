@@ -236,11 +236,11 @@ activate (GtkApplication *app, void *_data) {
     PanelApplicationsMenu *apps_menu
         = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
 
-    gtk_box_append (
+    hide_applications_menu (apps_menu);
+
+    gtk_box_prepend (
         panel_box,
         GTK_WIDGET (panel_applications_menu_get_launcher_button (apps_menu)));
-
-    hide_applications_menu (apps_menu);
 
     PanelTaskbar *panel_taskbar = panel_taskbar_init ();
 
