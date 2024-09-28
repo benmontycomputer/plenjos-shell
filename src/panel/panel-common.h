@@ -17,4 +17,4 @@ typedef struct {
 
 #define UNUSED(x) (void)(x)
 
-#define DATA_DIRS_DEFAULT "/usr/share"
+#define DATA_DIRS_DEFAULT "/usr/share:/usr/local/share"

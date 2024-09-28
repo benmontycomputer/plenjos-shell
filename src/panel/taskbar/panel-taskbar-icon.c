@@ -387,6 +387,12 @@ init_icon_exec_map () {
 
     char *xdg_data_dirs = g_strdup (getenv ("XDG_DATA_DIRS"));
 
+    if (!xdg_data_dirs) {
+        size_t len = strlen (DATA_DIRS_DEFAULT) + 1;
+        xdg_data_dirs = malloc (len);
+        snprintf (xdg_data_dirs, len, "%s", DATA_DIRS_DEFAULT);
+    }
+
     str_split_return_val str_split_result = str_split (xdg_data_dirs, ':');
 
     char **desktop_paths

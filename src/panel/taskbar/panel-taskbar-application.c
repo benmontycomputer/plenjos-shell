@@ -103,7 +103,8 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
     self->items_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
     self->taskbar_item_fixed = GTK_FIXED (gtk_fixed_new ());
-    gtk_widget_set_size_request (GTK_WIDGET (self->taskbar_item_fixed), 48, 56);
+    gtk_widget_set_size_request (GTK_WIDGET (self->taskbar_item_fixed), 48,
+                                 56);
 
     self->taskbar_item_button = GTK_BUTTON (gtk_button_new ());
 
@@ -159,8 +160,9 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
 
     gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (icon_2), 0, 0);
     gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->icon), 0, 0);
-    gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->indicator), 21, 48);
-    
+    gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->indicator), 21,
+                   48);
+
     g_signal_connect (self->taskbar_item_button, "clicked",
                       G_CALLBACK (button_click), self);
 
