@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<schemalist>
+
+  <schema path="/com/plenjos/shell/panel/" id="com.plenjos.shell.panel">
+
+    <key name='style' type='s'>
+      <choices>
+        <choice value="3D-Dock"/>
+        <choice value="2D-Dock"/>
+        <choice value="2D-Panel"/>
+        <choice value="Invisible"/>
+      </choices>
+      <default>"true"</default>
+      <summary>Automatically install updates</summary>
+      <description>
+        If enabled, updates will automatically be downlaoded and installed.
+        If disabled, updates will still be downloaded, but the user will be
+        asked to install them manually.
+      </description>
+    </key>
+
+    <key name='background-color-top' type='s'>
+      <default>'rgba(77,77,77,0.5)'</default>
+      <summary>Panel background color (top of gradient)</summary>
+      <description>
+        The primary background color of the panel (top of gradient). Should
+        be formatted properly to be parsed by gdk_rgba_parse ().
+      </description>
+    </key>
+    <key name='background-color-bottom' type='s'>
+      <default>'rgba(102,102,102,0.5)'</default>
+      <summary>Panel background color (bottom of gradient)</summary>
+      <description>
+        The primary background color of the panel (bottom of gradient).
+        Should be formatted properly to be parsed by gdk_rgba_parse ().
+      </description>
+    </key>
+
+  </schema>
+
+</schemalist>

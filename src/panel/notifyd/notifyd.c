@@ -3,7 +3,7 @@
 #define NOTIFICATIONS_SPEC_VERSION "1.2"
 
 typedef struct _NotifyDaemon {
-    PlenjosNotifyFdoGBusSkeleton *skeleton;
+    PlenjosNotifyFdoGBus *skeleton;
 } NotifyDaemon;
 
 const char *capabilities[] = {
@@ -24,7 +24,7 @@ gboolean close_notify (GtkWindow *win) {
 }
 
 static gboolean
-on_notify (PlenjosNotifyFdoGBusSkeleton *skeleton,
+on_notify (PlenjosNotifyFdoGBus *skeleton,
            GDBusMethodInvocation *invocation, const gchar *app_name,
            guint replaces_id, gchar *app_icon, gchar *summary, gchar *body,
            gchar **actions_data, GVariant *hints, gint expire_timeout,
@@ -34,7 +34,7 @@ on_notify (PlenjosNotifyFdoGBusSkeleton *skeleton,
             app_name, replaces_id, app_icon, summary, body, NULL, expire_timeout);
     fflush (stdout);
 
-    GtkWindow *win = GTK_WINDOW (gtk_window_new (GTK_WINDOW_TOPLEVEL));
+    GtkWindow *win = GTK_WINDOW (gtk_window_new ());
 
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (win);
@@ -63,7 +63,23 @@ on_notify (PlenjosNotifyFdoGBusSkeleton *skeleton,
     gtk_window_set_deletable (win, FALSE);
     gtk_window_set_resizable (win, FALSE);
 
-    gtk_window_set_child (win, gtk_label_new (body));
+    GtkGrid *grid = GTK_GRID (gtk_grid_new ());
+
+    gtk_window_set_child (win, GTK_WIDGET (grid));
+
+    GtkLabel *summary_label = GTK_LABEL (gtk_label_new (summary));
+    GtkLabel *body_label = GTK_LABEL (gtk_label_new (body));
+
+    gtk_grid_attach (grid, GTK_WIDGET (summary_label), 1, 0, 1, 1);
+    gtk_grid_attach (grid, GTK_WIDGET (body_label), 1, 1, 1, 1);
+
+    if (app_icon) {
+        GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (app_icon));
+
+        gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
+
+        gtk_grid_attach (grid, GTK_WIDGET (icon), 0, 0, 1, 2);
+    }
 
     gtk_window_present (win);
     
@@ -75,7 +91,7 @@ on_notify (PlenjosNotifyFdoGBusSkeleton *skeleton,
 }
 
 static gboolean
-on_get_server_information (PlenjosNotifyFdoGBusSkeleton *skeleton,
+on_get_server_information (PlenjosNotifyFdoGBus *skeleton,
                            GDBusMethodInvocation *invocation,
                            NotifyDaemon *self) {
     printf ("get server information\n");
@@ -93,7 +109,7 @@ on_name_acquired (GDBusConnection *connection, const char *name,
                   gpointer user_data) {
     UNUSED (user_data);
 
-    PlenjosNotifyFdoGBusSkeleton *skeleton
+    PlenjosNotifyFdoGBus *skeleton
         = plenjos_notify_fdo_gbus_skeleton_new ();
 
     GError *error = NULL;
@@ -129,15 +145,7 @@ on_name_acquired (GDBusConnection *connection, const char *name,
 }
 
 int
-main (int argc, char **argv) {
-    for (int i = 0; i < argc; i++) {
-        printf("%d: %s\n", argv[i]);
-    }
-
-    fflush (stdout);
-
-    gtk_init (NULL, NULL);
-
+notifyd_init () {
     GMainLoop *loop;
 
     loop = g_main_loop_new (NULL, FALSE);

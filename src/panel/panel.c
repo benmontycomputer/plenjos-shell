@@ -95,8 +95,16 @@ draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
     cairo_pattern_t *pattern
         = cairo_pattern_create_linear (0, y, 0, y + height - 4.0);
 
-    cairo_pattern_add_color_stop_rgba (pattern, 0.0, 0.3, 0.3, 0.3, 0.5);
-    cairo_pattern_add_color_stop_rgba (pattern, 1.0, 0.4, 0.4, 0.4, 0.5);
+    // cairo_pattern_add_color_stop_rgba (pattern, 0.0, 0.3, 0.3, 0.3, 0.5);
+    // cairo_pattern_add_color_stop_rgba (pattern, 1.0, 0.4, 0.4, 0.4, 0.5);
+
+    cairo_pattern_add_color_stop_rgba (
+        pattern, 0.0, self->bg_primary.red, self->bg_primary.green,
+        self->bg_primary.blue, self->bg_primary.alpha);
+    cairo_pattern_add_color_stop_rgba (
+        pattern, 1.0, self->bg_primary_bottom.red,
+        self->bg_primary_bottom.green, self->bg_primary_bottom.blue,
+        self->bg_primary_bottom.alpha);
 
     cairo_set_source (cr, pattern);
 
@@ -165,6 +173,51 @@ activate (GtkApplication *app, void *_data) {
     self->gtk_window = gtk_window;
     self->supports_alpha = FALSE;
     self->taskbar = NULL;
+    self->panel_settings = g_settings_new ("com.plenjos.shell.panel");
+
+    self->style = PANEL_STYLE_THREE_D_DOCK;
+
+    char *style_str = g_settings_get_string (self->panel_settings, "style");
+
+    if (style_str) {
+        if (!strcmp (style_str, "3D-Dock")) {
+            self->style = PANEL_STYLE_THREE_D_DOCK;
+        } else if (!strcmp (style_str, "2D-Dock")) {
+            self->style = PANEL_STYLE_DOCK;
+        } else if (!strcmp (style_str, "2D-Panel")) {
+            self->style = PANEL_STYLE_PANEL;
+        } else if (!strcmp (style_str, "Invisible")) {
+            self->style = PANEL_STYLE_INVISIBLE;
+        }
+
+        free (style_str);
+    }
+
+    self->bg_primary.red = 0;
+    self->bg_primary.green = 0;
+    self->bg_primary.blue = 0;
+    self->bg_primary.alpha = 1;
+
+    char *bg_primary_str
+        = g_settings_get_string (self->panel_settings, "background-color-top");
+    if (bg_primary_str) {
+        gdk_rgba_parse (&self->bg_primary, bg_primary_str);
+
+        free (bg_primary_str);
+    }
+
+    self->bg_primary_bottom.red = 0;
+    self->bg_primary_bottom.green = 0;
+    self->bg_primary_bottom.blue = 0;
+    self->bg_primary_bottom.alpha = 1;
+
+    char *bg_primary_bottom_str = g_settings_get_string (
+        self->panel_settings, "background-color-bottom");
+    if (bg_primary_bottom_str) {
+        gdk_rgba_parse (&self->bg_primary_bottom, bg_primary_bottom_str);
+
+        free (bg_primary_bottom_str);
+    }
 
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (gtk_window);

@@ -4,6 +4,13 @@
 
 #include <gtk/gtk.h>
 
+enum PanelStyle {
+    PANEL_STYLE_THREE_D_DOCK,
+    PANEL_STYLE_DOCK,
+    PANEL_STYLE_PANEL,
+    PANEL_STYLE_INVISIBLE
+};
+
 typedef struct {
     PanelTaskbar *taskbar;
 
@@ -13,6 +20,16 @@ typedef struct {
 
     bool supports_alpha;
     bool dark_mode;
+
+    GSettings *panel_settings;
+
+    enum PanelStyle style;
+
+    GdkRGBA bg_primary;
+    GdkRGBA bg_primary_bottom;
+    GdkRGBA bg_secondary;
+    GdkRGBA border_primary;
+    GdkRGBA border_secondary;
 } Panel;
 
 #define UNUSED(x) (void)(x)

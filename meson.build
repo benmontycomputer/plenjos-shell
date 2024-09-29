@@ -22,8 +22,10 @@ playerctl = dependency('playerctl', version: '>=2.4.1')
 
 alsa = dependency('alsa', version: '>=1.2.8')
 
+dbus = dependency('dbus-1', version: '>=1.12.0')
+
 test('basic', exe)
 
+subdir('data')
 subdir('protocol')
-
 subdir('src')

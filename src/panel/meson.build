@@ -6,6 +6,7 @@ subdir('taskbar')
 subdir('applications-menu')
 subdir('blur')
 subdir('tray')
+subdir('notifyd')
 
 gnome = import('gnome')
 
