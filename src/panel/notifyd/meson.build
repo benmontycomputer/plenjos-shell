@@ -9,11 +9,14 @@ daemon_generated_sources += gnome.gdbus_codegen(
 )
 
 notifyd_sources = [
-    'notifyd.c',
+    'notifyd/notifyd.c',
 ]
 
-executable(
-    'plenjos-notifyd', notifyd_sources + daemon_generated_sources,
-    build_by_default: true,
-    dependencies: [gtk, gtk_layer_shell, dbus],
-    install: true)
+#executable(
+#    'plenjos-notifyd', notifyd_sources + daemon_generated_sources,
+#    build_by_default: true,
+#    dependencies: [gtk, gtk_layer_shell, dbus],
+#    install: true)
+
+panel_sources += notifyd_sources
+panel_sources += daemon_generated_sources

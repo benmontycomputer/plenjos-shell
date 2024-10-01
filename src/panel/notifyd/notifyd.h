@@ -10,3 +10,5 @@
 #include "plenjos-notifyd-fdo-gbus.h"
 
 #define UNUSED(x) (void)(x)
+
+int notifyd_init ();

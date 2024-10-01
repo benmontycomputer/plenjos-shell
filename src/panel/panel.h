@@ -14,3 +14,5 @@
 #include "blur/stack-blur.h"
 
 #include "panel-common.h"
+
+#include "notifyd/notifyd.h"

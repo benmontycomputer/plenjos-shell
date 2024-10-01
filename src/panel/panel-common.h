@@ -13,6 +13,7 @@ enum PanelStyle {
 
 typedef struct {
     PanelTaskbar *taskbar;
+    gpointer *tray;
 
     GdkPixbuf *blurred;
 
@@ -30,6 +31,10 @@ typedef struct {
     GdkRGBA bg_secondary;
     GdkRGBA border_primary;
     GdkRGBA border_secondary;
+
+    GtkApplication *app;
+
+    GListModel *monitors;
 } Panel;
 
 #define UNUSED(x) (void)(x)

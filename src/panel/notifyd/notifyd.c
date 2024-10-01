@@ -17,21 +17,22 @@ on_get_capabilities () {
     return capabilities;
 }
 
-gboolean close_notify (GtkWindow *win) {
+gboolean
+close_notify (GtkWindow *win) {
     gtk_window_close (win);
 
     return FALSE;
 }
 
 static gboolean
-on_notify (PlenjosNotifyFdoGBus *skeleton,
-           GDBusMethodInvocation *invocation, const gchar *app_name,
-           guint replaces_id, gchar *app_icon, gchar *summary, gchar *body,
-           gchar **actions_data, GVariant *hints, gint expire_timeout,
-           gpointer user_data) {
+on_notify (PlenjosNotifyFdoGBus *skeleton, GDBusMethodInvocation *invocation,
+           const gchar *app_name, guint replaces_id, gchar *app_icon,
+           gchar *summary, gchar *body, gchar **actions_data, GVariant *hints,
+           gint expire_timeout, gpointer user_data) {
     printf ("App name: %s, replaces_id: %u, app_icon: %s, summary: %s, body: "
             "%s, actions_data: %s, expire_timeout: %d\n",
-            app_name, replaces_id, app_icon, summary, body, NULL, expire_timeout);
+            app_name, replaces_id, app_icon, summary, body, NULL,
+            expire_timeout);
     fflush (stdout);
 
     GtkWindow *win = GTK_WINDOW (gtk_window_new ());
@@ -48,7 +49,7 @@ on_notify (PlenjosNotifyFdoGBus *skeleton,
 
     // The margins are the gaps around the window's edges
     // Margins and anchors can be set like this...
-    gtk_layer_set_margin (win, GTK_LAYER_SHELL_EDGE_TOP, 24);
+    gtk_layer_set_margin (win, GTK_LAYER_SHELL_EDGE_TOP, 8);
 
     // ... or like this
     // Anchors are if the window is pinned to each edge of the output
@@ -57,14 +58,13 @@ on_notify (PlenjosNotifyFdoGBus *skeleton,
         gtk_layer_set_anchor (win, i, anchors[i]);
     }
 
-    gtk_widget_set_size_request (GTK_WIDGET (win), 480, 120);
+    gtk_layer_set_exclusive_zone (win, 0);
 
-    gtk_window_set_decorated (win, FALSE);
-    gtk_window_set_deletable (win, FALSE);
-    gtk_window_set_resizable (win, FALSE);
+    gtk_widget_set_name (GTK_WIDGET (win), "notifyd_window");
 
     GtkGrid *grid = GTK_GRID (gtk_grid_new ());
 
+    gtk_widget_set_name (GTK_WIDGET (grid), "notifyd_grid");
     gtk_window_set_child (win, GTK_WIDGET (grid));
 
     GtkLabel *summary_label = GTK_LABEL (gtk_label_new (summary));
@@ -77,13 +77,15 @@ on_notify (PlenjosNotifyFdoGBus *skeleton,
         GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (app_icon));
 
         gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
+        gtk_widget_set_name (GTK_WIDGET (icon), "notifyd_icon");
 
         gtk_grid_attach (grid, GTK_WIDGET (icon), 0, 0, 1, 2);
     }
 
     gtk_window_present (win);
-    
-    g_timeout_add (expire_timeout == -1 ? 5000 : expire_timeout, G_SOURCE_FUNC (close_notify), win);
+
+    g_timeout_add (expire_timeout == -1 ? 5000 : expire_timeout,
+                   G_SOURCE_FUNC (close_notify), win);
 
     plenjos_notify_fdo_gbus_complete_notify (skeleton, invocation, 0);
 
@@ -109,8 +111,7 @@ on_name_acquired (GDBusConnection *connection, const char *name,
                   gpointer user_data) {
     UNUSED (user_data);
 
-    PlenjosNotifyFdoGBus *skeleton
-        = plenjos_notify_fdo_gbus_skeleton_new ();
+    PlenjosNotifyFdoGBus *skeleton = plenjos_notify_fdo_gbus_skeleton_new ();
 
     GError *error = NULL;
 
@@ -146,12 +147,7 @@ on_name_acquired (GDBusConnection *connection, const char *name,
 
 int
 notifyd_init () {
-    GMainLoop *loop;
-
-    loop = g_main_loop_new (NULL, FALSE);
     g_bus_own_name (G_BUS_TYPE_SESSION, "org.freedesktop.Notifications",
                     G_BUS_NAME_OWNER_FLAGS_NONE, NULL, on_name_acquired, NULL,
                     NULL, NULL);
-
-    g_main_loop_run (loop);
 }

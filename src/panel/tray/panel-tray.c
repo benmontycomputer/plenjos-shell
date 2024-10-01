@@ -1,10 +1,25 @@
 #include "panel-tray.h"
+#include "panel-common.h"
 
 static void
 show_control_center (GtkButton *button, PanelTray *self) {
     UNUSED (button);
 
     gtk_stack_set_visible_child_name (self->stack, "Control Center");
+
+    // the ref and unref is needed so the widget isn't destroyed after being
+    // removed from the box.
+    g_object_ref (self->control_center_popover);
+
+    if (gtk_widget_get_parent (GTK_WIDGET (self->control_center_popover))) {
+        gtk_box_remove (GTK_BOX (gtk_widget_get_parent (
+                            GTK_WIDGET (self->control_center_popover))),
+                        GTK_WIDGET (self->control_center_popover));
+    }
+    gtk_box_append (GTK_BOX (gtk_widget_get_parent (GTK_WIDGET (button))),
+                    GTK_WIDGET (self->control_center_popover));
+
+    g_object_unref (self->control_center_popover);
 
     // panel_tray_menu_toggle_show (self->menu);
     gtk_popover_popup (self->control_center_popover);
@@ -32,13 +47,113 @@ stack_child_changed (GtkStack *stack, GtkWidget *child, PanelTray *self) {
     }
 }
 
-PanelTray *
-panel_tray_new (gpointer panel_ptr) {
-    UNUSED (panel_ptr);
+void
+panel_tray_update_monitors (PanelTray *self) {
+    // the ref and unref is needed so the widget isn't destroyed after being
+    // removed from the box.
+    g_object_ref (self->control_center_popover);
 
+    if (gtk_widget_get_parent (GTK_WIDGET (self->control_center_popover))) {
+        gtk_box_remove (GTK_BOX (gtk_widget_get_parent (
+                            GTK_WIDGET (self->control_center_popover))),
+                        GTK_WIDGET (self->control_center_popover));
+    }
+
+    if (self->windows) {
+        for (size_t i = 0; self->windows[i]; i++) {
+            GtkWindow *win = self->windows[i]->gtk_window;
+
+            gtk_window_close (win);
+        }
+    }
+
+    size_t n_monitors = g_list_model_get_n_items (((Panel *)self->panel)->monitors);
+
+    self->windows = malloc ((n_monitors + 1) * sizeof (GtkWindow *));
+
+    for (size_t i = 0; i < n_monitors; i++) {
+        PanelTrayWindow *window = malloc (sizeof (PanelTrayWindow));
+
+        window->gtk_window
+            = GTK_WINDOW (gtk_application_window_new (((Panel *)self->panel)->app));
+
+        // Before the window is first realized, set it up to be a layer surface
+        gtk_layer_init_for_window (window->gtk_window);
+
+        // Order below normal windows
+        gtk_layer_set_layer (window->gtk_window, GTK_LAYER_SHELL_LAYER_TOP);
+
+        // Push other windows out of the way
+        gtk_layer_auto_exclusive_zone_enable (window->gtk_window);
+
+        gtk_layer_set_monitor (window->gtk_window, g_list_model_get_item (((Panel *)self->panel)->monitors, i));
+
+        static const gboolean anchors_2[] = { TRUE, TRUE, TRUE, FALSE };
+        for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
+            gtk_layer_set_anchor (window->gtk_window, i, anchors_2[i]);
+        }
+
+        gtk_widget_set_size_request (GTK_WIDGET (window->gtk_window), 480, 32);
+
+        gtk_widget_set_name (GTK_WIDGET (window->gtk_window),
+                             "panel_topbar_window");
+
+        window->tray_box = GTK_CENTER_BOX (gtk_center_box_new ());
+
+        gtk_widget_set_hexpand (GTK_WIDGET (window->tray_box), TRUE);
+
+        gtk_widget_set_name (GTK_WIDGET (window->tray_box), "menu_bar_box");
+
+        gtk_window_set_child (window->gtk_window, GTK_WIDGET (window->tray_box));
+        gtk_widget_show (GTK_WIDGET (window->gtk_window));
+
+        window->control_center_button = GTK_BUTTON (gtk_button_new ());
+
+        GtkBox *control_center_button_box
+            = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+
+        gtk_box_append (control_center_button_box,
+                        gtk_label_new ("Control Center"));
+        gtk_box_append (control_center_button_box,
+                        gtk_image_new_from_icon_name ("tweaks-app-symbolic"));
+
+        gtk_button_set_child (window->control_center_button,
+                              GTK_WIDGET (control_center_button_box));
+
+        gtk_widget_set_name (GTK_WIDGET (window->control_center_button),
+                             "menu_bar_button");
+
+        g_signal_connect (window->control_center_button, "clicked",
+                          G_CALLBACK (show_control_center), self);
+
+        window->clock = clock_new ();
+
+        g_timeout_add (500, (GSourceFunc)clock_update, window->clock);
+
+        window->tray_end_box
+            = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+
+        gtk_box_append (window->tray_end_box,
+                        GTK_WIDGET (window->control_center_button));
+
+        gtk_center_box_set_center_widget (window->tray_box,
+                                          GTK_WIDGET (window->clock->label));
+        gtk_center_box_set_end_widget (window->tray_box,
+                                       GTK_WIDGET (window->tray_end_box));
+    }
+
+    g_object_unref (self->control_center_popover);
+}
+
+PanelTray *
+panel_tray_new (gpointer *panel) {
     PanelTray *self = malloc (sizeof (PanelTray));
 
+    self->panel = panel;
+
     self->stack = GTK_STACK (gtk_stack_new ());
+
+    self->windows = NULL;
 
     gtk_stack_set_interpolate_size (self->stack, TRUE);
     gtk_stack_set_hhomogeneous (self->stack, FALSE);
@@ -60,9 +175,9 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_grid_set_column_spacing (self->control_center_grid, 12);
 
     // Icon size DND
-    self->control_center_button = GTK_BUTTON (gtk_button_new ());
+    // self->control_center_button = GTK_BUTTON (gtk_button_new ());
 
-    GtkBox *control_center_button_box
+    /* GtkBox *control_center_button_box
         = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
     gtk_box_append (control_center_button_box,
@@ -77,7 +192,7 @@ panel_tray_new (gpointer panel_ptr) {
                          "menu_bar_button");
 
     g_signal_connect (self->control_center_button, "clicked",
-                      G_CALLBACK (show_control_center), self);
+                      G_CALLBACK (show_control_center), self); */
 
     gtk_stack_add_titled (self->stack, GTK_WIDGET (self->control_center_grid),
                           "Control Center", "Control Center");
@@ -137,9 +252,9 @@ panel_tray_new (gpointer panel_ptr) {
     self->audio_button = audio_button_new (self->stack);
     self->power_button = power_button_new (self->stack);
 
-    self->clock = clock_new ();
+    /* self->clock = clock_new ();
 
-    g_timeout_add (500, (GSourceFunc)clock_update, self->clock);
+    g_timeout_add (500, (GSourceFunc)clock_update, self->clock); */
 
     gtk_grid_attach (self->control_center_grid,
                      GTK_WIDGET (self->media_control->box), 0, 3, 4, 1);
@@ -168,7 +283,7 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_grid_attach (self->control_center_grid, GTK_WIDGET (audio_box), 0, 2,
                      4, 1);
 
-    self->tray_box = GTK_CENTER_BOX (gtk_center_box_new ());
+    /* self->tray_box = GTK_CENTER_BOX (gtk_center_box_new ());
 
     self->tray_end_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
 
@@ -181,7 +296,7 @@ panel_tray_new (gpointer panel_ptr) {
     gtk_center_box_set_center_widget (self->tray_box,
                                       GTK_WIDGET (self->clock->label));
     gtk_center_box_set_end_widget (self->tray_box,
-                                   GTK_WIDGET (self->tray_end_box));
+                                   GTK_WIDGET (self->tray_end_box)); */
 
     return self;
 }

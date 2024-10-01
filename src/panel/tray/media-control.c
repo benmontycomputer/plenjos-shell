@@ -226,7 +226,7 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
 
     gtk_widget_set_name (GTK_WIDGET (box), "control_center_card");
-    gtk_widget_set_hexpand (GTK_WIDGET (box), TRUE);
+    gtk_widget_set_hexpand (GTK_WIDGET (box), FALSE);
     gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_FILL);
 
     // DND icons
@@ -256,6 +256,7 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     gtk_box_append (controls_box, GTK_WIDGET (next_button));
 
     GtkLabel *label = GTK_LABEL (gtk_label_new ("Loading..."));
+    gtk_label_set_max_width_chars (label, 0);
 
     gtk_widget_set_hexpand (GTK_WIDGET (label), TRUE);
     gtk_label_set_wrap (label, TRUE);
@@ -286,9 +287,11 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     // Dialog icon
     GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (name->name));
 
+    gtk_widget_set_name (GTK_WIDGET (icon), "media_player_icon");
+
     gtk_widget_set_halign (GTK_WIDGET (icon), GTK_ALIGN_START);
 
-    GtkBox *info_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 2));
+    GtkBox *info_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
     gtk_box_append (info_box, GTK_WIDGET (icon));
     gtk_box_append (info_box, GTK_WIDGET (label));

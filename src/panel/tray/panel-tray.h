@@ -14,19 +14,31 @@
 
 #include "media-control.h"
 
-#include "panel-tray-menu.h"
-
-typedef struct PanelTray {
+typedef struct PanelTrayWindow {
     GtkCenterBox *tray_box;
 
     GtkBox *tray_end_box;
+
+    Clock *clock;
+
+    GtkButton *control_center_button;
+
+    GtkWindow *gtk_window;
+} PanelTrayWindow;
+
+typedef struct PanelTray {
+    /* GtkCenterBox *tray_box;
+
+    GtkBox *tray_end_box; */
+
+    PanelTrayWindow **windows;
 
     AudioButton *audio_button;
     NetworkButton *network_button;
     BluetoothButton *bluetooth_button;
     PowerButton *power_button;
 
-    GtkButton *control_center_button;
+    // GtkButton *control_center_button;
 
     GtkStack *stack;
 
@@ -36,13 +48,16 @@ typedef struct PanelTray {
 
     GtkGrid *control_center_grid;
 
-    Clock *clock;
+    // Clock *clock;
 
     MediaControl *media_control;
 
     GtkBox *back_box;
     GtkLabel *back_label;
     GtkButton *back_button;
+
+    gpointer *panel;
 } PanelTray;
 
-PanelTray *panel_tray_new (gpointer panel_ptr);
+PanelTray *panel_tray_new (gpointer *panel);
+void panel_tray_update_monitors (PanelTray *self);

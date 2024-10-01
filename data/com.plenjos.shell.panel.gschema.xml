@@ -11,7 +11,7 @@
         <choice value="2D-Panel"/>
         <choice value="Invisible"/>
       </choices>
-      <default>"true"</default>
+      <default>"3D-Dock"</default>
       <summary>Automatically install updates</summary>
       <description>
         If enabled, updates will automatically be downlaoded and installed.

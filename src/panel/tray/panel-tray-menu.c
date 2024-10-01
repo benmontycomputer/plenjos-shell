@@ -1,6 +1,18 @@
 #include "panel-tray-menu.h"
 
 static gboolean
+event_handle (GdkSurface *window, GdkEvent *event, PanelTrayMenu *self) {
+    GdkEventType type = gdk_event_get_event_type (event);
+
+    if (type == GDK_BUTTON_PRESS) {
+        printf("test\n\n");
+        fflush(stdout);
+    }
+
+    return FALSE;
+}
+
+static gboolean
 check_escape (GtkEventControllerKey *key_controller, guint keyval,
               guint keycode, GdkModifierType state, PanelTrayMenu *self) {
     UNUSED (key_controller);
@@ -26,6 +38,12 @@ focus_out_event (GtkEventControllerFocus *focus_controller,
     return;
 }
 
+static void realize (GtkWidget *widget, PanelTrayMenu *self) {
+    GdkSurface *surface = gtk_native_get_surface (GTK_NATIVE (self->window));
+
+    g_signal_connect (surface, "event", G_CALLBACK (event_handle), self);
+}
+
 PanelTrayMenu *
 panel_tray_menu_new (Panel *panel) {
     PanelTrayMenu *self = malloc (sizeof (PanelTrayMenu));
@@ -36,20 +54,22 @@ panel_tray_menu_new (Panel *panel) {
 
     self->window = GTK_WINDOW (gtk_window_new ());
 
-    // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (self->window);
 
-    // Order below normal windows
     gtk_layer_set_layer (self->window, GTK_LAYER_SHELL_LAYER_OVERLAY);
 
-    gtk_layer_set_keyboard_mode (
-        self->window,
-        GTK_LAYER_SHELL_KEYBOARD_MODE_ON_DEMAND); // NONE is default
+    gtk_layer_set_keyboard_mode (self->window,
+                                 GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE);
 
-    gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_BOTTOM, TRUE);
-    gtk_layer_set_anchor (self->window, GTK_LAYER_SHELL_EDGE_RIGHT, TRUE);
+    gtk_layer_set_margin (self->window, GTK_LAYER_SHELL_EDGE_TOP, 8);
+    gtk_layer_set_margin (self->window, GTK_LAYER_SHELL_EDGE_RIGHT, 8);
 
-    gtk_widget_set_size_request (GTK_WIDGET (self->window), 400, -1);
+    static const gboolean anchors[] = { FALSE, TRUE, TRUE, FALSE };
+    for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
+        gtk_layer_set_anchor (self->window, i, anchors[i]);
+    }
+
+    gtk_layer_set_exclusive_zone (self->window, 0);
 
     GtkEventController *key_controller = gtk_event_controller_key_new ();
     GtkEventController *focus_controller = gtk_event_controller_focus_new ();
@@ -69,6 +89,12 @@ panel_tray_menu_new (Panel *panel) {
     gtk_widget_set_name (GTK_WIDGET (self->window), "panel_tray_menu_window");
     gtk_widget_set_name (GTK_WIDGET (self->box), "panel_tray_menu_window_box");
 
+    g_signal_connect (self->window, "realize", G_CALLBACK (realize), self);
+
+    gtk_window_present (self->window);
+
+    gtk_widget_hide (GTK_WIDGET (self->window));
+
     return self;
 }
 
@@ -77,6 +103,7 @@ panel_tray_menu_toggle_show (PanelTrayMenu *self) {
     if (self->visible) {
         gtk_widget_hide (GTK_WIDGET (self->window));
     } else {
+        gtk_widget_grab_focus (GTK_WIDGET (self->window));
         gtk_widget_show (GTK_WIDGET (self->window));
     }
 
