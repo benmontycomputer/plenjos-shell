@@ -41,6 +41,18 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
     panel_taskbar_run (taskbar);
 }
 
+void
+hyprland_backend_run_wrap (GTask *task, GObject *source_object,
+                           gpointer task_data, GCancellable *cancellable) {
+    UNUSED (task);
+    UNUSED (source_object);
+    UNUSED (cancellable);
+
+    HyprlandBackend *backend = (HyprlandBackend *)task_data;
+
+    hyprland_backend_run (backend);
+}
+
 static void
 draw (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi, Panel *self) {
     UNUSED (drawing_area);
@@ -274,9 +286,10 @@ activate (GtkApplication *app, void *_data) {
 
     gtk_box_append (panel_box, GTK_WIDGET (panel_taskbar->taskbar_box));
 
-    GTask *task = g_task_new (gtk_window, NULL, NULL, NULL);
-    g_task_set_task_data (task, panel_taskbar, NULL);
-    g_task_run_in_thread (task, (GTaskThreadFunc)panel_taskbar_run_wrap);
+    GTask *taskbar_task = g_task_new (gtk_window, NULL, NULL, NULL);
+    g_task_set_task_data (taskbar_task, panel_taskbar, NULL);
+    g_task_run_in_thread (taskbar_task,
+                          (GTaskThreadFunc)panel_taskbar_run_wrap);
 
     self->tray = (gpointer)panel_tray_new ((gpointer)self);
 
@@ -362,7 +375,7 @@ activate (GtkApplication *app, void *_data) {
     cairo_surface_destroy (surface);
 
     self->blurred = scaled;*/
-    
+
     GdkDisplay *display = gdk_display_get_default ();
 
     // This will update automatically
@@ -370,11 +383,19 @@ activate (GtkApplication *app, void *_data) {
 
     panel_tray_update_monitors ((PanelTray *)self->tray);
 
-    g_signal_connect (self->monitors, "items-changed", G_CALLBACK (monitors_changed), self);
+    g_signal_connect (self->monitors, "items-changed",
+                      G_CALLBACK (monitors_changed), self);
 
     self->blurred = pbuf;
 
     panel_applications_menu_set_bg (apps_menu, self->blurred);
+
+    HyprlandBackend *hypr = hyprland_backend_init ();
+
+    GTask *hypr_task = g_task_new (gtk_window, NULL, NULL, NULL);
+    g_task_set_task_data (hypr_task, hypr, NULL);
+    g_task_run_in_thread (hypr_task,
+                          (GTaskThreadFunc)hyprland_backend_run_wrap);
 }
 
 int

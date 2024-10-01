@@ -16,3 +16,5 @@
 #include "panel-common.h"
 
 #include "notifyd/notifyd.h"
+
+#include "hyprland/backend.h"

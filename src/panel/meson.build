@@ -7,6 +7,7 @@ subdir('applications-menu')
 subdir('blur')
 subdir('tray')
 subdir('notifyd')
+subdir('hyprland')
 
 gnome = import('gnome')
 
