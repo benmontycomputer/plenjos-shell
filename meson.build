@@ -24,6 +24,8 @@ alsa = dependency('alsa', version: '>=1.2.8')
 
 dbus = dependency('dbus-1', version: '>=1.12.0')
 
+jansson = dependency('jansson', version: '>=2.14')
+
 test('basic', exe)
 
 subdir('data')

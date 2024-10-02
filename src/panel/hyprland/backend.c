@@ -87,9 +87,6 @@ getSocket1Reply (const char *rq) {
 
     snprintf (socketPath, socketPathLen, "%s/.socket.sock", socketFolderPath);
 
-    printf("%s\n\n\n", socketPath);
-    fflush(stdout);
-
     // Use snprintf to copy the socketPath string into serverAddress.sun_path
     if (snprintf (serverAddress.sun_path, sizeof (serverAddress.sun_path),
                   "%s", socketPath)
@@ -122,6 +119,8 @@ getSocket1Reply (const char *rq) {
     char buffer[8192] = { 0 };
     char *response = NULL;
 
+    size_t response_len = 1;
+
     do {
         sizeWritten = read (serverSocket, buffer, 8192);
 
@@ -132,20 +131,107 @@ getSocket1Reply (const char *rq) {
             return "";
         }
 
-        printf ("%s\n", buffer);
-        fflush (stdout);
+        if (sizeWritten != 0) {
+            size_t new_start = response_len - 1;
 
-        response = malloc (sizeWritten + 1);
-        snprintf (response, sizeWritten + 1, "%s", buffer);
+            response_len += strlen (buffer);
+
+            if (response)
+                response = realloc (response, response_len);
+            else
+                response = malloc (response_len);
+
+            snprintf (response + new_start, response_len - new_start, "%s",
+                      buffer);
+        }
     } while (sizeWritten > 0);
 
     close (serverSocket);
+
+    printf ("Opened buffer: \n\n%s\n\n", buffer);
+    fflush (stdout);
+
     return response;
 }
 
 void
 hyprland_backend_run (HyprlandBackend *self) {
     FILE *file = fdopen (self->socketfd, "r");
+
+    char *workspaces_init = getSocket1Reply ("j/workspaces");
+
+    printf ("\n%s\n", workspaces_init);
+    fflush (stdout);
+
+    // https://jansson.readthedocs.io/en/latest/tutorial.html
+    json_t *root;
+    json_error_t error;
+
+    root = json_loads (workspaces_init, 0, &error);
+    free (workspaces_init);
+
+    if (!root) {
+        fprintf (
+            stderr,
+            "Couldn't parse initial workspaces JSON. error on line %d: %s\n",
+            error.line, error.text);
+        fflush (stderr);
+    } else {
+        if (!json_is_array (root)) {
+            fprintf (stderr, "Error: root node for initial workspaces JSON is "
+                             "not an array.\n");
+            fflush (stderr);
+        } else {
+            self->workspacesCount = json_array_size (root);
+            self->workspaces = malloc (sizeof (HyprlandWorkspace *) * self->workspacesCount);
+
+            for (size_t i = 0; i < self->workspacesCount; i++) {
+                json_t *data, *id, *name, *monitor, *monitorID, *windows,
+                    *hasfullscreen, *lastwindow, *lastwindowtitle;
+
+                const char *message_text;
+
+                data = json_array_get (root, i);
+                if (!json_is_object (data)) {
+                    fprintf (
+                        stderr,
+                        "error: workspace data at index %d is not an object\n",
+                        i);
+                    fflush (stderr);
+                } else {
+                    // TODO: check types on these
+
+                    id = json_object_get (data, "id");
+                    name = json_object_get (data, "name");
+                    monitor = json_object_get (data, "monitor");
+                    monitorID = json_object_get (data, "monitorID");
+                    windows = json_object_get (data, "windows");
+                    hasfullscreen = json_object_get (data, "hasfullscreen");
+                    lastwindow = json_object_get (data, "lastwindow");
+                    lastwindowtitle
+                        = json_object_get (data, "lastwindowtitle");
+
+                    HyprlandWorkspace workspace = {
+                        id : json_integer_value (id),
+                        name : json_string_value (name),
+                        monitor : json_string_value (monitor),
+                        monitorID : json_integer_value (monitorID),
+                        windows : json_integer_value (windows),
+                        hasfullscreen : json_boolean_value (hasfullscreen),
+                        lastwindow : json_string_value (lastwindow),
+                        lastwindowtitle : json_string_value (lastwindowtitle)
+                    };
+
+                    self->workspaces[i] = malloc (sizeof (HyprlandWorkspace));
+                    self->workspaces[i][0] = workspace;
+
+                    printf ("id: %d, name: %s\n", self->workspaces[i]->id, self->workspaces[i]->name);
+                }
+            }
+        }
+
+        json_decref (root);
+    }
 
     while (true) {
         char buffer[1024];
@@ -158,11 +244,7 @@ hyprland_backend_run (HyprlandBackend *self) {
             continue;
         }
 
-        printf ("%s\n", receivedCharPtr);
-        fflush (stdout);
-
-        printf ("Workspaces: %s\n\n", getSocket1Reply ("workspaces"));
-
+        printf ("%s", receivedCharPtr);
         fflush (stdout);
     }
 }
