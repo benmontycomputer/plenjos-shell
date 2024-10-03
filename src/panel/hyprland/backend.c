@@ -156,6 +156,10 @@ getSocket1Reply (const char *rq) {
 
 void
 hyprland_backend_run (HyprlandBackend *self) {
+    for (size_t i = 0; i < WORKSPACES_MAX; i++) {
+        self->workspaces[i] = NULL;
+    }
+
     FILE *file = fdopen (self->socketfd, "r");
 
     char *workspaces_init = getSocket1Reply ("j/workspaces");
@@ -183,7 +187,6 @@ hyprland_backend_run (HyprlandBackend *self) {
             fflush (stderr);
         } else {
             self->workspacesCount = json_array_size (root);
-            self->workspaces = malloc (sizeof (HyprlandWorkspace *) * self->workspacesCount);
 
             for (size_t i = 0; i < self->workspacesCount; i++) {
                 json_t *data, *id, *name, *monitor, *monitorID, *windows,
@@ -211,8 +214,10 @@ hyprland_backend_run (HyprlandBackend *self) {
                     lastwindowtitle
                         = json_object_get (data, "lastwindowtitle");
 
+                    int id_int = json_integer_value (id);
+
                     HyprlandWorkspace workspace = {
-                        id : json_integer_value (id),
+                        id : id_int,
                         name : json_string_value (name),
                         monitor : json_string_value (monitor),
                         monitorID : json_integer_value (monitorID),
@@ -222,10 +227,23 @@ hyprland_backend_run (HyprlandBackend *self) {
                         lastwindowtitle : json_string_value (lastwindowtitle)
                     };
 
-                    self->workspaces[i] = malloc (sizeof (HyprlandWorkspace));
-                    self->workspaces[i][0] = workspace;
+                    // TODO: stop this from potentially breaking the program
+                    if (id >= WORKSPACES_MAX) {
+                        fprintf (stderr,
+                                 "workspace id %d is greater than the max of "
+                                 "%d. Can't continue.\n",
+                                 id_int, WORKSPACES_MAX);
+                        fflush (stderr);
 
-                    printf ("id: %d, name: %s\n", self->workspaces[i]->id, self->workspaces[i]->name);
+                        continue;
+                    }
+
+                    self->workspaces[id_int]
+                        = malloc (sizeof (HyprlandWorkspace));
+                    self->workspaces[id_int][0] = workspace;
+
+                    printf ("id: %d, name: %s\n", self->workspaces[id_int]->id,
+                            self->workspaces[id_int]->name);
                 }
             }
         }
@@ -242,6 +260,23 @@ hyprland_backend_run (HyprlandBackend *self) {
             usleep (1);
 
             continue;
+        }
+
+        // Using "createworkspace>" instead of "createworkspace" because it's shorter than
+        // "createworkspace>>" but "createworkspace" would also match "createworkspacev2>>"
+        if (!strncmp (receivedCharPtr, "createworkspace>", 10)) {
+            long workspace_id = strtol (receivedCharPtr + 11, NULL, 10);
+
+            if (self->workspaces[workspace_id]) {
+                // Show workspace
+
+                fprintf (stderr, "Newly created workspace %d was already in the array. NOT GOOD.\n", (int)workspace_id);
+                fflush (stdout);
+            } else {
+                HyprlandWorkspace workspace;
+                workspace.id = (int)workspace_id;
+                workspace.
+            }
         }
 
         printf ("%s", receivedCharPtr);

@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <jansson.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,7 +10,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <jansson.h>
+
+#define WORKSPACES_MAX 256
 
 // This was helpful:
 // https://github.com/Alexays/Waybar/blob/master/src/modules/hyprland/backend.cpp
@@ -29,7 +31,7 @@ typedef struct HyprlandBackend {
     int socketfd;
 
     int workspacesCount;
-    HyprlandWorkspace **workspaces;
+    HyprlandWorkspace *workspaces[WORKSPACES_MAX];
 } HyprlandBackend;
 
 HyprlandBackend *hyprland_backend_init ();
