@@ -1,3 +1,3 @@
 panel_sources += [
-    'hyprland/backend.c',
+    'hyprland/backend.c', 'hyprland/workspaces.c',
 ]

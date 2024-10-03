@@ -1,4 +1,5 @@
 #include "hyprland/backend.h"
+#include "hyprland/workspaces.h"
 
 // This was helpful:
 // https://github.com/Alexays/Waybar/blob/master/src/modules/hyprland/backend.cpp
@@ -155,101 +156,14 @@ getSocket1Reply (const char *rq) {
 }
 
 void
-hyprland_backend_run (HyprlandBackend *self) {
+hypr_backend_run (HyprBackend *self) {
     for (size_t i = 0; i < WORKSPACES_MAX; i++) {
         self->workspaces[i] = NULL;
     }
 
+    updateWorkspace (UPDATE_ALL_WORKSPACES, self);
+
     FILE *file = fdopen (self->socketfd, "r");
-
-    char *workspaces_init = getSocket1Reply ("j/workspaces");
-
-    printf ("\n%s\n", workspaces_init);
-    fflush (stdout);
-
-    // https://jansson.readthedocs.io/en/latest/tutorial.html
-    json_t *root;
-    json_error_t error;
-
-    root = json_loads (workspaces_init, 0, &error);
-    free (workspaces_init);
-
-    if (!root) {
-        fprintf (
-            stderr,
-            "Couldn't parse initial workspaces JSON. error on line %d: %s\n",
-            error.line, error.text);
-        fflush (stderr);
-    } else {
-        if (!json_is_array (root)) {
-            fprintf (stderr, "Error: root node for initial workspaces JSON is "
-                             "not an array.\n");
-            fflush (stderr);
-        } else {
-            self->workspacesCount = json_array_size (root);
-
-            for (size_t i = 0; i < self->workspacesCount; i++) {
-                json_t *data, *id, *name, *monitor, *monitorID, *windows,
-                    *hasfullscreen, *lastwindow, *lastwindowtitle;
-
-                const char *message_text;
-
-                data = json_array_get (root, i);
-                if (!json_is_object (data)) {
-                    fprintf (
-                        stderr,
-                        "error: workspace data at index %d is not an object\n",
-                        i);
-                    fflush (stderr);
-                } else {
-                    // TODO: check types on these
-
-                    id = json_object_get (data, "id");
-                    name = json_object_get (data, "name");
-                    monitor = json_object_get (data, "monitor");
-                    monitorID = json_object_get (data, "monitorID");
-                    windows = json_object_get (data, "windows");
-                    hasfullscreen = json_object_get (data, "hasfullscreen");
-                    lastwindow = json_object_get (data, "lastwindow");
-                    lastwindowtitle
-                        = json_object_get (data, "lastwindowtitle");
-
-                    int id_int = json_integer_value (id);
-
-                    HyprlandWorkspace workspace = {
-                        id : id_int,
-                        name : json_string_value (name),
-                        monitor : json_string_value (monitor),
-                        monitorID : json_integer_value (monitorID),
-                        windows : json_integer_value (windows),
-                        hasfullscreen : json_boolean_value (hasfullscreen),
-                        lastwindow : json_string_value (lastwindow),
-                        lastwindowtitle : json_string_value (lastwindowtitle)
-                    };
-
-                    // TODO: stop this from potentially breaking the program
-                    if (id >= WORKSPACES_MAX) {
-                        fprintf (stderr,
-                                 "workspace id %d is greater than the max of "
-                                 "%d. Can't continue.\n",
-                                 id_int, WORKSPACES_MAX);
-                        fflush (stderr);
-
-                        continue;
-                    }
-
-                    self->workspaces[id_int]
-                        = malloc (sizeof (HyprlandWorkspace));
-                    self->workspaces[id_int][0] = workspace;
-
-                    printf ("id: %d, name: %s\n", self->workspaces[id_int]->id,
-                            self->workspaces[id_int]->name);
-                }
-            }
-        }
-
-        json_decref (root);
-    }
 
     while (true) {
         char buffer[1024];
@@ -262,21 +176,49 @@ hyprland_backend_run (HyprlandBackend *self) {
             continue;
         }
 
-        // Using "createworkspace>" instead of "createworkspace" because it's shorter than
-        // "createworkspace>>" but "createworkspace" would also match "createworkspacev2>>"
-        if (!strncmp (receivedCharPtr, "createworkspace>", 10)) {
-            long workspace_id = strtol (receivedCharPtr + 11, NULL, 10);
+        // Using "createworkspace>" instead of "createworkspace" because it's
+        // shorter than "createworkspace>>" but "createworkspace" would also
+        // match "createworkspacev2>>"
+        /* if (!strncmp (receivedCharPtr, "createworkspace>", 16)) {
+            long workspace_id = strtol (receivedCharPtr + 17, NULL, 10);
 
             if (self->workspaces[workspace_id]) {
                 // Show workspace
 
-                fprintf (stderr, "Newly created workspace %d was already in the array. NOT GOOD.\n", (int)workspace_id);
-                fflush (stdout);
-            } else {
-                HyprlandWorkspace workspace;
+                fprintf (stderr, "Newly created workspace %d was already in the
+        array. NOT GOOD.\n", (int)workspace_id); fflush (stdout); } else {
+                HyprWorkspace workspace;
                 workspace.id = (int)workspace_id;
-                workspace.
+                workspace.monitorID = self->monitors[self->currentMonitor];
             }
+        } */
+
+        if (!strncmp (receivedCharPtr, "workspace>", 10)) {
+            onWorkspaceActivated (receivedCharPtr + 11, self);
+        } else if (!strncmp (receivedCharPtr, "activespecial>", 14)) {
+            onSpecialWorkspaceActivated (receivedCharPtr + 15, self);
+        } else if (!strncmp (receivedCharPtr, "destroyworkspace>", 17)) {
+            onWorkspaceDestroyed (receivedCharPtr + 18, self);
+        } else if (!strncmp (receivedCharPtr, "createworkspace>", 16)) {
+            onWorkspaceCreated (receivedCharPtr + 17, self);
+        } else if (!strncmp (receivedCharPtr, "focusedmon>", 11)) {
+            onMonitorFocused (receivedCharPtr + 12, self);
+        } else if (!strncmp (receivedCharPtr, "moveworkspace>", 14)) {
+            onWorkspaceMoved (receivedCharPtr + 15, self);
+        } else if (!strncmp (receivedCharPtr, "openwindow>", 11)) {
+            onWindowOpened (receivedCharPtr + 12, self);
+        } else if (!strncmp (receivedCharPtr, "closewindow>", 12)) {
+            onWindowClosed (receivedCharPtr + 13, self);
+        } else if (!strncmp (receivedCharPtr, "movewindow>", 11)) {
+            onWindowMoved (receivedCharPtr + 12, self);
+        } else if (!strncmp (receivedCharPtr, "urgent>", 7)) {
+            setUrgentWorkspace (receivedCharPtr + 8, self);
+        } else if (!strncmp (receivedCharPtr, "renameworkspace>", 16)) {
+            onWorkspaceRenamed (receivedCharPtr + 17, self);
+        } else if (!strncmp (receivedCharPtr, "windowtitle>", 12)) {
+            onWindowTitleEvent (receivedCharPtr + 13, self);
+        } else if (!strncmp (receivedCharPtr, "configreloaded>", 15)) {
+            onConfigReloaded (self);
         }
 
         printf ("%s", receivedCharPtr);
@@ -284,8 +226,8 @@ hyprland_backend_run (HyprlandBackend *self) {
     }
 }
 
-HyprlandBackend *
-hyprland_backend_init () {
+HyprBackend *
+hypr_backend_init () {
     const char *his = getenv ("HYPRLAND_INSTANCE_SIGNATURE");
 
     if (his == NULL) {
@@ -329,7 +271,7 @@ hyprland_backend_init () {
         return NULL;
     }
 
-    HyprlandBackend *self = malloc (sizeof (HyprlandBackend));
+    HyprBackend *self = malloc (sizeof (HyprBackend));
 
     self->socketfd = socketfd;
 

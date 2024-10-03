@@ -42,15 +42,15 @@ panel_taskbar_run_wrap (GTask *task, GObject *source_object,
 }
 
 void
-hyprland_backend_run_wrap (GTask *task, GObject *source_object,
+hypr_backend_run_wrap (GTask *task, GObject *source_object,
                            gpointer task_data, GCancellable *cancellable) {
     UNUSED (task);
     UNUSED (source_object);
     UNUSED (cancellable);
 
-    HyprlandBackend *backend = (HyprlandBackend *)task_data;
+    HyprBackend *backend = (HyprBackend *)task_data;
 
-    hyprland_backend_run (backend);
+    hypr_backend_run (backend);
 }
 
 static void
@@ -390,12 +390,12 @@ activate (GtkApplication *app, void *_data) {
 
     panel_applications_menu_set_bg (apps_menu, self->blurred);
 
-    HyprlandBackend *hypr = hyprland_backend_init ();
+    HyprBackend *hypr = hypr_backend_init ();
 
     GTask *hypr_task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (hypr_task, hypr, NULL);
     g_task_run_in_thread (hypr_task,
-                          (GTaskThreadFunc)hyprland_backend_run_wrap);
+                          (GTaskThreadFunc)hypr_backend_run_wrap);
 }
 
 int
