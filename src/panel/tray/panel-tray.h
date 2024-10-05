@@ -17,6 +17,7 @@
 typedef struct PanelTrayWindow {
     GtkCenterBox *tray_box;
 
+    GtkBox *workspaces_box;
     GtkBox *tray_end_box;
 
     Clock *clock;
@@ -24,13 +25,11 @@ typedef struct PanelTrayWindow {
     GtkButton *control_center_button;
 
     GtkWindow *gtk_window;
+
+    GdkMonitor *monitor;
 } PanelTrayWindow;
 
 typedef struct PanelTray {
-    /* GtkCenterBox *tray_box;
-
-    GtkBox *tray_end_box; */
-
     PanelTrayWindow **windows;
 
     AudioButton *audio_button;
@@ -38,17 +37,10 @@ typedef struct PanelTray {
     BluetoothButton *bluetooth_button;
     PowerButton *power_button;
 
-    // GtkButton *control_center_button;
-
     GtkStack *stack;
-
-    // PanelTrayMenu *menu;
     GtkPopover *control_center_popover;
     GtkBox *control_center_popover_box;
-
     GtkGrid *control_center_grid;
-
-    // Clock *clock;
 
     MediaControl *media_control;
 

@@ -2,9 +2,7 @@
 
 #include "hyprland/backend.h"
 
-#define UPDATE_ALL_WORKSPACES -1
-
-void updateWorkspace (int workspace_id, HyprBackend *self);
+void updateWorkspaces (HyprBackend *self);
 void onWorkspaceActivated (char *payload, HyprBackend *self);
 void onSpecialWorkspaceActivated (char *payload, HyprBackend *self);
 void onWorkspaceDestroyed (char *payload, HyprBackend *self);

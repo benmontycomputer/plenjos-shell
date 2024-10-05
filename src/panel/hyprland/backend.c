@@ -8,16 +8,14 @@
 static char *
 getSocketFolder (const char *instanceSig) {
     // DON'T FREE EVEN IN CALLING FUNCTION
-    static char *socketFolder = NULL;
+    static char *path = NULL;
 
     // socket path, specified by EventManager of Hyprland
-    if (socketFolder != NULL) {
-        return socketFolder;
+    if (path != NULL) {
+        return path;
     }
 
     const char *xdgRuntimeDirEnv = getenv ("XDG_RUNTIME_DIR");
-
-    char *path = NULL;
 
     if (xdgRuntimeDirEnv) {
         DIR *dir = opendir (xdgRuntimeDirEnv);
@@ -95,6 +93,8 @@ getSocket1Reply (const char *rq) {
         fprintf (stderr, "Hyprland IPC: Couldn't copy socket path (6).\n");
         fflush (stderr);
 
+        free (socketPath);
+
         return NULL;
     }
 
@@ -105,8 +105,12 @@ getSocket1Reply (const char *rq) {
                  socketPath);
         fflush (stderr);
 
+        free (socketPath);
+
         return NULL;
     }
+
+    free (socketPath);
 
     ssize_t sizeWritten = write (serverSocket, rq, strlen (rq));
 
@@ -149,9 +153,6 @@ getSocket1Reply (const char *rq) {
 
     close (serverSocket);
 
-    printf ("Opened buffer: \n\n%s\n\n", buffer);
-    fflush (stdout);
-
     return response;
 }
 
@@ -161,11 +162,17 @@ hypr_backend_run (HyprBackend *self) {
         self->workspaces[i] = NULL;
     }
 
-    updateWorkspace (UPDATE_ALL_WORKSPACES, self);
+    updateWorkspaces (self);
 
     FILE *file = fdopen (self->socketfd, "r");
 
+    self->backend_waiting = false;
+
     while (true) {
+        while (self->backend_waiting) {
+            usleep (1);
+        }
+
         char buffer[1024];
 
         char *receivedCharPtr = fgets (buffer, 1024, file);
@@ -175,23 +182,6 @@ hypr_backend_run (HyprBackend *self) {
 
             continue;
         }
-
-        // Using "createworkspace>" instead of "createworkspace" because it's
-        // shorter than "createworkspace>>" but "createworkspace" would also
-        // match "createworkspacev2>>"
-        /* if (!strncmp (receivedCharPtr, "createworkspace>", 16)) {
-            long workspace_id = strtol (receivedCharPtr + 17, NULL, 10);
-
-            if (self->workspaces[workspace_id]) {
-                // Show workspace
-
-                fprintf (stderr, "Newly created workspace %d was already in the
-        array. NOT GOOD.\n", (int)workspace_id); fflush (stdout); } else {
-                HyprWorkspace workspace;
-                workspace.id = (int)workspace_id;
-                workspace.monitorID = self->monitors[self->currentMonitor];
-            }
-        } */
 
         if (!strncmp (receivedCharPtr, "workspace>", 10)) {
             onWorkspaceActivated (receivedCharPtr + 11, self);
@@ -227,7 +217,7 @@ hypr_backend_run (HyprBackend *self) {
 }
 
 HyprBackend *
-hypr_backend_init () {
+hypr_backend_init (Panel *panel) {
     const char *his = getenv ("HYPRLAND_INSTANCE_SIGNATURE");
 
     if (his == NULL) {
@@ -260,6 +250,8 @@ hypr_backend_init () {
 
     strncpy (addr.sun_path, socketPath, sizeof (addr.sun_path) - 1);
 
+    free (socketPath);
+
     addr.sun_path[sizeof (addr.sun_path) - 1] = 0;
 
     int l = sizeof (struct sockaddr_un);
@@ -274,6 +266,8 @@ hypr_backend_init () {
     HyprBackend *self = malloc (sizeof (HyprBackend));
 
     self->socketfd = socketfd;
+    self->currentMonitor = 0;
+    self->panel = panel;
 
     return self;
 }

@@ -61,15 +61,17 @@ panel_tray_update_monitors (PanelTray *self) {
 
     if (self->windows) {
         for (size_t i = 0; self->windows[i]; i++) {
-            GtkWindow *win = self->windows[i]->gtk_window;
+            PanelTrayWindow *win = self->windows[i];
 
-            gtk_window_close (win);
+            gtk_window_close (win->gtk_window);
+
+            free (win);
         }
     }
 
     size_t n_monitors = g_list_model_get_n_items (((Panel *)self->panel)->monitors);
 
-    self->windows = malloc ((n_monitors + 1) * sizeof (GtkWindow *));
+    self->windows = malloc ((n_monitors + 1) * sizeof (PanelTrayWindow *));
 
     for (size_t i = 0; i < n_monitors; i++) {
         PanelTrayWindow *window = malloc (sizeof (PanelTrayWindow));
@@ -86,7 +88,10 @@ panel_tray_update_monitors (PanelTray *self) {
         // Push other windows out of the way
         gtk_layer_auto_exclusive_zone_enable (window->gtk_window);
 
-        gtk_layer_set_monitor (window->gtk_window, g_list_model_get_item (((Panel *)self->panel)->monitors, i));
+        GdkMonitor *monitor = GDK_MONITOR (g_list_model_get_item (((Panel *)self->panel)->monitors, i));
+
+        gtk_layer_set_monitor (window->gtk_window, monitor);
+        window->monitor = monitor;
 
         static const gboolean anchors_2[] = { TRUE, TRUE, TRUE, FALSE };
         for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
@@ -130,17 +135,25 @@ panel_tray_update_monitors (PanelTray *self) {
 
         g_timeout_add (500, (GSourceFunc)clock_update, window->clock);
 
+        window->workspaces_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+
         window->tray_end_box
             = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
 
         gtk_box_append (window->tray_end_box,
                         GTK_WIDGET (window->control_center_button));
 
+        gtk_center_box_set_start_widget (window->tray_box,
+                                       GTK_WIDGET (window->workspaces_box));
         gtk_center_box_set_center_widget (window->tray_box,
                                           GTK_WIDGET (window->clock->label));
         gtk_center_box_set_end_widget (window->tray_box,
                                        GTK_WIDGET (window->tray_end_box));
+
+        self->windows[i] = window;
     }
+
+    self->windows[n_monitors] = NULL;
 
     g_object_unref (self->control_center_popover);
 }

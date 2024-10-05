@@ -2,6 +2,7 @@
 
 #include <dirent.h>
 #include <errno.h>
+#include <gtk/gtk.h>
 #include <jansson.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,6 +11,8 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+
+#include "panel-common.h"
 
 #define WORKSPACES_MAX 256
 #define MONITORS_MAX 256
@@ -26,6 +29,10 @@ typedef struct HyprWorkspace {
     bool hasfullscreen;
     char *lastwindow;
     char *lastwindowtitle;
+
+    GdkMonitor *gdk_monitor;
+
+    GtkWidget *button;
 } HyprWorkspace;
 
 typedef struct HyprMonitor {
@@ -41,8 +48,12 @@ typedef struct HyprBackend {
     HyprMonitor *monitors[MONITORS_MAX];
 
     int currentMonitor;
+
+    Panel *panel;
+
+    bool backend_waiting;
 } HyprBackend;
 
-HyprBackend *hypr_backend_init ();
+HyprBackend *hypr_backend_init (Panel *panel);
 void hypr_backend_run (HyprBackend *self);
 char *getSocket1Reply (const char *rq);

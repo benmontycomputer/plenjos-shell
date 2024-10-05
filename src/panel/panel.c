@@ -24,7 +24,6 @@
 #include "panel.h"
 
 #include "taskbar/panel-taskbar.h"
-#include "tray/panel-tray-menu.h"
 #include "tray/panel-tray.h"
 
 #include "applications-menu/panel-applications-menu.h"
@@ -349,33 +348,6 @@ activate (GtkApplication *app, void *_data) {
             "/usr/share/backgrounds/gnome/drool-d.svg", 2560, -1, NULL);
     }
 
-    /*int scale_factor = gdk_monitor_get_scale_factor (
-        gdk_display_get_monitor_at_window (gdk_display_get_default (), win));
-
-    cairo_surface_t *surfaceold
-        = gdk_cairo_surface_create_from_pixbuf (pbuf, 1, win);
-
-    cairo_surface_t *surface = cairo_image_surface_create (
-        CAIRO_FORMAT_RGB24, cairo_image_surface_get_width (surfaceold),
-        cairo_image_surface_get_height (surfaceold));
-
-    cairo_surface_set_device_scale (surface, scale_factor, scale_factor);
-
-    stack_blur (surfaceold, surface, 240, 240);
-
-    GdkPixbuf *unscaled
-        = gdk_pixbuf_get_from_surface (surface, 0, 0, 2560, 1440);
-
-    GdkPixbuf *scaled
-        = gdk_pixbuf_scale_simple (unscaled, 2560, 1440, GDK_INTERP_BILINEAR);
-
-    g_object_unref (unscaled);
-    g_object_unref (pbuf);
-    cairo_surface_destroy (surfaceold);
-    cairo_surface_destroy (surface);
-
-    self->blurred = scaled;*/
-
     GdkDisplay *display = gdk_display_get_default ();
 
     // This will update automatically
@@ -390,7 +362,7 @@ activate (GtkApplication *app, void *_data) {
 
     panel_applications_menu_set_bg (apps_menu, self->blurred);
 
-    HyprBackend *hypr = hypr_backend_init ();
+    HyprBackend *hypr = hypr_backend_init (self);
 
     GTask *hypr_task = g_task_new (gtk_window, NULL, NULL, NULL);
     g_task_set_task_data (hypr_task, hypr, NULL);

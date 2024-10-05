@@ -191,6 +191,17 @@
     font-weight: lighter;
 }
 
+#panel_tray_workspace_button {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    padding: 4px;
+}
+
+#panel_tray_workspace_button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
 #panel_clock {
     padding: 0px 4px;
     margin: 2px 1px;
