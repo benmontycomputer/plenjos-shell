@@ -1,6 +1,7 @@
 #include "panel-taskbar.h"
 #include "panel-taskbar-application.h"
 #include "panel-taskbar-toplevel-button.h"
+#include "panel-common.h"
 
 // Lots of code adapted from https://github.com/selairi/yatbfw
 
@@ -79,6 +80,14 @@ registry_handle_global (void *data, struct wl_registry *registry,
         fflush (stdout);
         zwlr_foreign_toplevel_manager_v1_add_listener (
             self->toplevel_manager, &toplevel_manager_listener, self);
+    } else if (!strcmp (interface,
+                      hyprland_toplevel_export_manager_v1_interface.name)) {
+        self->export_manager = wl_registry_bind (
+            self->registry, name, &hyprland_toplevel_export_manager_v1_interface,
+            version);
+        printf ("Binding interface %s\n",
+                hyprland_toplevel_export_manager_v1_interface.name);
+        fflush (stdout);
     } else if (!strcmp (interface, wl_output_interface.name)) {
         self->output = wl_registry_bind (self->registry, name,
                                          &wl_output_interface, version);

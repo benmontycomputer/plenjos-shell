@@ -1,6 +1,14 @@
 #include "hyprland/backend.h"
 #include "hyprland/workspaces.h"
 
+struct hyprland_toplevel_export_frame_v1 *getToplevelFrame (struct zwlr_foreign_toplevel_handle_v1 *handle, HyprBackend *self) {
+    struct hyprland_toplevel_export_frame_v1 *frame = hyprland_toplevel_export_manager_v1_capture_toplevel_with_wlr_toplevel_handle (self->panel->taskbar->export_manager, false, handle);
+
+    struct wl_buffer buffer;
+
+    hyprland_toplevel_exportframe
+}
+
 // This was helpful:
 // https://github.com/Alexays/Waybar/blob/master/src/modules/hyprland/backend.cpp
 

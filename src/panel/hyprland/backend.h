@@ -11,6 +11,9 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
+#include <wayland-client.h>
+
+#include "hyprland-toplevel-export-v1-client.h"
 
 #include "panel-common.h"
 
@@ -50,6 +53,7 @@ typedef struct HyprBackend {
     int currentMonitor;
 
     Panel *panel;
+    struct hyprland_toplevel_export_manager_v1 *toplevelExportManager;
 
     bool backend_waiting;
 } HyprBackend;

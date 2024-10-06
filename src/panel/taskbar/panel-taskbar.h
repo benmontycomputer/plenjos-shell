@@ -9,6 +9,7 @@
 #include <wayland-cursor.h>
 #include "xdg-shell-client.h"
 #include "wlr-foreign-toplevel-management-unstable-v1-client.h"
+#include "hyprland-toplevel-export-v1-client.h"
 
 #include <stdbool.h>
 #include <poll.h>
@@ -25,6 +26,7 @@ typedef struct PanelTaskbar {
     struct wl_shm *shm;
     // struct zwlr_layer_shell_v1 *layer_shell;
     struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+    struct hyprland_toplevel_export_manager_v1 *export_manager;
     struct wl_output *output;
 
     bool has_keyboard;
@@ -39,6 +41,7 @@ typedef struct PanelTaskbar {
     GtkBox *taskbar_box;
 
     GSettings *settings;
+
 } PanelTaskbar;
 
 PanelTaskbar *panel_taskbar_init();

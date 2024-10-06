@@ -32,7 +32,8 @@
         "text_encoding": "c",
         "array": "c",
         "string_view": "c",
-        "span": "c"
+        "span": "c",
+        "hyprland-toplevel-export-v1-client.h": "c"
     },
     "C_Cpp.clang_format_fallbackStyle": "{BasedOnStyle: GNU, IndentWidth: 4, BreakBeforeBraces: Attach, BreakAfterReturnType: None}",
     "editor.tabSize": 4,
