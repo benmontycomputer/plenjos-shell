@@ -21,5 +21,5 @@ panel_sources += panel_protocol_srcs
 executable(
     'plenjos-panel', panel_sources,
     build_by_default: true,
-    dependencies: [gtk, gtk_layer_shell, wayland_client, wayland_protocols, m, playerctl, alsa, dbus, jansson],
+    dependencies: [gtk, gtk_layer_shell, wayland_client, wayland_protocols, m, playerctl, alsa, dbus, jansson, gnome_bluetooth],
     install: true)

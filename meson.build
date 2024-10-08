@@ -26,6 +26,8 @@ dbus = dependency('dbus-1', version: '>=1.12.0')
 
 jansson = dependency('jansson', version: '>=2.14')
 
+gnome_bluetooth = dependency('gnome-bluetooth-ui-3.0', version: '>=47.0')
+
 test('basic', exe)
 
 subdir('data')

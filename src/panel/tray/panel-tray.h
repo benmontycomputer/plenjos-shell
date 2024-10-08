@@ -8,8 +8,8 @@
 #include "clock.h"
 
 #include "audio-button.h"
-#include "network-button.h"
 #include "bluetooth-button.h"
+#include "network-button.h"
 #include "power-button.h"
 
 #include "media-control.h"

@@ -202,6 +202,22 @@
     background-color: rgba(255, 255, 255, 0.2);
 }
 
+#panel_tray_bluetooth_settings > * > * > * > * > * {
+    margin: 4px;
+}
+
+#panel_tray_bluetooth_settings > * > * > * > * > * > label {
+    margin-bottom: -24px;
+    display: none;
+}
+
+
+#panel_tray_bluetooth_settings > * > * > * {
+    background-color: transparent;
+    border: none;
+    margin: 0px;
+}
+
 #panel_clock {
     padding: 0px 4px;
     margin: 2px 1px;
@@ -268,8 +284,8 @@
 }
 
 #control_center_popover contents {
-    background-color: rgba(80, 80, 80, 0.9);
     border-radius: 16px;
+    background-color: rgba(32, 32, 32, 0.7);
 }
 
 #notifyd_icon {

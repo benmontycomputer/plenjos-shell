@@ -169,7 +169,7 @@ panel_tray_new (gpointer *panel) {
     self->windows = NULL;
 
     gtk_stack_set_interpolate_size (self->stack, TRUE);
-    gtk_stack_set_hhomogeneous (self->stack, FALSE);
+    gtk_stack_set_hhomogeneous (self->stack, TRUE);
     gtk_stack_set_vhomogeneous (self->stack, FALSE);
 
     gtk_stack_set_transition_type (self->stack,

@@ -13,6 +13,13 @@ bluetooth_button_new (GtkStack *stack) {
 
     self->box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
+    self->settings = BLUETOOTH_SETTINGS_WIDGET (bluetooth_settings_widget_new ());
+    gtk_widget_set_hexpand (GTK_WIDGET (self->settings), FALSE);
+
+    gtk_widget_set_name (GTK_WIDGET (self->settings), "panel_tray_bluetooth_settings");
+
+    gtk_box_append (self->box, GTK_WIDGET (self->settings));
+
     self->button = GTK_BUTTON (
         gtk_button_new ());
 
