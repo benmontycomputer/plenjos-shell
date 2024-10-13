@@ -4,11 +4,6 @@
   <requires lib="gtk" version="4.8"/>
   <template class="PanelApplicationsMenu" parent="GtkApplicationWindow">
     <property name="name">panel_applications_menu_window</property>
-    <property name="can-focus">False</property>
-    <property name="resizable">False</property>
-    <property name="default-width">200</property>
-    <property name="default-height">200</property>
-    <property name="decorated">False</property>
     <child>
       <object class="GtkScrolledWindow" id="scrolled_window">
         <property name="name">panel_applications_menu_scrolled_window</property>

@@ -358,12 +358,12 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
         GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE); // NONE is default
 
     // Push other windows out of the way
-    // gtk_layer_auto_exclusive_zone_enable (GTK_WINDOW
-    // (&self->parent_instance));
+    gtk_layer_set_exclusive_zone (GTK_WINDOW (&self->parent_instance), -1);
 
     // We don't need to get keyboard input
-    // gtk_layer_set_keyboard_mode (gtk_window,
-    // GTK_LAYER_SHELL_KEYBOARD_MODE_NONE); // NONE is default
+    gtk_layer_set_keyboard_mode (
+        GTK_WINDOW (&self->parent_instance),
+        GTK_LAYER_SHELL_KEYBOARD_MODE_EXCLUSIVE); // NONE is default
 
     // Anchors are if the window is pinned to each edge of the output
     static const gboolean anchors[] = { TRUE, TRUE, TRUE, TRUE };
@@ -386,22 +386,6 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
                       self);
 
     gtk_widget_show (GTK_WIDGET (&self->parent_instance));
-
-    GdkRectangle geo;
-    gdk_monitor_get_geometry (
-        gdk_display_get_monitor_at_surface (
-            gdk_display_get_default (),
-            gtk_native_get_surface (GTK_NATIVE (&self->parent_instance))),
-        &geo);
-
-    gtk_widget_set_size_request (GTK_WIDGET (&self->parent_instance),
-                                 geo.width, geo.height);
-
-    // TODO: is this line needed?
-    // gtk_window_set_keep_above (GTK_WINDOW (&self->parent_instance), TRUE);
-
-    // TODO: possibly keep the window always open or loaded so it doesn't
-    // reload apps and icons every time
 
     self->icon_theme = gtk_icon_theme_get_for_display (
         gtk_widget_get_display (GTK_WIDGET (&self->parent_instance)));
@@ -503,41 +487,15 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
         free (data_dirs);
     }
 
-    /*gchar **favorites = g_settings_get_strv (self->settings,
-    "items-desktop-paths");
+    GdkRectangle geo;
+    gdk_monitor_get_geometry (
+        gdk_display_get_monitor_at_surface (
+            gdk_display_get_default (),
+            gtk_native_get_surface (GTK_NATIVE (&self->parent_instance))),
+        &geo);
 
-    for (size_t i = 0; favorites[i]; i++) {
-      GKeyFile *key_file = g_key_file_new ();
-
-      if (g_key_file_load_from_file (key_file, favorites[i], 0, NULL)) {
-        gchar *name = g_key_file_get_string ((GKeyFile *)key_file,
-    G_KEY_FILE_DESKTOP_GROUP, G_KEY_FILE_DESKTOP_KEY_NAME, NULL); gchar *exec =
-    g_key_file_get_string ((GKeyFile *)key_file, G_KEY_FILE_DESKTOP_GROUP,
-    G_KEY_FILE_DESKTOP_KEY_EXEC, NULL); gchar *icon = g_key_file_get_string
-    ((GKeyFile *)key_file, G_KEY_FILE_DESKTOP_GROUP,
-    G_KEY_FILE_DESKTOP_KEY_ICON, NULL);
-
-        if (name && exec) {
-          GtkWidget *app = applications_menu_render_app (self, icon, exec,
-    name);
-
-          gtk_grid_attach (self->favorites_grid, GTK_WIDGET (app),
-    self->favorites_count % 4, (int)(self->favorites_count / 4), 1, 1);
-
-          self->favorites_count++;
-        }
-
-        free (name);
-        free (exec);
-        free (icon);
-      }
-
-      g_key_file_free ((GKeyFile *)key_file);
-    }
-
-    gtk_widget_show_all (GTK_WIDGET (self->favorites_grid));
-
-    free_string_list (favorites);*/
+    // gtk_widget_set_size_request (GTK_WIDGET (&self->parent_instance),
+    //                              geo.width, geo.height);
 
     gtk_widget_set_margin_start (GTK_WIDGET (self->scrolled_window),
                                  geo.width / 6);
