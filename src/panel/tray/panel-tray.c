@@ -69,15 +69,16 @@ panel_tray_update_monitors (PanelTray *self) {
         }
     }
 
-    size_t n_monitors = g_list_model_get_n_items (((Panel *)self->panel)->monitors);
+    size_t n_monitors
+        = g_list_model_get_n_items (((Panel *)self->panel)->monitors);
 
     self->windows = malloc ((n_monitors + 1) * sizeof (PanelTrayWindow *));
 
     for (size_t i = 0; i < n_monitors; i++) {
         PanelTrayWindow *window = malloc (sizeof (PanelTrayWindow));
 
-        window->gtk_window
-            = GTK_WINDOW (gtk_application_window_new (((Panel *)self->panel)->app));
+        window->gtk_window = GTK_WINDOW (
+            gtk_application_window_new (((Panel *)self->panel)->app));
 
         // Before the window is first realized, set it up to be a layer surface
         gtk_layer_init_for_window (window->gtk_window);
@@ -88,7 +89,8 @@ panel_tray_update_monitors (PanelTray *self) {
         // Push other windows out of the way
         gtk_layer_auto_exclusive_zone_enable (window->gtk_window);
 
-        GdkMonitor *monitor = GDK_MONITOR (g_list_model_get_item (((Panel *)self->panel)->monitors, i));
+        GdkMonitor *monitor = GDK_MONITOR (
+            g_list_model_get_item (((Panel *)self->panel)->monitors, i));
 
         gtk_layer_set_monitor (window->gtk_window, monitor);
         window->monitor = monitor;
@@ -109,7 +111,8 @@ panel_tray_update_monitors (PanelTray *self) {
 
         gtk_widget_set_name (GTK_WIDGET (window->tray_box), "menu_bar_box");
 
-        gtk_window_set_child (window->gtk_window, GTK_WIDGET (window->tray_box));
+        gtk_window_set_child (window->gtk_window,
+                              GTK_WIDGET (window->tray_box));
         gtk_widget_show (GTK_WIDGET (window->gtk_window));
 
         window->control_center_button = GTK_BUTTON (gtk_button_new ());
@@ -135,16 +138,21 @@ panel_tray_update_monitors (PanelTray *self) {
 
         g_timeout_add (500, (GSourceFunc)clock_update, window->clock);
 
-        window->workspaces_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+        window->workspaces_box
+            = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+        gtk_widget_add_css_class (GTK_WIDGET (window->workspaces_box),
+                                  "panel_top_bar_item");
 
         window->tray_end_box
             = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+        gtk_widget_add_css_class (GTK_WIDGET (window->tray_end_box),
+                                  "panel_top_bar_item");
 
         gtk_box_append (window->tray_end_box,
                         GTK_WIDGET (window->control_center_button));
 
         gtk_center_box_set_start_widget (window->tray_box,
-                                       GTK_WIDGET (window->workspaces_box));
+                                         GTK_WIDGET (window->workspaces_box));
         gtk_center_box_set_center_widget (window->tray_box,
                                           GTK_WIDGET (window->clock->label));
         gtk_center_box_set_end_widget (window->tray_box,
