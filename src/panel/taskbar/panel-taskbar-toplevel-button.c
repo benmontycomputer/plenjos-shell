@@ -299,6 +299,16 @@ toplevel_handle_state (void *data,
     }
 }
 
+static void
+toplevel_handle_panel (void *data,
+                       struct zwlr_foreign_toplevel_handle_v1 *handle,
+                       struct zwlr_foreign_toplevel_handle_v1 *parent) {
+    PanelTaskbarToplevelButton *self = (PanelTaskbarToplevelButton *)data;
+
+    printf ("Parent added %s\n", self->m_id);
+    fflush (stdout);
+}
+
 static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
     = {
           .title = toplevel_handle_title,
@@ -307,7 +317,7 @@ static const struct zwlr_foreign_toplevel_handle_v1_listener toplevel_listener
           .done = toplevel_excess,
           .output_enter = toplevel_excess,
           .output_leave = toplevel_excess,
-          .parent = toplevel_excess,
+          .parent = toplevel_handle_panel,
           .state = toplevel_handle_state,
       };
 

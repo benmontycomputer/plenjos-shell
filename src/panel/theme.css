@@ -1,6 +1,5 @@
 #panel_window, #panel_topbar_window {
     background-color: transparent;
-    font-family: monospace;
 }
 
 #panel_box {
@@ -26,7 +25,6 @@
 }
 
 #panel_popover {
-    font-family: monospace;
     font-size: 11px;
 }
 
@@ -177,7 +175,6 @@
 #menu_bar_box {
     padding: 4px;
     background-color: transparent;
-    font-family: monospace;
     font-weight: 600;
 }
 
@@ -298,7 +295,6 @@
 #control_center_popover {
     margin-top: 8px;
     margin-right: 6px;
-    font-family: monospace;
 }
 
 #control_center_popover contents, #panel_popover contents, #panel_popover arrow {
