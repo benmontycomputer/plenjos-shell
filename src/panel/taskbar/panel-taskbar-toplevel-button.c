@@ -74,7 +74,7 @@ get_icon_from_app_id (PanelTaskbar *taskbar, char *id) {
 
         g_list_free_full (icon_exec_map,
                           (GDestroyNotify)free_icon_exec_map_item);
-        
+
         icon_exec_map = NULL;
     }
     if (icon == NULL) {
@@ -259,8 +259,10 @@ toplevel_excess () {}
 
 static gboolean
 handle_state_activated_main_thread (PanelTaskbarToplevelButton *self) {
-    self->m_application->toplevels = g_list_remove (self->m_application->toplevels, self);
-    self->m_application->toplevels = g_list_prepend (self->m_application->toplevels, self);
+    self->m_application->toplevels
+        = g_list_remove (self->m_application->toplevels, self);
+    self->m_application->toplevels
+        = g_list_prepend (self->m_application->toplevels, self);
 
     return FALSE;
 }
@@ -359,11 +361,12 @@ button_rerender_app_id_and_icon_gtk (gpointer user_data) {
 
     GdkPixbuf *pbuf = NULL;
     if (self->m_icon_path)
-        pbuf = gdk_pixbuf_new_from_file_at_size (self->m_icon_path, 48, 48, NULL);
+        pbuf = gdk_pixbuf_new_from_file_at_size (self->m_icon_path, 48, 48,
+                                                 NULL);
 
     if (pbuf) {
         self->icon = gtk_image_new_from_pixbuf (pbuf);
-        
+
         g_object_unref (pbuf);
     } else {
         self->icon = gtk_image_new ();
@@ -375,7 +378,8 @@ button_rerender_app_id_and_icon_gtk (gpointer user_data) {
 
     gtk_widget_set_size_request (self->label, 60, 32);
 
-    self->box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0);
+    self->box = gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 4);
+    gtk_widget_set_margin_end (GTK_WIDGET (self->box), 8);
 
     gtk_box_append (GTK_BOX (self->box), self->icon);
     gtk_box_append (GTK_BOX (self->box), self->label);

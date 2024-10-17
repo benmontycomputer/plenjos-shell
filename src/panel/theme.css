@@ -1,5 +1,6 @@
 #panel_window, #panel_topbar_window {
     background-color: transparent;
+    font-family: monospace;
 }
 
 #panel_box {
@@ -25,7 +26,8 @@
 }
 
 #panel_popover {
-    
+    font-family: monospace;
+    font-size: 11px;
 }
 
 #indicator {
@@ -56,11 +58,36 @@
     animation-iteration-count: infinite;
 }
 
-#panel_button, #panel_popover_button, #menu_bar_button {
+.panel_top_bar_item, #menu_bar_button {
+    padding: 2px 8px;
+    background-color: rgba(30, 30, 30, 0.7);
+    background-image: none;
+    box-shadow: none;
+    border: none;
+    border-radius: 10px;
+}
+
+#menu_bar_button:hover {
+    background-color: rgba(60, 60, 60, 0.7);
+}
+
+#panel_button, #panel_popover_button {
     background-color: transparent;
     background-image: none;
     box-shadow: none;
     border: none;
+}
+
+#menu_bar_button {
+    -gtk-icon-size: 16px;
+}
+
+#panel_popover_button {
+    border-radius: 12px;
+}
+
+#panel_popover_button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
 }
 
 #panel_button, #panel_popover_button {
@@ -121,14 +148,6 @@
     opacity: 0.3;
 }
 
-#panel_popover_button {
-    border-radius: 12px;
-}
-
-#panel_popover_button:hover, #menu_bar_button:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
-
 #taskbar_box {
     padding: 0px;
 }
@@ -156,12 +175,10 @@
 }
 
 #menu_bar_box {
-    padding: 2px;
+    padding: 4px;
     background-color: transparent;
-}
-
-#menu_bar_button {
-    -gtk-icon-size: 16px;
+    font-family: monospace;
+    font-weight: 600;
 }
 
 #panel_tray_menu_button {
@@ -196,7 +213,7 @@
     background-image: none;
     box-shadow: none;
     border: none;
-    padding: 4px 6px;
+    padding: 2px 4px;
 }
 
 #panel_tray_workspace_button:hover {
@@ -220,14 +237,7 @@
 }
 
 #panel_clock {
-    padding: 8px;
-}
-
-.panel_top_bar_item {
-    padding: 2px 6px;
-    margin: 4px;
-    background-color: rgba(30, 30, 30, 0.6);
-    border-radius: 16px;
+    padding: 2px 12px;
 }
 
 #panel_tray_menu_window_box {
@@ -288,9 +298,10 @@
 #control_center_popover {
     margin-top: 8px;
     margin-right: 6px;
+    font-family: monospace;
 }
 
-#control_center_popover contents {
+#control_center_popover contents, #panel_popover contents, #panel_popover arrow {
     border-radius: 16px;
     background-color: rgba(32, 32, 32, 0.7);
 }

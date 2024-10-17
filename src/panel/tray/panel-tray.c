@@ -116,6 +116,8 @@ panel_tray_update_monitors (PanelTray *self) {
         gtk_widget_show (GTK_WIDGET (window->gtk_window));
 
         window->control_center_button = GTK_BUTTON (gtk_button_new ());
+        gtk_widget_add_css_class (GTK_WIDGET (window->control_center_button),
+                                  "panel_top_bar_item");
 
         GtkBox *control_center_button_box
             = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
@@ -138,21 +140,25 @@ panel_tray_update_monitors (PanelTray *self) {
 
         g_timeout_add (500, (GSourceFunc)clock_update, window->clock);
 
+        window->tray_start_box
+            = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
+
         window->workspaces_box
             = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
         gtk_widget_add_css_class (GTK_WIDGET (window->workspaces_box),
                                   "panel_top_bar_item");
 
+        gtk_box_append (window->tray_start_box,
+                        GTK_WIDGET (window->workspaces_box));
+
         window->tray_end_box
             = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-        gtk_widget_add_css_class (GTK_WIDGET (window->tray_end_box),
-                                  "panel_top_bar_item");
 
         gtk_box_append (window->tray_end_box,
                         GTK_WIDGET (window->control_center_button));
 
         gtk_center_box_set_start_widget (window->tray_box,
-                                         GTK_WIDGET (window->workspaces_box));
+                                         GTK_WIDGET (window->tray_start_box));
         gtk_center_box_set_center_widget (window->tray_box,
                                           GTK_WIDGET (window->clock->label));
         gtk_center_box_set_end_widget (window->tray_box,

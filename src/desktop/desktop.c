@@ -77,10 +77,13 @@ static void update_monitors (Desktop *self) {
             bg = g_settings_get_string (bg_settings, "picture-uri");
         }
 
-        GtkWidget *img = gtk_image_new_from_file (bg + 7);
-        gtk_widget_set_size_request (GTK_WIDGET (img), 2560, 2560);
+        // GtkWidget *img = gtk_image_new_from_file (bg + 7);
 
-        gtk_window_set_child (gtk_window, img);
+        // gtk_window_set_child (gtk_window, img);
+
+        GtkWidget *picture = gtk_picture_new_for_filename (bg + 7);
+        gtk_picture_set_content_fit (GTK_PICTURE (picture), GTK_CONTENT_FIT_COVER);
+        gtk_window_set_child (gtk_window, picture);
 
         gtk_layer_set_monitor (gtk_window, g_list_model_get_item (self->monitors, i));
         gtk_window_present (gtk_window);

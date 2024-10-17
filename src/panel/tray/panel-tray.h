@@ -17,6 +17,7 @@
 typedef struct PanelTrayWindow {
     GtkCenterBox *tray_box;
 
+    GtkBox *tray_start_box;
     GtkBox *workspaces_box;
     GtkBox *tray_end_box;
 
