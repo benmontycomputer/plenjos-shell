@@ -9,6 +9,7 @@
         <choice value="3D-Dock"/>
         <choice value="2D-Dock"/>
         <choice value="2D-Panel"/>
+        <choice value="Tray"/>
         <choice value="Invisible"/>
       </choices>
       <default>"3D-Dock"</default>

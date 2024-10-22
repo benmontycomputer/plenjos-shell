@@ -183,30 +183,29 @@ activate (GtkApplication *app, void *_data) {
         gdk_display_get_default (), GTK_STYLE_PROVIDER (cssProvider),
         GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-    // Create a normal GTK window however you like
-    GtkWindow *gtk_window = GTK_WINDOW (gtk_application_window_new (app));
-
     Panel *self = malloc (sizeof (Panel));
     self->app = app;
     self->blurred = NULL;
-    self->gtk_window = gtk_window;
+    self->gtk_window = NULL;
     self->supports_alpha = FALSE;
     self->taskbar = NULL;
     self->panel_settings = g_settings_new ("com.plenjos.shell.panel");
 
-    self->style = PANEL_STYLE_THREE_D_DOCK;
+    self->style = TASKBAR_STYLE_THREE_D_DOCK;
 
     char *style_str = g_settings_get_string (self->panel_settings, "style");
 
     if (style_str) {
         if (!strcmp (style_str, "3D-Dock")) {
-            self->style = PANEL_STYLE_THREE_D_DOCK;
+            self->style = TASKBAR_STYLE_THREE_D_DOCK;
         } else if (!strcmp (style_str, "2D-Dock")) {
-            self->style = PANEL_STYLE_DOCK;
+            self->style = TASKBAR_STYLE_DOCK;
         } else if (!strcmp (style_str, "2D-Panel")) {
-            self->style = PANEL_STYLE_PANEL;
+            self->style = TASKBAR_STYLE_PANEL;
+        } else if (!strcmp (style_str, "Tray")) {
+            self->style = TASKBAR_STYLE_TRAY;
         } else if (!strcmp (style_str, "Invisible")) {
-            self->style = PANEL_STYLE_INVISIBLE;
+            self->style = TASKBAR_STYLE_INVISIBLE;
         }
 
         free (style_str);
@@ -237,6 +236,10 @@ activate (GtkApplication *app, void *_data) {
 
         free (bg_primary_bottom_str);
     }
+
+    // Create a normal GTK window however you like
+    GtkWindow *gtk_window = GTK_WINDOW (gtk_application_window_new (app));
+    self->gtk_window = gtk_window;
 
     // Before the window is first realized, set it up to be a layer surface
     gtk_layer_init_for_window (gtk_window);

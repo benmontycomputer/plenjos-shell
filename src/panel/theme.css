@@ -58,7 +58,7 @@
 
 .panel_top_bar_item, #menu_bar_button {
     padding: 2px 8px;
-    background-color: rgba(30, 30, 30, 0.7);
+    background-color: rgba(30, 30, 30, 0.5);
     background-image: none;
     box-shadow: none;
     border: none;

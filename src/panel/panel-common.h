@@ -4,11 +4,12 @@
 
 #include <gtk/gtk.h>
 
-enum PanelStyle {
-    PANEL_STYLE_THREE_D_DOCK,
-    PANEL_STYLE_DOCK,
-    PANEL_STYLE_PANEL,
-    PANEL_STYLE_INVISIBLE
+enum TaskbarStyle {
+    TASKBAR_STYLE_THREE_D_DOCK,
+    TASKBAR_STYLE_DOCK,
+    TASKBAR_STYLE_PANEL,
+    TASKBAR_STYLE_TRAY,
+    TASKBAR_STYLE_INVISIBLE
 };
 
 typedef struct {
@@ -24,7 +25,7 @@ typedef struct {
 
     GSettings *panel_settings;
 
-    enum PanelStyle style;
+    enum TaskbarStyle style;
 
     GdkRGBA bg_primary;
     GdkRGBA bg_primary_bottom;
