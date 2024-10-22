@@ -65,13 +65,20 @@ remove_app (PanelTaskbarApplication *self) {
         self->icon_path = NULL;
     }
 
-    GtkWidget *last_widget = GTK_WIDGET (self->taskbar_item_button);
-    gtk_widget_set_sensitive (GTK_WIDGET (last_widget), FALSE);
+    if (self->rendered_buttons) {
+        for (int i = 0; self->rendered_buttons[i]; i++) {
+            GtkWidget *last_widget
+                = GTK_WIDGET (self->rendered_buttons[i]->button);
+            gtk_widget_set_sensitive (GTK_WIDGET (last_widget), FALSE);
+
+            g_timeout_add_once (400, (GSourceOnceFunc)remove_app_finalize,
+                                last_widget);
+
+            free (self->rendered_buttons[i]);
+        }
+    }
 
     free (self);
-
-    g_timeout_add_once (400, (GSourceOnceFunc)remove_app_finalize,
-                        last_widget);
 }
 
 void
@@ -84,6 +91,119 @@ panel_taskbar_application_set_pinned (PanelTaskbarApplication *self,
     }
 }
 
+static PanelTaskbarApplicationRendered *
+panel_taskbar_application_render_button (PanelTaskbarWindow *win,
+                                         PanelTaskbarApplication *self) {
+    GtkButton *taskbar_item_button = GTK_BUTTON (gtk_button_new ());
+
+    GtkGesture *right_click = gtk_gesture_click_new ();
+    gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (right_click), 3);
+
+    g_signal_connect (right_click, "pressed",
+                      G_CALLBACK (secondary_button_click), self);
+    gtk_widget_add_controller (GTK_WIDGET (taskbar_item_button),
+                               GTK_EVENT_CONTROLLER (right_click));
+
+    gtk_widget_set_name (GTK_WIDGET (taskbar_item_button), "panel_button");
+
+    GtkFixed *taskbar_item_fixed = GTK_FIXED (gtk_fixed_new ());
+    gtk_widget_set_size_request (GTK_WIDGET (taskbar_item_fixed), 48, 56);
+
+    gtk_button_set_child (taskbar_item_button,
+                          GTK_WIDGET (taskbar_item_fixed));
+
+    gtk_box_append (win->taskbar_box, GTK_WIDGET (taskbar_item_button));
+
+    GdkPixbuf *pbuf = NULL;
+    if (self->icon_path)
+        pbuf
+            = gdk_pixbuf_new_from_file_at_size (self->icon_path, 48, 48, NULL);
+
+    GtkImage *icon, *icon_reflection;
+
+    if (pbuf) {
+        icon = GTK_IMAGE (gtk_image_new_from_pixbuf (pbuf));
+        icon_reflection = GTK_IMAGE (gtk_image_new_from_pixbuf (pbuf));
+
+        g_object_unref (pbuf);
+    } else {
+        icon = GTK_IMAGE (gtk_image_new ());
+        icon_reflection = GTK_IMAGE (gtk_image_new ());
+    }
+
+    gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
+    gtk_widget_set_size_request (GTK_WIDGET (icon_reflection), 48, 48);
+
+    gtk_widget_set_name (GTK_WIDGET (icon_reflection),
+                         "panel_button_reflection");
+
+    GtkWidget *indicator = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
+    gtk_widget_set_name (indicator, "indicator");
+    gtk_widget_set_size_request (indicator, 6, 6);
+    gtk_widget_set_halign (indicator, GTK_ALIGN_CENTER);
+    gtk_widget_set_valign (indicator, GTK_ALIGN_CENTER);
+
+    gtk_fixed_put (taskbar_item_fixed, GTK_WIDGET (icon_reflection), 0, 0);
+    gtk_fixed_put (taskbar_item_fixed, GTK_WIDGET (icon), 0, 0);
+    gtk_fixed_put (taskbar_item_fixed, GTK_WIDGET (indicator), 21, 48);
+
+    g_signal_connect (taskbar_item_button, "clicked",
+                      G_CALLBACK (button_click), self);
+
+    PanelTaskbarApplicationRendered *return_val
+        = malloc (sizeof (PanelTaskbarApplicationRendered));
+
+    return_val->button = taskbar_item_button;
+    return_val->indicator = indicator;
+}
+
+void
+panel_taskbar_application_update_monitors (PanelTaskbarApplication *self) {
+    if (self->rendered_buttons) {
+        for (size_t i = 0; self->rendered_buttons[i]; i++) {
+            PanelTaskbarApplicationRendered *rendered
+                = self->rendered_buttons[i];
+
+            GtkBox *parent = GTK_BOX (
+                gtk_widget_get_parent (GTK_WIDGET (rendered->button)));
+            if (parent)
+                gtk_box_remove (parent, GTK_WIDGET (rendered->button));
+
+            free (rendered);
+        }
+
+        free (self->rendered_buttons);
+    }
+
+    size_t n_taskbars;
+
+    for (n_taskbars = 0; self->taskbar->windows[n_taskbars]; n_taskbars++)
+        ;
+
+    self->rendered_buttons
+        = malloc ((n_taskbars + 1) * sizeof (PanelTaskbarWindow *));
+
+    for (int i = 0; self->taskbar->windows[i]; i++) {
+        PanelTaskbarWindow *window = self->taskbar->windows[i];
+
+        // TODO: check if the app should be shown on this window.
+        bool should_show = true;
+
+        if (should_show) {
+            self->rendered_buttons[i]
+                = panel_taskbar_application_render_button (window, self);
+        } else {
+            self->rendered_buttons[i]
+                = malloc (sizeof (PanelTaskbarApplicationRendered));
+
+            self->rendered_buttons[i]->button = NULL;
+            self->rendered_buttons[i]->indicator = NULL;
+        }
+    }
+
+    self->rendered_buttons[n_taskbars] = NULL;
+}
+
 PanelTaskbarApplication *
 panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
     PanelTaskbarApplication *self = malloc (sizeof (PanelTaskbarApplication));
@@ -92,79 +212,16 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
 
     self->id = g_strdup (id);
     self->icon_path = NULL;
-
-    self->icon = NULL;
     self->exec = NULL;
-
     self->toplevels = NULL;
-
-    self->indicator = NULL;
+    self->rendered_buttons = NULL;
 
     self->items_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
-
-    self->taskbar_item_fixed = GTK_FIXED (gtk_fixed_new ());
-    gtk_widget_set_size_request (GTK_WIDGET (self->taskbar_item_fixed), 48,
-                                 56);
-
-    self->taskbar_item_button = GTK_BUTTON (gtk_button_new ());
-
-    GtkGesture *right_click = gtk_gesture_click_new ();
-    gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (right_click), 3);
-
-    g_signal_connect (right_click, "pressed",
-                      G_CALLBACK (secondary_button_click), self);
-    gtk_widget_add_controller (GTK_WIDGET (self->taskbar_item_button),
-                               GTK_EVENT_CONTROLLER (right_click));
-
-    gtk_widget_set_name (GTK_WIDGET (self->taskbar_item_button),
-                         "panel_button");
-
-    gtk_button_set_child (self->taskbar_item_button,
-                          GTK_WIDGET (self->taskbar_item_fixed));
-
-    gtk_box_append (taskbar->taskbar_box,
-                    GTK_WIDGET (self->taskbar_item_button));
 
     self->taskbar = taskbar;
     taskbar->applications = g_list_append (taskbar->applications, self);
 
     self->icon_path = get_icon_from_app_id (self->taskbar, self->id);
-
-    GdkPixbuf *pbuf = NULL;
-    if (self->icon_path)
-        pbuf
-            = gdk_pixbuf_new_from_file_at_size (self->icon_path, 48, 48, NULL);
-
-    GtkImage *icon_2;
-
-    if (pbuf) {
-        self->icon = GTK_IMAGE (gtk_image_new_from_pixbuf (pbuf));
-        icon_2 = GTK_IMAGE (gtk_image_new_from_pixbuf (pbuf));
-
-        g_object_unref (pbuf);
-    } else {
-        self->icon = GTK_IMAGE (gtk_image_new ());
-        icon_2 = GTK_IMAGE (gtk_image_new ());
-    }
-
-    gtk_widget_set_size_request (GTK_WIDGET (self->icon), 48, 48);
-    gtk_widget_set_size_request (GTK_WIDGET (icon_2), 48, 48);
-
-    gtk_widget_set_name (GTK_WIDGET (icon_2), "panel_button_reflection");
-
-    self->indicator = gtk_box_new (GTK_ORIENTATION_VERTICAL, 0);
-    gtk_widget_set_name (self->indicator, "indicator");
-    gtk_widget_set_size_request (self->indicator, 6, 6);
-    gtk_widget_set_halign (self->indicator, GTK_ALIGN_CENTER);
-    gtk_widget_set_valign (self->indicator, GTK_ALIGN_CENTER);
-
-    gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (icon_2), 0, 0);
-    gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->icon), 0, 0);
-    gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->indicator), 21,
-                   48);
-
-    g_signal_connect (self->taskbar_item_button, "clicked",
-                      G_CALLBACK (button_click), self);
 
     self->popover = GTK_POPOVER (gtk_popover_new ());
 
@@ -172,9 +229,12 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
 
     gtk_popover_set_child (self->popover, GTK_WIDGET (self->items_box));
 
-    gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->popover), 0, 0);
+    panel_taskbar_application_update_monitors (self);
 
-    gtk_popover_present (self->popover);
+    /* gtk_fixed_put (self->taskbar_item_fixed, GTK_WIDGET (self->popover), 0,
+    0);
+
+    gtk_popover_present (self->popover); */
 
     return self;
 }
@@ -188,7 +248,14 @@ panel_taskbar_application_add_toplevel (PanelTaskbarApplication *self,
         gtk_box_append (self->items_box, toplevel->rendered);
     }
 
-    gtk_widget_set_opacity (self->indicator, 1.0);
+    if (self->rendered_buttons) {
+        for (int i = 0; self->rendered_buttons[i]; i++) {
+            if (self->rendered_buttons[i]->indicator) {
+                gtk_widget_set_opacity (self->rendered_buttons[i]->indicator,
+                                        1.0);
+            }
+        }
+    }
 }
 
 void
@@ -202,7 +269,12 @@ panel_taskbar_application_remove_toplevel (
 
     if (!self->toplevels || !self->toplevels->data) {
         if (self->pinned) {
-            gtk_widget_set_opacity (self->indicator, 0.0);
+            if (self->rendered_buttons) {
+                for (int i = 0; self->rendered_buttons[i]; i++) {
+                    gtk_widget_set_opacity (
+                        self->rendered_buttons[i]->indicator, 0.0);
+                }
+            }
         } else {
             remove_app (self);
         }

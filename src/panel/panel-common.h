@@ -1,7 +1,5 @@
 #pragma once
 
-#include "taskbar/panel-taskbar.h"
-
 #include <gtk/gtk.h>
 
 enum TaskbarStyle {
@@ -13,17 +11,37 @@ enum TaskbarStyle {
 };
 
 typedef struct {
-    PanelTaskbar *taskbar;
+    struct PanelTaskbar *taskbar;
     gpointer *tray;
 
+    // TODO: remove this and everything that uses it
     GdkPixbuf *blurred;
 
-    GtkWindow *gtk_window;
+    // GtkWindow *gtk_window;
 
     bool supports_alpha;
     bool dark_mode;
 
     GSettings *panel_settings;
+
+    /* enum TaskbarStyle style;
+
+    GdkRGBA bg_primary;
+    GdkRGBA bg_primary_bottom;
+    GdkRGBA bg_secondary;
+    GdkRGBA border_primary;
+    GdkRGBA border_secondary; */
+
+    GtkApplication *app;
+
+    GListModel *monitors;
+} Panel;
+
+typedef struct PanelTaskbarWindow {
+    GtkWindow *gtk_window;
+    GtkBox *taskbar_box;
+
+    GdkMonitor *monitor;
 
     enum TaskbarStyle style;
 
@@ -33,10 +51,38 @@ typedef struct {
     GdkRGBA border_primary;
     GdkRGBA border_secondary;
 
-    GtkApplication *app;
+    struct PanelTaskbar *taskbar;
+} PanelTaskbarWindow;
 
-    GListModel *monitors;
-} Panel;
+typedef struct PanelTaskbar {
+    PanelTaskbarWindow **windows;
+
+    Panel *panel;
+
+    struct wl_display *display;
+    struct wl_registry *registry;
+    struct wl_compositor *compositor;
+    struct xdg_wm_base *wm_base;
+    struct wl_seat *seat;
+    struct wl_shm *shm;
+    // struct zwlr_layer_shell_v1 *layer_shell;
+    struct zwlr_foreign_toplevel_manager_v1 *toplevel_manager;
+    struct hyprland_toplevel_export_manager_v1 *export_manager;
+    struct wl_output *output;
+
+    bool has_keyboard;
+    bool has_pointer;
+
+    bool running;
+
+    struct wl_pointer *pointer;
+    struct wl_keyboard *keyboard;
+
+    GList *applications;
+
+    GSettings *settings;
+
+} PanelTaskbar;
 
 #define UNUSED(x) (void)(x)
 

@@ -5,6 +5,11 @@
 #include "panel-taskbar.h"
 
 typedef struct {
+    GtkButton *button;
+    GtkWidget *indicator;
+} PanelTaskbarApplicationRendered;
+
+typedef struct {
     GList *toplevels;
     PanelTaskbar *taskbar;
 
@@ -12,19 +17,11 @@ typedef struct {
     char *icon_path;
     char *exec;
 
+    PanelTaskbarApplicationRendered **rendered_buttons;
     GtkBox *items_box;
-
-    GtkFixed *taskbar_item_fixed;
-
-    GtkButton *taskbar_item_button;
-
-    GtkImage *icon;
-
     GtkPopover *popover;
 
     gboolean pinned;
-
-    GtkWidget *indicator;
 } PanelTaskbarApplication;
 
 enum panel_taskbar_toplevel_state_field {

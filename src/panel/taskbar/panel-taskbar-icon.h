@@ -1,3 +1,5 @@
+#pragma once
+
 #include <assert.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -6,7 +8,6 @@
 #include <gtk/gtk.h>
 
 #include "panel-taskbar.h"
-#include "panel-common.h"
 
 typedef struct {
     char **result;

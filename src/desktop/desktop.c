@@ -30,6 +30,8 @@ static void update_monitors (Desktop *self) {
 
             gtk_window_close (win);
         }
+
+        free (self->windows);
     }
 
     size_t n_monitors = g_list_model_get_n_items (self->monitors);

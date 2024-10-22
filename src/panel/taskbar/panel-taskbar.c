@@ -1,20 +1,37 @@
 #include "panel-taskbar.h"
+#include "panel-common.h"
 #include "panel-taskbar-application.h"
 #include "panel-taskbar-toplevel-button.h"
-#include "panel-common.h"
+
+void
+panel_taskbar_update_monitors (PanelTaskbar *self) {
+    if (self->windows) {
+        for (size_t i = 0; self->windows[i]; i++) {
+            PanelTaskbarWindow *win = self->windows[i];
+
+            gtk_window_close (win->gtk_window);
+
+            free (win);
+        }
+
+        free (self->windows);
+    }
+
+    size_t n_monitors
+        = g_list_model_get_n_items (self->panel->monitors);
+
+    self->windows = malloc ((n_monitors + 1) * sizeof (PanelTaskbarWindow *));
+
+    for (size_t i = 0; i < n_monitors; i++) {
+        self->windows[i] = panel_taskbar_window_new (
+            self, GDK_MONITOR (g_list_model_get_item (
+                      ((Panel *)self->panel)->monitors, i)));
+    }
+
+    self->windows[n_monitors] = NULL;
+}
 
 // Lots of code adapted from https://github.com/selairi/yatbfw
-
-gboolean
-handle_application_gtk (PanelTaskbarToplevelButton *toplevel_button) {
-    panel_taskbar_toplevel_button_gtk_run (toplevel_button);
-
-    gtk_box_append (
-        toplevel_button->m_taskbar->taskbar_box,
-        toplevel_button->rendered);
-
-    return FALSE;
-}
 
 static void
 toplevel_manager_handle_toplevel (
@@ -24,8 +41,7 @@ toplevel_manager_handle_toplevel (
 
     PanelTaskbar *self = (PanelTaskbar *)data;
 
-    panel_taskbar_toplevel_button_new (toplevel_handle, self->seat,
-                                               self);
+    panel_taskbar_toplevel_button_new (toplevel_handle, self->seat, self);
 }
 
 static const struct zwlr_foreign_toplevel_manager_v1_listener
@@ -81,10 +97,10 @@ registry_handle_global (void *data, struct wl_registry *registry,
         zwlr_foreign_toplevel_manager_v1_add_listener (
             self->toplevel_manager, &toplevel_manager_listener, self);
     } else if (!strcmp (interface,
-                      hyprland_toplevel_export_manager_v1_interface.name)) {
+                        hyprland_toplevel_export_manager_v1_interface.name)) {
         self->export_manager = wl_registry_bind (
-            self->registry, name, &hyprland_toplevel_export_manager_v1_interface,
-            version);
+            self->registry, name,
+            &hyprland_toplevel_export_manager_v1_interface, version);
         printf ("Binding interface %s\n",
                 hyprland_toplevel_export_manager_v1_interface.name);
         fflush (stdout);
@@ -141,13 +157,13 @@ static const struct wl_seat_listener seat_listener = {
 };
 
 PanelTaskbar *
-panel_taskbar_init () {
+panel_taskbar_init (Panel *panel) {
     PanelTaskbar *self = malloc (sizeof (PanelTaskbar));
 
-    self->settings = g_settings_new ("org.gnome.desktop.interface");
+    self->windows = NULL;
+    self->panel = panel;
 
-    self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-    gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
+    self->settings = g_settings_new ("org.gnome.desktop.interface");
 
     self->applications = NULL;
 
@@ -245,7 +261,7 @@ panel_taskbar_run (PanelTaskbar *self) {
         // for ()
         //  TODO: finish this part
 
-        //printf ("Timeout %d\n", timeout_msecs);
+        // printf ("Timeout %d\n", timeout_msecs);
 
         // Process pending Wayland events
         wl_display_dispatch_pending (self->display);
@@ -257,12 +273,12 @@ panel_taskbar_run (PanelTaskbar *self) {
             if (fds[0].revents) {
                 wl_display_dispatch (self->display);
                 fds[0].revents = 0;
-                //printf ("Poll %d\n", ret);
-                //fflush (stdout);
+                // printf ("Poll %d\n", ret);
+                // fflush (stdout);
             }
         } else if (ret == 0) {
-            //printf ("Timeout\n");
-            //fflush (stdout);
+            // printf ("Timeout\n");
+            // fflush (stdout);
         } else {
             printf ("Poll failed %d\n", ret);
             fflush (stdout);
