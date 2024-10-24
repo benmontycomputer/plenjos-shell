@@ -1,4 +1,5 @@
 #include "panel-taskbar.h"
+#include "tray/panel-tray.h"
 
 static void draw_taskbar_3d_dock (GtkDrawingArea *drawing_area, cairo_t *cr,
                                   int wi, int hi, PanelTaskbarWindow *self);
@@ -57,28 +58,6 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
         free (bg_primary_bottom_str);
     }
 
-    GtkWindow *gtk_window
-        = GTK_WINDOW (gtk_application_window_new (taskbar->panel->app));
-    self->gtk_window = gtk_window;
-
-    gtk_layer_init_for_window (gtk_window);
-
-    gtk_layer_set_layer (gtk_window, GTK_LAYER_SHELL_LAYER_TOP);
-    gtk_layer_auto_exclusive_zone_enable (gtk_window);
-    gtk_layer_set_monitor (self->gtk_window, monitor);
-
-    static const gboolean anchors[] = { TRUE, TRUE, FALSE, TRUE };
-    for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
-        gtk_layer_set_anchor (gtk_window, i, anchors[i]);
-    }
-
-    // gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
-    gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
-
-    GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-    gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
-    gtk_widget_set_halign (GTK_WIDGET (panel_box), GTK_ALIGN_CENTER);
-
     // Start actual taskbar stuff
 
     PanelApplicationsMenu *apps_menu
@@ -89,7 +68,6 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
     self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
     panel_applications_menu_insert_launcher_button (apps_menu, self->taskbar_box);
-    gtk_box_append (panel_box, GTK_WIDGET (self->taskbar_box));
 
     GtkBox *box2 = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
     gtk_widget_set_halign (GTK_WIDGET (box2), GTK_ALIGN_CENTER);
@@ -120,12 +98,50 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
         break;
     }
 
-    gtk_box_append (box2, GTK_WIDGET (da));
-    gtk_box_append (box2, GTK_WIDGET (panel_box));
+    if (self->style == TASKBAR_STYLE_THREE_D_DOCK || self->style == TASKBAR_STYLE_DOCK || self->style == TASKBAR_STYLE_PANEL) {
+        GtkWindow *gtk_window
+            = GTK_WINDOW (gtk_application_window_new (taskbar->panel->app));
+        self->gtk_window = gtk_window;
 
-    gtk_window_set_child (gtk_window, GTK_WIDGET (box2));
+        gtk_layer_init_for_window (gtk_window);
 
-    gtk_window_present (gtk_window);
+        gtk_layer_set_layer (gtk_window, GTK_LAYER_SHELL_LAYER_TOP);
+        gtk_layer_auto_exclusive_zone_enable (gtk_window);
+        gtk_layer_set_monitor (self->gtk_window, monitor);
+
+        static const gboolean anchors[] = { TRUE, TRUE, FALSE, TRUE };
+        for (int i = 0; i < GTK_LAYER_SHELL_EDGE_ENTRY_NUMBER; i++) {
+            gtk_layer_set_anchor (gtk_window, i, anchors[i]);
+        }
+
+        // gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
+        gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
+
+        GtkBox *panel_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
+        gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
+        gtk_widget_set_halign (GTK_WIDGET (panel_box), GTK_ALIGN_CENTER);
+
+        gtk_box_append (panel_box, GTK_WIDGET (self->taskbar_box));
+        gtk_box_append (box2, GTK_WIDGET (da));
+        gtk_box_append (box2, GTK_WIDGET (panel_box));
+
+        gtk_window_set_child (gtk_window, GTK_WIDGET (box2));
+
+        gtk_window_present (gtk_window);
+    } else if (self->style == TASKBAR_STYLE_TRAY) {
+        gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box), "panel_top_bar_item");
+        gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box), "panel_top_bar_taskbar");
+
+        for (int i = 0; ((PanelTray *)taskbar->panel->tray)->windows[i]; i++) {
+            PanelTrayWindow *tray_win = ((PanelTray *)taskbar->panel->tray)->windows[i];
+
+            if (tray_win->monitor == monitor) {
+                gtk_box_append (tray_win->tray_start_box, GTK_WIDGET (self->taskbar_box));
+
+                break;
+            }
+        }
+    }
 
     return self;
 }

@@ -65,6 +65,10 @@
     border-radius: 10px;
 }
 
+.panel_top_bar_taskbar #indicator {
+    opacity: 0;
+}
+
 #menu_bar_button:hover {
     background-color: rgba(60, 60, 60, 0.7);
 }
@@ -223,7 +227,7 @@
 
 #panel_tray_bluetooth_settings > * > * > * > * > * > label {
     margin-bottom: -24px;
-    display: none;
+    opacity: 0;
 }
 
 
