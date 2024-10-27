@@ -7,9 +7,10 @@
 typedef struct {
     GtkButton *button;
     GtkWidget *indicator;
+    struct PanelTaskbarApplication *app;
 } PanelTaskbarApplicationRendered;
 
-typedef struct {
+typedef struct PanelTaskbarApplication {
     GList *toplevels;
     PanelTaskbar *taskbar;
 

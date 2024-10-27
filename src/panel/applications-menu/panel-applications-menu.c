@@ -112,7 +112,7 @@ applications_menu_app_clicked (GtkButton *widget, ClickedArgs *args) {
     free (new_exec);
 }
 
-GtkWidget *
+static GtkWidget *
 applications_menu_render_app (PanelApplicationsMenu *self, char *icon_name,
                               char *exec_path, char *display_name) {
     GtkButton *button = GTK_BUTTON (gtk_button_new ());
@@ -250,6 +250,18 @@ applications_menu_render_app (PanelApplicationsMenu *self, char *icon_name,
     return GTK_WIDGET (button);
 }
 
+void
+panel_applications_menu_set_monitor (PanelApplicationsMenu *self,
+                                     GdkMonitor *monitor) {
+    GdkRectangle geo;
+    gdk_monitor_get_geometry (monitor, &geo);
+
+    gtk_widget_set_margin_start (GTK_WIDGET (self->scrolled_window),
+                                 geo.width / 6);
+    gtk_widget_set_margin_end (GTK_WIDGET (self->scrolled_window),
+                               geo.width / 6);
+}
+
 static void
 applications_menu_add_app_from (PanelApplicationsMenu *self, char *icon_name,
                                 char *exec_path, char *display_name) {
@@ -266,7 +278,7 @@ panel_applications_menu_set_bg (PanelApplicationsMenu *self, GdkPixbuf *bg) {
     self->desktop_blurred = bg;
 }
 
-int
+static int
 sort_apps (GKeyFile *kf1, GKeyFile *kf2) {
     gchar *name1 = g_key_file_get_string (kf1, G_KEY_FILE_DESKTOP_GROUP,
                                           G_KEY_FILE_DESKTOP_KEY_NAME, NULL);
@@ -298,7 +310,7 @@ sort_apps (GKeyFile *kf1, GKeyFile *kf2) {
 }
 
 // https://stackoverflow.com/questions/9210528/split-string-with-delimiters-in-c
-char **
+static char **
 str_split_dashboard (char *a_str, const char a_delim) {
     char **result = 0;
     size_t count = 0;
@@ -503,7 +515,7 @@ panel_applications_menu_init (PanelApplicationsMenu *self) {
                                geo.width / 6);
 }
 
-void
+static void
 show_wrap (GtkButton *button, PanelApplicationsMenu *self) {
     UNUSED (button);
 

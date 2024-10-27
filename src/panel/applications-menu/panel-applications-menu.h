@@ -18,26 +18,33 @@
 
 #pragma once
 
+#include <assert.h>
+#include <ctype.h>
 #include <gtk/gtk.h>
 #include <stdbool.h>
-#include <ctype.h>
-#include <assert.h>
 
 #include <gtk4-layer-shell.h>
 
-#include "../taskbar/panel-taskbar-icon.h"
 #include "../panel-common.h"
+#include "../taskbar/panel-taskbar-icon.h"
 
 G_BEGIN_DECLS
 
-#define PANEL_TYPE_APPLICATIONS_MENU (panel_applications_menu_get_type())
+#define PANEL_TYPE_APPLICATIONS_MENU (panel_applications_menu_get_type ())
 
-G_DECLARE_FINAL_TYPE (PanelApplicationsMenu, panel_applications_menu, PANEL, APPLICATIONS_MENU, GtkApplicationWindow)
+G_DECLARE_FINAL_TYPE (PanelApplicationsMenu, panel_applications_menu, PANEL,
+                      APPLICATIONS_MENU, GtkApplicationWindow)
 
 G_END_DECLS
 
-void panel_applications_menu_set_bg (PanelApplicationsMenu *self, GdkPixbuf *bg);
+void panel_applications_menu_set_bg (PanelApplicationsMenu *self,
+                                     GdkPixbuf *bg);
 void hide_applications_menu (PanelApplicationsMenu *self);
 void show_applications_menu (PanelApplicationsMenu *self);
 
-GtkWidget *panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self, GtkBox *box);
+void panel_applications_menu_set_monitor (PanelApplicationsMenu *self,
+                                          GdkMonitor *monitor);
+
+GtkWidget *
+panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self,
+                                                GtkBox *box);

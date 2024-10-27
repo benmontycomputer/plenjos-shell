@@ -37,13 +37,27 @@ button_click (GtkButton *button, PanelTaskbarApplication *self) {
 
 static void
 secondary_button_click (GtkGestureClick *click, gint n_press, gdouble x,
-                        gdouble y, PanelTaskbarApplication *self) {
+                        gdouble y, PanelTaskbarApplicationRendered *self) {
     UNUSED (click);
     UNUSED (n_press);
     UNUSED (x);
     UNUSED (y);
 
-    gtk_popover_popup (self->popover);
+    GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (self->app->popover));
+
+    if (parent) {
+        g_object_ref (self->app->popover);
+
+        gtk_fixed_remove (GTK_FIXED (parent), GTK_WIDGET (self->app->popover));
+    }
+
+    gtk_fixed_put (GTK_FIXED (gtk_button_get_child (self->button)), GTK_WIDGET (self->app->popover), 0, 0);
+
+    if (parent) {
+        g_object_unref (self->app->popover);
+    }
+
+    gtk_popover_popup (self->app->popover);
 }
 
 static void
@@ -94,13 +108,16 @@ panel_taskbar_application_set_pinned (PanelTaskbarApplication *self,
 static PanelTaskbarApplicationRendered *
 panel_taskbar_application_render_button (PanelTaskbarWindow *win,
                                          PanelTaskbarApplication *self) {
+    PanelTaskbarApplicationRendered *return_val
+        = malloc (sizeof (PanelTaskbarApplicationRendered));
+
     GtkButton *taskbar_item_button = GTK_BUTTON (gtk_button_new ());
 
     GtkGesture *right_click = gtk_gesture_click_new ();
     gtk_gesture_single_set_button (GTK_GESTURE_SINGLE (right_click), 3);
 
     g_signal_connect (right_click, "pressed",
-                      G_CALLBACK (secondary_button_click), self);
+                      G_CALLBACK (secondary_button_click), return_val);
     gtk_widget_add_controller (GTK_WIDGET (taskbar_item_button),
                                GTK_EVENT_CONTROLLER (right_click));
 
@@ -150,11 +167,11 @@ panel_taskbar_application_render_button (PanelTaskbarWindow *win,
     g_signal_connect (taskbar_item_button, "clicked",
                       G_CALLBACK (button_click), self);
 
-    PanelTaskbarApplicationRendered *return_val
-        = malloc (sizeof (PanelTaskbarApplicationRendered));
-
+    return_val->app = self;
     return_val->button = taskbar_item_button;
     return_val->indicator = indicator;
+
+    return return_val;
 }
 
 void
@@ -198,6 +215,7 @@ panel_taskbar_application_update_monitors (PanelTaskbarApplication *self) {
 
             self->rendered_buttons[i]->button = NULL;
             self->rendered_buttons[i]->indicator = NULL;
+            self->rendered_buttons[i]->app = self;
         }
     }
 
@@ -224,6 +242,8 @@ panel_taskbar_application_new (char *id, PanelTaskbar *taskbar) {
     self->icon_path = get_icon_from_app_id (self->taskbar, self->id);
 
     self->popover = GTK_POPOVER (gtk_popover_new ());
+
+    gtk_popover_present (self->popover);
 
     gtk_widget_set_name (GTK_WIDGET (self->popover), "panel_popover");
 
