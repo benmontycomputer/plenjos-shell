@@ -219,8 +219,8 @@ hypr_backend_run (HyprBackend *self) {
             onConfigReloaded (self);
         }
 
-        printf ("%s", receivedCharPtr);
-        fflush (stdout);
+        // printf ("%s", receivedCharPtr);
+        // fflush (stdout);
     }
 }
 

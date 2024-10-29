@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<schemalist>
+
+  <schema path="/com/plenjos/shell/desktop/" id="com.plenjos.shell.desktop">
+
+    <key name='background' type='s'>
+      <default>"/usr/share/backgrounds/gnome/adwaita-l.jxl"</default>
+      <summary>Desktop Background</summary>
+    </key>
+
+  </schema>
+
+</schemalist>

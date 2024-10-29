@@ -23,7 +23,36 @@
 
 #include "desktop.h"
 
-static void update_monitors (Desktop *self) {
+static void
+update_bg (GSettings *bg_settings, gchar *key, Desktop *self) {
+    self->bg = g_settings_get_string (bg_settings, key);
+
+    printf ("%s\n", self->bg);
+    fflush (stdout);
+
+    if (self->bg_pbuf)
+        g_object_unref (self->bg_pbuf);
+
+    self->bg_pbuf = gdk_pixbuf_new_from_file (self->bg, NULL);
+}
+
+static void
+draw_desktop (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi,
+              Desktop *self) {
+    cairo_save (cr);
+
+    cairo_scale (cr, (double)wi / (double)gdk_pixbuf_get_width (self->bg_pbuf), (double)wi / (double)gdk_pixbuf_get_width (self->bg_pbuf));
+
+    gdk_cairo_set_source_pixbuf (cr, self->bg_pbuf, 0, 0);
+
+    cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
+    cairo_paint (cr);
+
+    cairo_restore (cr);
+}
+
+static void
+update_monitors (Desktop *self) {
     if (self->windows) {
         for (size_t i = 0; self->windows[i]; i++) {
             GtkWindow *win = self->windows[i];
@@ -39,8 +68,12 @@ static void update_monitors (Desktop *self) {
     self->windows = malloc ((n_monitors + 1) * sizeof (GtkWindow *));
 
     for (size_t i = 0; i < n_monitors; i++) {
+        GdkMonitor *monitor
+            = GDK_MONITOR (g_list_model_get_item (self->monitors, i));
+
         // Create a normal GTK window however you like
-        GtkWindow *gtk_window = GTK_WINDOW (gtk_application_window_new (self->app));
+        GtkWindow *gtk_window
+            = GTK_WINDOW (gtk_application_window_new (self->app));
 
         // Before the window is first realized, set it up to be a layer surface
         gtk_layer_init_for_window (gtk_window);
@@ -65,33 +98,17 @@ static void update_monitors (Desktop *self) {
             gtk_layer_set_anchor (gtk_window, i, anchors[i]);
         }
 
-        gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 2560, -1);
         gtk_widget_set_name (GTK_WIDGET (gtk_window), "desktop_window");
 
-        GSettings *settings = g_settings_new ("org.gnome.desktop.interface");
-        GSettings *bg_settings = g_settings_new ("org.gnome.desktop.background");
+        GtkDrawingArea *da = GTK_DRAWING_AREA (gtk_drawing_area_new ());
 
-        char *bg = NULL;
-        if (!strcmp (g_settings_get_string (settings, "color-scheme"),
-                    "prefer-dark")) {
-            bg = g_settings_get_string (bg_settings, "picture-uri-dark");
-        } else {
-            bg = g_settings_get_string (bg_settings, "picture-uri");
-        }
+        gtk_window_set_child (gtk_window, GTK_WIDGET (da));
 
-        // GtkWidget *img = gtk_image_new_from_file (bg + 7);
-
-        // gtk_window_set_child (gtk_window, img);
-
-        GtkWidget *picture = gtk_picture_new_for_filename (bg + 7);
-        gtk_picture_set_content_fit (GTK_PICTURE (picture), GTK_CONTENT_FIT_COVER);
-        gtk_window_set_child (gtk_window, picture);
-
-        gtk_layer_set_monitor (gtk_window, g_list_model_get_item (self->monitors, i));
+        gtk_layer_set_monitor (gtk_window, monitor);
         gtk_window_present (gtk_window);
 
-        printf("%d\n", i);
-        fflush(stdout);
+        gtk_drawing_area_set_draw_func (
+            da, (GtkDrawingAreaDrawFunc)draw_desktop, self, NULL);
 
         self->windows[i] = gtk_window;
     }
@@ -116,19 +133,29 @@ activate (GtkApplication *app, void *_data) {
     //     gdk_screen_get_default (), GTK_STYLE_PROVIDER (cssProvider),
     //     GTK_STYLE_PROVIDER_PRIORITY_USER);
 
-    Desktop *self = malloc (sizeof (Desktop *));
+    Desktop *self = malloc (sizeof (Desktop));
 
     self->windows = NULL;
     self->app = app;
+    self->bg = NULL;
+    self->bg_pbuf = NULL;
 
     GdkDisplay *display = gdk_display_get_default ();
 
     // This will update automatically
     self->monitors = gdk_display_get_monitors (display);
 
+    GSettings *bg_settings = g_settings_new ("com.plenjos.shell.desktop");
+
+    g_signal_connect (bg_settings, "changed::background",
+                      G_CALLBACK (update_bg), self);
+
+    update_bg (bg_settings, "background", self);
+
     update_monitors (self);
 
-    g_signal_connect (self->monitors, "items-changed", G_CALLBACK (monitors_changed), self);
+    g_signal_connect (self->monitors, "items-changed",
+                      G_CALLBACK (monitors_changed), self);
 }
 
 int

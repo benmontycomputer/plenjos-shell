@@ -14,23 +14,10 @@ typedef struct {
     struct PanelTaskbar *taskbar;
     gpointer *tray;
 
-    // TODO: remove this and everything that uses it
-    GdkPixbuf *blurred;
-
-    // GtkWindow *gtk_window;
-
     bool supports_alpha;
     bool dark_mode;
 
     GSettings *panel_settings;
-
-    /* enum TaskbarStyle style;
-
-    GdkRGBA bg_primary;
-    GdkRGBA bg_primary_bottom;
-    GdkRGBA bg_secondary;
-    GdkRGBA border_primary;
-    GdkRGBA border_secondary; */
 
     GtkApplication *app;
 

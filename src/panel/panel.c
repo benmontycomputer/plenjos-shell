@@ -75,8 +75,6 @@ activate (GtkApplication *app, void *_data) {
 
     Panel *self = malloc (sizeof (Panel));
     self->app = app;
-    self->blurred = NULL;
-    // self->gtk_window = NULL;
     self->supports_alpha = FALSE;
     self->taskbar = NULL;
     self->panel_settings = g_settings_new ("com.plenjos.shell.panel");
@@ -133,10 +131,6 @@ activate (GtkApplication *app, void *_data) {
 
     g_signal_connect (self->monitors, "items-changed",
                       G_CALLBACK (monitors_changed), self);
-
-    self->blurred = pbuf;
-
-    // panel_applications_menu_set_bg (apps_menu, self->blurred);
 
     HyprBackend *hypr = hypr_backend_init (self);
 
