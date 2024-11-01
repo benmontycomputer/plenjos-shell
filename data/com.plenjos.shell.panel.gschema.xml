@@ -37,6 +37,14 @@
         Should be formatted properly to be parsed by gdk_rgba_parse ().
       </description>
     </key>
+    <key name='border-color' type='s'>
+      <default>'rgba(180,180,180,0.5)'</default>
+      <summary>Panel background color (bottom of gradient)</summary>
+      <description>
+        The primary background color of the panel (bottom of gradient).
+        Should be formatted properly to be parsed by gdk_rgba_parse ().
+      </description>
+    </key>
 
   </schema>
 

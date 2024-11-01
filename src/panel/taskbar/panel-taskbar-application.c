@@ -130,7 +130,7 @@ panel_taskbar_application_render_button (PanelTaskbarWindow *win,
     gtk_widget_set_name (GTK_WIDGET (taskbar_item_button), "panel_button");
 
     GtkFixed *taskbar_item_fixed = GTK_FIXED (gtk_fixed_new ());
-    gtk_widget_set_size_request (GTK_WIDGET (taskbar_item_fixed), 48, 56);
+    gtk_widget_set_size_request (GTK_WIDGET (taskbar_item_fixed), 48, 54);
 
     gtk_button_set_child (taskbar_item_button,
                           GTK_WIDGET (taskbar_item_fixed));
