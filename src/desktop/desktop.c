@@ -34,6 +34,13 @@ update_bg (GSettings *bg_settings, gchar *key, Desktop *self) {
         g_object_unref (self->bg_pbuf);
 
     self->bg_pbuf = gdk_pixbuf_new_from_file (self->bg, NULL);
+
+    if (!self->windows)
+        return;
+
+    for (size_t i = 0; self->windows[i]; i++) {
+        gtk_widget_queue_draw (gtk_window_get_child (self->windows[i]));
+    }
 }
 
 static void
@@ -41,7 +48,13 @@ draw_desktop (GtkDrawingArea *drawing_area, cairo_t *cr, int wi, int hi,
               Desktop *self) {
     cairo_save (cr);
 
-    cairo_scale (cr, (double)wi / (double)gdk_pixbuf_get_width (self->bg_pbuf), (double)wi / (double)gdk_pixbuf_get_width (self->bg_pbuf));
+    double w_scale = (double)wi / (double)gdk_pixbuf_get_width (self->bg_pbuf);
+    double h_scale = (double)hi / (double)gdk_pixbuf_get_height (self->bg_pbuf);
+
+    if (w_scale > h_scale)
+        cairo_scale (cr, w_scale, w_scale);
+    else
+        cairo_scale (cr, h_scale, h_scale);
 
     gdk_cairo_set_source_pixbuf (cr, self->bg_pbuf, 0, 0);
 

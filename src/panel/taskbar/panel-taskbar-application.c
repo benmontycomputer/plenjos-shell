@@ -2,35 +2,39 @@
 #include "panel-taskbar-toplevel-button.h"
 
 static gboolean
-button_click (GtkButton *button, PanelTaskbarApplication *self) {
+button_click (GtkButton *button, PanelTaskbarApplicationRendered *self) {
     UNUSED (button);
     UNUSED (self);
 
-    if (!self->toplevels || !self->toplevels->data) {
-        if (self->exec) {
-            size_t len = strlen (self->exec) + strlen (" &") + 1;
-            char *new_exec = malloc (len);
-            snprintf (new_exec, len, "%s &", self->exec);
+    if (!self->app->toplevels || !self->app->toplevels->data) {
+        if (self->app->exec) {
+            if (!strcmp (self->app->exec, DASHBOARD_LAUNCH_STR)) {
+                show_applications_menu (self->win->apps_menu);
+            } else {
+                size_t len = strlen (self->app->exec) + strlen (" &") + 1;
+                char *new_exec = malloc (len);
+                snprintf (new_exec, len, "%s &", self->app->exec);
 
-            system (new_exec);
+                system (new_exec);
 
-            free (new_exec);
+                free (new_exec);
+            }
         }
 
         return FALSE;
     }
 
-    PanelTaskbarToplevelButton *toplevel_old = self->toplevels->data;
+    PanelTaskbarToplevelButton *toplevel_old = self->app->toplevels->data;
 
-    self->toplevels = g_list_remove (self->toplevels, toplevel_old);
-    self->toplevels = g_list_append (self->toplevels, toplevel_old);
+    self->app->toplevels = g_list_remove (self->app->toplevels, toplevel_old);
+    self->app->toplevels = g_list_append (self->app->toplevels, toplevel_old);
 
-    PanelTaskbarToplevelButton *toplevel_new = self->toplevels->data;
+    PanelTaskbarToplevelButton *toplevel_new = self->app->toplevels->data;
 
     zwlr_foreign_toplevel_handle_v1_activate (toplevel_new->m_toplevel_handle,
                                               toplevel_new->m_seat);
 
-    wl_display_roundtrip (self->taskbar->display);
+    wl_display_roundtrip (self->app->taskbar->display);
 
     return FALSE;
 }
@@ -43,7 +47,8 @@ secondary_button_click (GtkGestureClick *click, gint n_press, gdouble x,
     UNUSED (x);
     UNUSED (y);
 
-    GtkWidget *parent = gtk_widget_get_parent (GTK_WIDGET (self->app->popover));
+    GtkWidget *parent
+        = gtk_widget_get_parent (GTK_WIDGET (self->app->popover));
 
     if (parent) {
         g_object_ref (self->app->popover);
@@ -51,7 +56,8 @@ secondary_button_click (GtkGestureClick *click, gint n_press, gdouble x,
         gtk_fixed_remove (GTK_FIXED (parent), GTK_WIDGET (self->app->popover));
     }
 
-    gtk_fixed_put (GTK_FIXED (gtk_button_get_child (self->button)), GTK_WIDGET (self->app->popover), 0, 0);
+    gtk_fixed_put (GTK_FIXED (gtk_button_get_child (self->button)),
+                   GTK_WIDGET (self->app->popover), 0, 0);
 
     if (parent) {
         g_object_unref (self->app->popover);
@@ -165,11 +171,12 @@ panel_taskbar_application_render_button (PanelTaskbarWindow *win,
     gtk_fixed_put (taskbar_item_fixed, GTK_WIDGET (indicator), 21, 48);
 
     g_signal_connect (taskbar_item_button, "clicked",
-                      G_CALLBACK (button_click), self);
+                      G_CALLBACK (button_click), return_val);
 
     return_val->app = self;
     return_val->button = taskbar_item_button;
     return_val->indicator = indicator;
+    return_val->win = win;
 
     return return_val;
 }
@@ -190,6 +197,12 @@ panel_taskbar_application_update_monitors (PanelTaskbarApplication *self) {
         }
 
         free (self->rendered_buttons);
+    }
+
+    if (!self->taskbar->windows) {
+        self->rendered_buttons = malloc (sizeof (PanelTaskbarWindow *));
+        self->rendered_buttons[0] = NULL;
+        return;
     }
 
     size_t n_taskbars;
@@ -216,6 +229,7 @@ panel_taskbar_application_update_monitors (PanelTaskbarApplication *self) {
             self->rendered_buttons[i]->button = NULL;
             self->rendered_buttons[i]->indicator = NULL;
             self->rendered_buttons[i]->app = self;
+            self->rendered_buttons[i]->win = window;
         }
     }
 

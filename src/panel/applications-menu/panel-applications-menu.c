@@ -17,6 +17,8 @@
  */
 
 #include "panel-applications-menu.h"
+#include "../panel-common.h"
+#include "../taskbar/panel-taskbar-icon.h"
 
 #define MARKUP_FORMAT "<span size=\"small\">%s</span>"
 

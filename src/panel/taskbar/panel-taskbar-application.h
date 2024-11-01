@@ -8,6 +8,7 @@ typedef struct {
     GtkButton *button;
     GtkWidget *indicator;
     struct PanelTaskbarApplication *app;
+    PanelTaskbarWindow *win;
 } PanelTaskbarApplicationRendered;
 
 typedef struct PanelTaskbarApplication {
@@ -67,3 +68,5 @@ void panel_taskbar_application_remove_toplevel (
 
 void panel_taskbar_application_set_pinned (PanelTaskbarApplication *self,
                                            gboolean pinned);
+
+void panel_taskbar_application_update_monitors (PanelTaskbarApplication *self);

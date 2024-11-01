@@ -25,9 +25,6 @@
 
 #include <gtk4-layer-shell.h>
 
-#include "../panel-common.h"
-#include "../taskbar/panel-taskbar-icon.h"
-
 G_BEGIN_DECLS
 
 #define PANEL_TYPE_APPLICATIONS_MENU (panel_applications_menu_get_type ())

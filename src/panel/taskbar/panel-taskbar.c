@@ -29,6 +29,10 @@ panel_taskbar_update_monitors (PanelTaskbar *self) {
     }
 
     self->windows[n_monitors] = NULL;
+
+    for (GList *list = self->applications; list = list->next; list) {
+        panel_taskbar_application_update_monitors ((PanelTaskbarApplication *)list->data);
+    }
 }
 
 // Lots of code adapted from https://github.com/selairi/yatbfw
@@ -234,6 +238,14 @@ panel_taskbar_init (Panel *panel) {
 
     self->pointer = wl_seat_get_pointer (self->seat);
     self->keyboard = wl_seat_get_keyboard (self->seat);
+
+    PanelTaskbarApplication *dashboard = panel_taskbar_application_new ("view-app-grid", self);
+
+    panel_taskbar_application_set_pinned (dashboard, TRUE);
+
+    dashboard->exec = g_strdup (DASHBOARD_LAUNCH_STR);
+
+    self->applications = g_list_append (self->applications, dashboard);
 
     return self;
 }

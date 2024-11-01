@@ -60,15 +60,15 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
 
     // Start actual taskbar stuff
 
-    PanelApplicationsMenu *apps_menu
+    self->apps_menu
         = g_object_new (PANEL_TYPE_APPLICATIONS_MENU, NULL);
 
-    hide_applications_menu (apps_menu);
+    hide_applications_menu (self->apps_menu);
 
     self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
-    panel_applications_menu_insert_launcher_button (apps_menu, self->taskbar_box);
-    panel_applications_menu_set_monitor (apps_menu, monitor);
+    // panel_applications_menu_insert_launcher_button (apps_menu, self->taskbar_box);
+    panel_applications_menu_set_monitor (self->apps_menu, monitor);
 
     GtkBox *box2 = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
     gtk_widget_set_halign (GTK_WIDGET (box2), GTK_ALIGN_CENTER);

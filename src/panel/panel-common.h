@@ -2,6 +2,10 @@
 
 #include <gtk/gtk.h>
 
+#include "applications-menu/panel-applications-menu.h"
+
+#define DASHBOARD_LAUNCH_STR "__PANEL_DASHBOARD__"
+
 enum TaskbarStyle {
     TASKBAR_STYLE_THREE_D_DOCK,
     TASKBAR_STYLE_DOCK,
@@ -39,6 +43,7 @@ typedef struct PanelTaskbarWindow {
     GdkRGBA border_secondary;
 
     struct PanelTaskbar *taskbar;
+    PanelApplicationsMenu *apps_menu;
 } PanelTaskbarWindow;
 
 typedef struct PanelTaskbar {
