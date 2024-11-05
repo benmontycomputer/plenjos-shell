@@ -73,21 +73,21 @@ panel_tray_window_new (PanelTray *self, GdkMonitor *monitor) {
 
     gtk_widget_set_size_request (GTK_WIDGET (window->gtk_window), 480, 32);
 
-    gtk_widget_set_name (GTK_WIDGET (window->gtk_window),
-                         "panel_topbar_window");
+    gtk_widget_add_css_class (GTK_WIDGET (window->gtk_window),
+                              "menu_bar_window");
 
     window->tray_box = GTK_CENTER_BOX (gtk_center_box_new ());
 
     gtk_widget_set_hexpand (GTK_WIDGET (window->tray_box), TRUE);
 
-    gtk_widget_set_name (GTK_WIDGET (window->tray_box), "menu_bar_box");
+    gtk_widget_add_css_class (GTK_WIDGET (window->tray_box), "menu_bar_box");
 
     gtk_window_set_child (window->gtk_window, GTK_WIDGET (window->tray_box));
     gtk_widget_show (GTK_WIDGET (window->gtk_window));
 
     window->control_center_button = GTK_BUTTON (gtk_button_new ());
     gtk_widget_add_css_class (GTK_WIDGET (window->control_center_button),
-                              "panel_top_bar_item");
+                              "menu_bar_item");
 
     GtkBox *control_center_button_box
         = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
@@ -100,8 +100,8 @@ panel_tray_window_new (PanelTray *self, GdkMonitor *monitor) {
     gtk_button_set_child (window->control_center_button,
                           GTK_WIDGET (control_center_button_box));
 
-    gtk_widget_set_name (GTK_WIDGET (window->control_center_button),
-                         "menu_bar_button");
+    gtk_widget_add_css_class (GTK_WIDGET (window->control_center_button),
+                              "menu_bar_button");
 
     g_signal_connect (window->control_center_button, "clicked",
                       G_CALLBACK (show_control_center), self);
@@ -116,7 +116,7 @@ panel_tray_window_new (PanelTray *self, GdkMonitor *monitor) {
     window->workspaces_box
         = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
     gtk_widget_add_css_class (GTK_WIDGET (window->workspaces_box),
-                              "panel_top_bar_item");
+                              "menu_bar_item");
 
     gtk_box_append (window->tray_start_box,
                     GTK_WIDGET (window->workspaces_box));
@@ -197,8 +197,8 @@ panel_tray_new (gpointer *panel) {
 
     self->control_center_grid = GTK_GRID (gtk_grid_new ());
 
-    gtk_widget_set_name (GTK_WIDGET (self->control_center_grid),
-                         "control_center_grid");
+    gtk_widget_add_css_class (GTK_WIDGET (self->control_center_grid),
+                              "control_center_grid");
 
     gtk_grid_set_row_homogeneous (self->control_center_grid, FALSE);
     gtk_grid_set_column_homogeneous (self->control_center_grid, TRUE);
@@ -220,7 +220,7 @@ panel_tray_new (gpointer *panel) {
     gtk_button_set_child (self->control_center_button,
                           GTK_WIDGET (control_center_button_box));
 
-    gtk_widget_set_name (GTK_WIDGET (self->control_center_button),
+    gtk_widget_add_css_class (GTK_WIDGET (self->control_center_button),
                          "menu_bar_button");
 
     g_signal_connect (self->control_center_button, "clicked",
@@ -236,8 +236,8 @@ panel_tray_new (gpointer *panel) {
     self->control_center_popover_box
         = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
 
-    gtk_widget_set_name (GTK_WIDGET (self->control_center_popover),
-                         "control_center_popover");
+    gtk_widget_add_css_class (GTK_WIDGET (self->control_center_popover),
+                              "control_center_popover");
 
     gtk_popover_set_child (self->control_center_popover,
                            GTK_WIDGET (self->control_center_popover_box));
@@ -246,23 +246,23 @@ panel_tray_new (gpointer *panel) {
 
     self->back_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
-    gtk_widget_set_name (GTK_WIDGET (self->back_box),
-                         "control_center_back_box");
+    gtk_widget_add_css_class (GTK_WIDGET (self->back_box),
+                              "control_center_back_box");
 
     // Icon size LARGE_TOOLBAR
     self->back_button
         = GTK_BUTTON (gtk_button_new_from_icon_name ("go-previous"));
 
-    gtk_widget_set_name (GTK_WIDGET (self->back_button),
-                         "control_center_back_button");
+    gtk_widget_add_css_class (GTK_WIDGET (self->back_button),
+                              "control_center_back_button");
 
     g_signal_connect (self->back_button, "clicked", G_CALLBACK (go_back),
                       self);
 
     self->back_label = GTK_LABEL (gtk_label_new ("Control Center"));
 
-    gtk_widget_set_name (GTK_WIDGET (self->back_label),
-                         "control_center_back_label");
+    gtk_widget_add_css_class (GTK_WIDGET (self->back_label),
+                              "control_center_back_label");
 
     gtk_box_append (self->back_box, GTK_WIDGET (self->back_button));
     gtk_box_append (self->back_box, GTK_WIDGET (self->back_label));
@@ -295,8 +295,8 @@ panel_tray_new (gpointer *panel) {
     GtkBox *dnd_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 8));
     GtkBox *audio_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 8));
 
-    gtk_widget_set_name (GTK_WIDGET (quick_box), "control_center_card");
-    gtk_widget_set_name (GTK_WIDGET (dnd_box), "control_center_card");
+    gtk_widget_add_css_class (GTK_WIDGET (quick_box), "control_center_card");
+    gtk_widget_add_css_class (GTK_WIDGET (dnd_box), "control_center_card");
 
     gtk_box_append (quick_box, GTK_WIDGET (self->network_button->button));
     gtk_box_append (quick_box, GTK_WIDGET (self->bluetooth_button->button));

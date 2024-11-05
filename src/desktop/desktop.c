@@ -111,7 +111,7 @@ update_monitors (Desktop *self) {
             gtk_layer_set_anchor (gtk_window, i, anchors[i]);
         }
 
-        gtk_widget_set_name (GTK_WIDGET (gtk_window), "desktop_window");
+        gtk_widget_add_css_class (GTK_WIDGET (gtk_window), "desktop_window");
 
         GtkDrawingArea *da = GTK_DRAWING_AREA (gtk_drawing_area_new ());
 

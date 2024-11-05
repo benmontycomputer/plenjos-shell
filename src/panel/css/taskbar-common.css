@@ -1,0 +1,103 @@
+.taskbar_box_full {
+    margin-top: 8px;
+    border-radius: 16px;
+    background-color: rgba(51, 51, 51, 0.0);
+
+    margin-left: 24px;
+    margin-right: 24px;
+
+    animation-name: box_animate;
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(1, 0, 0, 1);
+    animation-iteration-count: 1;
+}
+
+.taskbar_box_2d_dock {
+    background-color: rgba(80, 80, 80, 0.5);
+
+    border: 1px solid rgba(160, 160, 160, 0.5);
+    box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.7);
+
+    padding: 0px 4px;
+}
+
+.taskbar_box_slim {
+    padding: 0px 2px;
+}
+
+.taskbar_popover {
+    font-size: 11px;
+}
+
+.taskbar_button,
+.taskbar_popover_button {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+    border: none;
+
+    padding: 2px;
+
+    -gtk-icon-size: 48px;
+}
+
+.taskbar_button {
+    animation-name: move_in;
+    animation-duration: 0.4s;
+    animation-timing-function: ease-in-out;
+    animation-iteration-count: 1;
+
+    margin-top: 2px;
+
+    padding-bottom: 4px;
+}
+
+.taskbar_button:disabled {
+    animation-name: move_out;
+}
+
+.taskbar_button_reflection {
+    filter: blur(2px);
+    -gtk-icon-transform: translate(0, 44px) scaleY(-1);
+    opacity: 0.3;
+}
+
+.taskbar_popover_button {
+    border-radius: 12px;
+}
+
+.taskbar_popover_button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+@keyframes move_in {
+    0% {
+        transform: translate(0px, 64px) rotate(56deg);
+        margin-right: -56px;
+    }
+
+    80% {
+        transform: translate(0px, -16px) rotate(56deg);
+        margin-right: -10px;
+    }
+
+    100% {
+        transform: translate(0px, 0px);
+    }
+}
+
+@keyframes move_out {
+    100% {
+        transform: translate(0px, 64px) rotate(56deg);
+        margin-right: -56px;
+    }
+
+    20% {
+        transform: translate(0px, -16px) rotate(56deg);
+        margin-right: -10px;
+    }
+
+    0% {
+        transform: translate(0px, 0px);
+    }
+}

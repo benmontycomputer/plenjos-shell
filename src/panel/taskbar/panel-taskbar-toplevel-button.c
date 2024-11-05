@@ -421,7 +421,7 @@ panel_taskbar_toplevel_button_gtk_run (PanelTaskbarToplevelButton *self) {
         return;
 
     self->rendered = gtk_button_new ();
-    gtk_widget_set_name (self->rendered, "panel_popover_button");
+    gtk_widget_add_css_class (self->rendered, "taskbar_popover_button");
     g_signal_connect (self->rendered, "clicked", G_CALLBACK (button_click),
                       self);
 

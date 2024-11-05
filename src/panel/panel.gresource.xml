@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <gresources>
   <gresource prefix="/com/plenjos/Panel">
-    <file>theme.css</file>
+    <file>css/applications-menu.css</file>
+    <file>css/common.css</file>
+    <file>css/menubar.css</file>
+    <file>css/taskbar-common.css</file>
+    <file>css/taskbar-menubar.css</file>
+    <file>css/theme.css</file>
     <file>applications-menu/panel-applications-menu.ui</file>
   </gresource>
 </gresources>

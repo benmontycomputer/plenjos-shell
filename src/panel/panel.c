@@ -68,10 +68,16 @@ activate (GtkApplication *app, void *_data) {
 
     GtkCssProvider *cssProvider = gtk_css_provider_new ();
     gtk_css_provider_load_from_resource (cssProvider,
-                                         "/com/plenjos/Panel/theme.css");
+                                         "/com/plenjos/Panel/css/theme.css");
     gtk_style_context_add_provider_for_display (
         gdk_display_get_default (), GTK_STYLE_PROVIDER (cssProvider),
         GTK_STYLE_PROVIDER_PRIORITY_USER);
+    
+    /*<file>css/applications-menu.css</file>
+    <file>css/common.css</file>
+    <file>css/menubar.css</file>
+    <file>css/taskbar-menubar.css</file>
+    <file>css/theme.css</file>*/
 
     Panel *self = malloc (sizeof (Panel));
     self->app = app;

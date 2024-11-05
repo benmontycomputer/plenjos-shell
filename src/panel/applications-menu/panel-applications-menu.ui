@@ -1,12 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.40.0 -->
 <interface>
-  <requires lib="gtk" version="4.8"/>
+  <requires lib="gtk" version="4.8" />
   <template class="PanelApplicationsMenu" parent="GtkApplicationWindow">
-    <property name="name">panel_applications_menu_window</property>
+    <style>
+      <class name="panel_applications_menu_window" />
+    </style>
     <child>
       <object class="GtkScrolledWindow" id="scrolled_window">
-        <property name="name">panel_applications_menu_scrolled_window</property>
+        <style>
+          <class name="panel_applications_menu_scrolled_window" />
+        </style>
         <property name="visible">True</property>
         <property name="can-focus">True</property>
         <property name="margin-start">240</property>
@@ -26,7 +30,9 @@
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkSearchEntry" id="search_entry">
-                    <property name="name">panel_applications_menu_search_entry</property>
+                    <style>
+                      <class name="panel_applications_menu_search_entry" />
+                    </style>
                     <property name="width-request">400</property>
                     <property name="height-request">56</property>
                     <property name="visible">True</property>
@@ -42,7 +48,9 @@
                 </child>
                 <child>
                   <object class="GtkFlowBox" id="apps_flow_box">
-                    <property name="name">panel_applications_menu_flow_box</property>
+                    <style>
+                      <class name="panel_applications_menu_flow_box" />
+                    </style>
                     <property name="visible">True</property>
                     <property name="can-focus">False</property>
                     <property name="margin-start">16</property>
@@ -56,7 +64,7 @@
                   </object>
                 </child>
                 <child>
-                  <placeholder/>
+                  <placeholder />
                 </child>
               </object>
             </child>

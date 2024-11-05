@@ -6,8 +6,8 @@ Clock *clock_new () {
     self->label = GTK_LABEL (gtk_label_new ("Loading..."));
     gtk_label_set_justify (self->label, GTK_JUSTIFY_RIGHT);
 
-    gtk_widget_set_name (GTK_WIDGET (self->label), "panel_clock");
-    gtk_widget_add_css_class (GTK_WIDGET (self->label), "panel_top_bar_item");
+    gtk_widget_add_css_class (GTK_WIDGET (self->label), "menu_bar_clock");
+    gtk_widget_add_css_class (GTK_WIDGET (self->label), "menu_bar_item");
 
     return self;
 }

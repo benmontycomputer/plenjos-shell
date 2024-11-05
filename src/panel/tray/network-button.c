@@ -19,7 +19,7 @@ network_button_new (GtkStack *stack) {
     GtkBox *button_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 8));
 
     GtkWidget *img = gtk_image_new_from_icon_name ("network-idle");
-    gtk_widget_set_name (img, "panel_tray_menu_button_image");
+    gtk_widget_add_css_class (img, "control_center_button_image");
     gtk_widget_set_size_request (img, 36, 36);
 
     GtkBox *labels = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -33,7 +33,7 @@ network_button_new (GtkStack *stack) {
     gtk_box_append (labels, network_label);
     gtk_box_append (labels, status_label);
 
-    gtk_widget_set_name (GTK_WIDGET (labels), "panel_tray_menu_button_labels_box");
+    gtk_widget_add_css_class (GTK_WIDGET (labels), "control_center_button_labels_box");
 
     gtk_box_append (button_box, img);
     gtk_box_append (button_box, GTK_WIDGET (labels));
@@ -42,7 +42,7 @@ network_button_new (GtkStack *stack) {
 
     gtk_widget_set_size_request (GTK_WIDGET (self->button), 36, 36);
 
-    gtk_widget_set_name (GTK_WIDGET (self->button), "panel_tray_menu_button");
+    gtk_widget_add_css_class (GTK_WIDGET (self->button), "control_center_button");
 
     g_signal_connect (self->button, "clicked", G_CALLBACK (show_network_menu),
                       self);

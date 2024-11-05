@@ -78,9 +78,9 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
     hide_applications_menu (self->apps_menu);
 
     self->taskbar_box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-    gtk_widget_set_name (GTK_WIDGET (self->taskbar_box), "taskbar_box");
-    // panel_applications_menu_insert_launcher_button (apps_menu,
-    // self->taskbar_box);
+    // gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box),
+    // "taskbar_box"); panel_applications_menu_insert_launcher_button
+    // (apps_menu, self->taskbar_box);
     panel_applications_menu_set_monitor (self->apps_menu, monitor);
 
     GtkBox *box2 = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 0));
@@ -101,16 +101,6 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
     // gtk_drawing_area_set_draw_func (da,
     // (GtkDrawingAreaDrawFunc)draw_taskbar,
     //                                 self, NULL);
-
-    switch (self->style) {
-    case TASKBAR_STYLE_THREE_D_DOCK:
-        gtk_drawing_area_set_draw_func (
-            da, (GtkDrawingAreaDrawFunc)draw_taskbar_3d_dock, self, NULL);
-        break;
-
-    default:
-        break;
-    }
 
     if (self->style == TASKBAR_STYLE_THREE_D_DOCK
         || self->style == TASKBAR_STYLE_DOCK
@@ -134,25 +124,24 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
         gtk_widget_set_margin_bottom (GTK_WIDGET (da), -71);
 
         // gtk_widget_set_size_request (GTK_WIDGET (gtk_window), 480, 56);
-        gtk_widget_set_name (GTK_WIDGET (gtk_window), "panel_window");
+        gtk_widget_add_css_class (GTK_WIDGET (gtk_window), "panel_window");
 
-        GtkBox *panel_box
-            = GTK_BOX (gtk_box_new (GTK_ORIENTATION_HORIZONTAL, 0));
-        gtk_widget_set_name (GTK_WIDGET (panel_box), "panel_box");
-        gtk_widget_set_halign (GTK_WIDGET (panel_box), GTK_ALIGN_CENTER);
+        gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box),
+                                  "taskbar_box_full");
+        gtk_widget_set_halign (GTK_WIDGET (self->taskbar_box),
+                               GTK_ALIGN_CENTER);
 
-        gtk_box_append (panel_box, GTK_WIDGET (self->taskbar_box));
-        gtk_box_append (box2, GTK_WIDGET (da));
-        gtk_box_append (box2, GTK_WIDGET (panel_box));
+        gtk_box_append (box2, GTK_WIDGET (self->taskbar_box));
 
         gtk_window_set_child (gtk_window, GTK_WIDGET (box2));
 
         gtk_window_present (gtk_window);
     } else if (self->style == TASKBAR_STYLE_TRAY) {
         gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box),
-                                  "panel_top_bar_item");
+                                  "menu_bar_item");
+
         gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box),
-                                  "panel_top_bar_taskbar");
+                                  "taskbar_box_slim");
 
         for (int i = 0; ((PanelTray *)taskbar->panel->tray)->windows[i]; i++) {
             PanelTrayWindow *tray_win
@@ -165,6 +154,32 @@ panel_taskbar_window_new (PanelTaskbar *taskbar, GdkMonitor *monitor) {
                 break;
             }
         }
+    }
+
+    switch (self->style) {
+    case TASKBAR_STYLE_THREE_D_DOCK:
+        GtkDrawingArea *da = GTK_DRAWING_AREA (gtk_drawing_area_new ());
+
+        gtk_widget_set_size_request (GTK_WIDGET (da), 0, 64);
+
+        gtk_widget_set_halign (GTK_WIDGET (da), GTK_ALIGN_FILL);
+        gtk_widget_set_hexpand (GTK_WIDGET (da), TRUE);
+
+        gtk_widget_set_margin_bottom (GTK_WIDGET (da), -72);
+
+        gtk_widget_set_hexpand (GTK_WIDGET (da), TRUE);
+        gtk_widget_set_vexpand (GTK_WIDGET (da), TRUE);
+
+        gtk_drawing_area_set_draw_func (
+            da, (GtkDrawingAreaDrawFunc)draw_taskbar_3d_dock, self, NULL);
+
+        gtk_box_prepend (box2, GTK_WIDGET (da));
+        break;
+    case TASKBAR_STYLE_DOCK:
+        gtk_widget_add_css_class (GTK_WIDGET (self->taskbar_box),
+                                  "taskbar_box_2d_dock");
+    default:
+        break;
     }
 
     return self;
@@ -263,7 +278,8 @@ draw_taskbar_3d_dock (GtkDrawingArea *drawing_area, cairo_t *cr, int wi,
                180 * degrees);
     cairo_close_path (cr);
 
-    cairo_set_source_rgba (cr, self->border_primary.red, self->border_primary.green,
+    cairo_set_source_rgba (
+        cr, self->border_primary.red, self->border_primary.green,
         self->border_primary.blue, self->border_primary.alpha);
 
     cairo_stroke_preserve (cr);

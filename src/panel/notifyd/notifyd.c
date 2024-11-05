@@ -60,11 +60,11 @@ on_notify (PlenjosNotifyFdoGBus *skeleton, GDBusMethodInvocation *invocation,
 
     gtk_layer_set_exclusive_zone (win, 0);
 
-    gtk_widget_set_name (GTK_WIDGET (win), "notifyd_window");
+    gtk_widget_add_css_class (GTK_WIDGET (win), "notifyd_window");
 
     GtkGrid *grid = GTK_GRID (gtk_grid_new ());
 
-    gtk_widget_set_name (GTK_WIDGET (grid), "notifyd_grid");
+    gtk_widget_add_css_class (GTK_WIDGET (grid), "notifyd_grid");
     gtk_window_set_child (win, GTK_WIDGET (grid));
 
     GtkLabel *summary_label = GTK_LABEL (gtk_label_new (summary));
@@ -77,7 +77,7 @@ on_notify (PlenjosNotifyFdoGBus *skeleton, GDBusMethodInvocation *invocation,
         GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (app_icon));
 
         gtk_widget_set_size_request (GTK_WIDGET (icon), 48, 48);
-        gtk_widget_set_name (GTK_WIDGET (icon), "notifyd_icon");
+        gtk_widget_add_css_class (GTK_WIDGET (icon), "notifyd_icon");
 
         gtk_grid_attach (grid, GTK_WIDGET (icon), 0, 0, 1, 2);
     }

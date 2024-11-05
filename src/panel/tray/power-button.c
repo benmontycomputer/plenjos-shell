@@ -17,7 +17,7 @@ power_button_menu_button_new (char *icon, char *label) {
 
     GtkButton *button = GTK_BUTTON (gtk_button_new ());
 
-    gtk_widget_set_name (GTK_WIDGET (button), "panel_power_menu_button");
+    gtk_widget_add_css_class (GTK_WIDGET (button), "panel_power_menu_button");
 
     gtk_button_set_child (button, GTK_WIDGET (box));
 
@@ -35,7 +35,7 @@ power_button_new (GtkStack *stack) {
 
     gtk_widget_set_size_request (GTK_WIDGET (self->button), 32, 32);
 
-    gtk_widget_set_name (GTK_WIDGET (self->button), "panel_tray_menu_button");
+    gtk_widget_add_css_class (GTK_WIDGET (self->button), "control_center_button");
 
     g_signal_connect (self->button, "clicked", G_CALLBACK (show_power_menu),
                       self);

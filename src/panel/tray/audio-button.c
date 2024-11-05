@@ -41,7 +41,7 @@ audio_button_new (GtkStack *stack) {
 
     gtk_widget_set_size_request (GTK_WIDGET (self->button), 32, 32);
 
-    gtk_widget_set_name (GTK_WIDGET (self->button), "panel_tray_menu_button");
+    gtk_widget_add_css_class (GTK_WIDGET (self->button), "control_center_button");
 
     g_signal_connect (self->button, "clicked", G_CALLBACK (show_audio_menu),
                       self);

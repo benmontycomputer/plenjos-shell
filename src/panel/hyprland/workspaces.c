@@ -122,7 +122,7 @@ addWorkspaceGtk (WorkspaceArgs *args) {
 
     GtkWidget *button = gtk_button_new_with_label (workspace_ptr->name);
 
-    gtk_widget_set_name (button, "panel_tray_workspace_button");
+    gtk_widget_add_css_class (button, "menu_bar_workspace_button");
 
     WorkspaceArgs *new_args = malloc (sizeof (WorkspaceArgs));
 

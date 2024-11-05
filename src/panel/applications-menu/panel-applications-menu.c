@@ -118,7 +118,7 @@ static GtkWidget *
 applications_menu_render_app (PanelApplicationsMenu *self, char *icon_name,
                               char *exec_path, char *display_name) {
     GtkButton *button = GTK_BUTTON (gtk_button_new ());
-    gtk_widget_set_name (GTK_WIDGET (button), "panel_applications_menu_item");
+    gtk_widget_add_css_class (GTK_WIDGET (button), "panel_applications_menu_item");
     GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
 
     GtkImage *icon = GTK_IMAGE (gtk_image_new ());
@@ -530,7 +530,7 @@ panel_applications_menu_insert_launcher_button (PanelApplicationsMenu *self,
     if (!self->launcher_button) {
         self->launcher_button = gtk_button_new ();
 
-        gtk_widget_set_name (self->launcher_button, "panel_button");
+        gtk_widget_add_css_class (self->launcher_button, "taskbar_button");
 
         gtk_widget_set_valign (self->launcher_button, GTK_ALIGN_START);
 

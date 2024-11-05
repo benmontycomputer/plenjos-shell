@@ -225,7 +225,7 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
 
     GtkBox *box = GTK_BOX (gtk_box_new (GTK_ORIENTATION_VERTICAL, 2));
 
-    gtk_widget_set_name (GTK_WIDGET (box), "control_center_card");
+    gtk_widget_add_css_class (GTK_WIDGET (box), "control_center_card");
     gtk_widget_set_hexpand (GTK_WIDGET (box), FALSE);
     gtk_widget_set_halign (GTK_WIDGET (box), GTK_ALIGN_FILL);
 
@@ -237,9 +237,9 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     GtkButton *next_button
         = GTK_BUTTON (gtk_button_new_from_icon_name ("media-skip-forward-symbolic"));
 
-    gtk_widget_set_name (GTK_WIDGET (previous_button), "media_player_button");
-    gtk_widget_set_name (GTK_WIDGET (play_button), "media_player_button");
-    gtk_widget_set_name (GTK_WIDGET (next_button), "media_player_button");
+    gtk_widget_add_css_class (GTK_WIDGET (previous_button), "media_player_button");
+    gtk_widget_add_css_class (GTK_WIDGET (play_button), "media_player_button");
+    gtk_widget_add_css_class (GTK_WIDGET (next_button), "media_player_button");
 
     g_signal_connect (previous_button, "clicked", G_CALLBACK (previous),
                       player);
@@ -287,7 +287,7 @@ generate_player (PlayerctlPlayerName *name, MediaControl *self) {
     // Dialog icon
     GtkImage *icon = GTK_IMAGE (gtk_image_new_from_icon_name (name->name));
 
-    gtk_widget_set_name (GTK_WIDGET (icon), "media_player_icon");
+    gtk_widget_add_css_class (GTK_WIDGET (icon), "media_player_icon");
 
     gtk_widget_set_halign (GTK_WIDGET (icon), GTK_ALIGN_START);
 
